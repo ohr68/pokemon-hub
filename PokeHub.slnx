@@ -1,0 +1,44 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/API/">
+    <Project Path="src/API/PokeHub.Api/PokeHub.Api.csproj" />
+  </Folder>
+  <Folder Name="/src/Common/">
+    <Project Path="src/Common/PokeHub.Common.Application/PokeHub.Common.Application.csproj" />
+    <Project Path="src/Common/PokeHub.Common.Domain/PokeHub.Common.Domain.csproj" />
+    <Project Path="src/Common/PokeHub.Common.Infrastructure/PokeHub.Common.Infrastructure.csproj" />
+    <Project Path="src/Common/PokeHub.Common.Presentation/PokeHub.Common.Presentation.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/" />
+  <Folder Name="/src/Modules/Pokedex/">
+    <Project Path="src/Modules/Pokedex/PokeHub.Modules.Pokedex.Application/PokeHub.Modules.Pokedex.Application.csproj" />
+    <Project Path="src/Modules/Pokedex/PokeHub.Modules.Pokedex.Domain/PokeHub.Modules.Pokedex.Domain.csproj" />
+    <Project Path="src/Modules/Pokedex/PokeHub.Modules.Pokedex.Infrastructure/PokeHub.Modules.Pokedex.Infrastructure.csproj" />
+    <Project Path="src/Modules/Pokedex/PokeHub.Modules.Pokedex.IntegrationEvents/PokeHub.Modules.Pokedex.IntegrationEvents.csproj" />
+    <Project Path="src/Modules/Pokedex/PokeHub.Modules.Pokedex.Presentation/PokeHub.Modules.Pokedex.Presentation.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Trades/">
+    <Project Path="src/Modules/Trades/PokeHub.Modules.Trades.Application/PokeHub.Modules.Trades.Application.csproj" />
+    <Project Path="src/Modules/Trades/PokeHub.Modules.Trades.Domain/PokeHub.Modules.Trades.Domain.csproj" />
+    <Project Path="src/Modules/Trades/PokeHub.Modules.Trades.Infrastructure/PokeHub.Modules.Trades.Infrastructure.csproj" />
+    <Project Path="src/Modules/Trades/PokeHub.Modules.Trades.IntegrationEvents/PokeHub.Modules.Trades.IntegrationEvents.csproj" />
+    <Project Path="src/Modules/Trades/PokeHub.Modules.Trades.Presentation/PokeHub.Modules.Trades.Presentation.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Users/">
+    <Project Path="src/Modules/Users/PokeHub.Modules.Users.Application/PokeHub.Modules.Users.Application.csproj" />
+    <Project Path="src/Modules/Users/PokeHub.Modules.Users.Domain/PokeHub.Modules.Users.Domain.csproj" />
+    <Project Path="src/Modules/Users/PokeHub.Modules.Users.Infrastructure/PokeHub.Modules.Users.Infrastructure.csproj" />
+    <Project Path="src/Modules/Users/PokeHub.Modules.Users.IntegrationEvents/PokeHub.Modules.Users.IntegrationEvents.csproj" />
+    <Project Path="src/Modules/Users/PokeHub.Modules.Users.Presentation/PokeHub.Modules.Users.Presentation.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Users/test/">
+    <Project Path="src/Modules/Users/test/PokeHub.Modules.Users.ArchitectureTests/PokeHub.Modules.Users.ArchitectureTests.csproj" />
+    <Project Path="src/Modules/Users/test/PokeHub.Modules.Users.IntegrationTests/PokeHub.Modules.Users.IntegrationTests.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/PokeHub.ArchitectureTests/PokeHub.ArchitectureTests.csproj" />
+  </Folder>
+  <Folder Name="/docker-compose/">
+    <File Path="docker-compose.yml" />
+  </Folder>
+</Solution>

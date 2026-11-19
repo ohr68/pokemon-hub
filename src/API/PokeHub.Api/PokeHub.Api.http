@@ -1,0 +1,6 @@
+@PokeHub.Api_HostAddress = http://localhost:5100
+
+GET {{PokeHub.Api_HostAddress}}/health
+Accept: application/json
+
+###

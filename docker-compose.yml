@@ -1,0 +1,79 @@
+# Host ports are offset (5100, 5433, 6380, 5342, 8082) so PokeHub can run next to other local stacks.
+services:
+  pokehub.api:
+    image: ${DOCKER_REGISTRY-}pokehubapi
+    container_name: PokeHub.Api
+    build:
+      context: .
+      dockerfile: src/API/PokeHub.Api/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+    ports:
+      - "5100:8080"
+    depends_on:
+      - pokehub.database
+      - pokehub.redis
+      - pokehub.identity
+    networks:
+      - pokehub_network
+
+  pokehub.database:
+    image: postgres:17
+    container_name: PokeHub.Database
+    environment:
+      - POSTGRES_DB=pokehub
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - pokehub-database-data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    networks:
+      - pokehub_network
+
+  pokehub.seq:
+    image: datalust/seq:latest
+    container_name: PokeHub.Seq
+    environment:
+      - ACCEPT_EULA=Y
+      - SEQ_FIRSTRUN_NOAUTHENTICATION=True
+    ports:
+      - "5342:5341"
+      - "8082:80"
+    networks:
+      - pokehub_network
+
+  pokehub.redis:
+    image: redis:7
+    container_name: PokeHub.Redis
+    restart: always
+    ports:
+      - "6380:6379"
+    networks:
+      - pokehub_network
+
+  pokehub.identity:
+    image: quay.io/keycloak/keycloak:26.4
+    container_name: PokeHub.Identity
+    # Imports the pokehub realm from .files on first start.
+    command: start-dev --import-realm
+    environment:
+      - KC_HEALTH_ENABLED=true
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+    volumes:
+      - ./.containers/identity:/opt/keycloak/data
+      - ./.files:/opt/keycloak/data/import
+    ports:
+      - "18080:8080"
+      - "9000:9000"
+    networks:
+      - pokehub_network
+
+networks:
+  pokehub_network:
+    driver: bridge
+
+volumes:
+  pokehub-database-data:
