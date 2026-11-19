@@ -128,6 +128,237 @@ namespace PokeHub.Modules.Pokedex.Infrastructure.Database.Migrations
 
                     b.ToTable("outbox_message_consumers", "pokedex");
                 });
+
+            modelBuilder.Entity("PokeHub.Modules.Pokedex.Domain.Pokemon.OwnedPokemon", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<bool>("IsShiny")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_shiny");
+
+                    b.Property<int>("Level")
+                        .HasColumnType("integer")
+                        .HasColumnName("level");
+
+                    b.Property<string>("Nickname")
+                        .HasMaxLength(12)
+                        .HasColumnType("character varying(12)")
+                        .HasColumnName("nickname");
+
+                    b.Property<DateTime>("ObtainedOnUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("obtained_on_utc");
+
+                    b.Property<string>("Origin")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("origin");
+
+                    b.Property<Guid>("OriginalTrainerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("original_trainer_id");
+
+                    b.Property<int>("SpeciesId")
+                        .HasColumnType("integer")
+                        .HasColumnName("species_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("TrainerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("trainer_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_pokemon");
+
+                    b.HasIndex("OriginalTrainerId")
+                        .HasDatabaseName("ix_pokemon_original_trainer_id");
+
+                    b.HasIndex("SpeciesId")
+                        .HasDatabaseName("ix_pokemon_species_id");
+
+                    b.HasIndex("TrainerId", "Status")
+                        .HasDatabaseName("ix_pokemon_trainer_id_status");
+
+                    b.ToTable("pokemon", "pokedex");
+                });
+
+            modelBuilder.Entity("PokeHub.Modules.Pokedex.Domain.Pokemon.OwnershipRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Change")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("change");
+
+                    b.Property<DateTime>("OccurredOnUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("occurred_on_utc");
+
+                    b.Property<Guid>("PokemonId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("pokemon_id");
+
+                    b.Property<int>("SpeciesId")
+                        .HasColumnType("integer")
+                        .HasColumnName("species_id");
+
+                    b.Property<Guid>("TrainerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("trainer_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_ownership_history");
+
+                    b.HasIndex("PokemonId")
+                        .HasDatabaseName("ix_ownership_history_pokemon_id");
+
+                    b.HasIndex("SpeciesId")
+                        .HasDatabaseName("ix_ownership_history_species_id");
+
+                    b.HasIndex("TrainerId", "Change", "SpeciesId")
+                        .HasDatabaseName("ix_ownership_history_trainer_id_change_species_id");
+
+                    b.ToTable("ownership_history", "pokedex");
+                });
+
+            modelBuilder.Entity("PokeHub.Modules.Pokedex.Domain.Species.PokemonSpecies", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    b.Property<int>("Generation")
+                        .HasColumnType("integer")
+                        .HasColumnName("generation");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("PrimaryType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("primary_type");
+
+                    b.Property<string>("SecondaryType")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("secondary_type");
+
+                    b.Property<DateTime>("SyncedOnUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("synced_on_utc");
+
+                    b.HasKey("Id")
+                        .HasName("pk_species");
+
+                    b.HasIndex("Name")
+                        .HasDatabaseName("ix_species_name");
+
+                    b.ToTable("species", "pokedex");
+                });
+
+            modelBuilder.Entity("PokeHub.Modules.Pokedex.Domain.Trainers.Trainer", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("name");
+
+                    b.Property<int?>("StarterSpeciesId")
+                        .HasColumnType("integer")
+                        .HasColumnName("starter_species_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_trainers");
+
+                    b.HasIndex("StarterSpeciesId")
+                        .HasDatabaseName("ix_trainers_starter_species_id");
+
+                    b.ToTable("trainers", "pokedex");
+                });
+
+            modelBuilder.Entity("PokeHub.Modules.Pokedex.Domain.Pokemon.OwnedPokemon", b =>
+                {
+                    b.HasOne("PokeHub.Modules.Pokedex.Domain.Trainers.Trainer", null)
+                        .WithMany()
+                        .HasForeignKey("OriginalTrainerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_pokemon_trainers_original_trainer_id");
+
+                    b.HasOne("PokeHub.Modules.Pokedex.Domain.Species.PokemonSpecies", null)
+                        .WithMany()
+                        .HasForeignKey("SpeciesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_pokemon_species_species_id");
+
+                    b.HasOne("PokeHub.Modules.Pokedex.Domain.Trainers.Trainer", null)
+                        .WithMany()
+                        .HasForeignKey("TrainerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_pokemon_trainers_trainer_id");
+                });
+
+            modelBuilder.Entity("PokeHub.Modules.Pokedex.Domain.Pokemon.OwnershipRecord", b =>
+                {
+                    b.HasOne("PokeHub.Modules.Pokedex.Domain.Pokemon.OwnedPokemon", null)
+                        .WithMany("History")
+                        .HasForeignKey("PokemonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_ownership_history_pokemon_pokemon_id");
+
+                    b.HasOne("PokeHub.Modules.Pokedex.Domain.Species.PokemonSpecies", null)
+                        .WithMany()
+                        .HasForeignKey("SpeciesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_ownership_history_species_species_id");
+
+                    b.HasOne("PokeHub.Modules.Pokedex.Domain.Trainers.Trainer", null)
+                        .WithMany()
+                        .HasForeignKey("TrainerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_ownership_history_trainers_trainer_id");
+                });
+
+            modelBuilder.Entity("PokeHub.Modules.Pokedex.Domain.Trainers.Trainer", b =>
+                {
+                    b.HasOne("PokeHub.Modules.Pokedex.Domain.Species.PokemonSpecies", null)
+                        .WithMany()
+                        .HasForeignKey("StarterSpeciesId")
+                        .HasConstraintName("fk_trainers_species_starter_species_id");
+                });
+
+            modelBuilder.Entity("PokeHub.Modules.Pokedex.Domain.Pokemon.OwnedPokemon", b =>
+                {
+                    b.Navigation("History");
+                });
 #pragma warning restore 612, 618
         }
     }

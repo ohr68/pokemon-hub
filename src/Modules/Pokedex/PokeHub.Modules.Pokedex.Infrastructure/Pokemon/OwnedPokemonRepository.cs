@@ -1,0 +1,18 @@
+using Microsoft.EntityFrameworkCore;
+using PokeHub.Modules.Pokedex.Domain.Pokemon;
+using PokeHub.Modules.Pokedex.Infrastructure.Database;
+
+namespace PokeHub.Modules.Pokedex.Infrastructure.Pokemon;
+
+internal sealed class OwnedPokemonRepository(PokedexDbContext context) : IOwnedPokemonRepository
+{
+    public async Task<OwnedPokemon?> GetAsync(Guid pokemonId, CancellationToken cancellationToken = default)
+    {
+        return await context.Pokemon.SingleOrDefaultAsync(p => p.Id == pokemonId, cancellationToken);
+    }
+
+    public void Insert(OwnedPokemon pokemon)
+    {
+        context.Pokemon.Add(pokemon);
+    }
+}

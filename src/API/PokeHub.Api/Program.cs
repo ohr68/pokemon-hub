@@ -39,9 +39,11 @@ builder.Services.AddApplication(moduleApplicationAssemblies);
 string databaseConnectionString = builder.Configuration.GetConnectionString("Database")!;
 string redisConnectionString = builder.Configuration.GetConnectionString("Cache")!;
 
-// No module consumes integration events yet; add each module's ConfigureConsumers here when it does.
+// Each module that consumes integration events registers its consumers here.
 builder.Services.AddInfrastructure(
-    [],
+    [
+        PokedexModule.ConfigureConsumers,
+    ],
     databaseConnectionString,
     redisConnectionString);
 

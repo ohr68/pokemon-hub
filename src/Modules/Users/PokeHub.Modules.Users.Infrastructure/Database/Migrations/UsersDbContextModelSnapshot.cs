@@ -54,47 +54,12 @@ namespace PokeHub.Modules.Users.Infrastructure.Database.Migrations
                         },
                         new
                         {
-                            PermissionCode = "events:search",
+                            PermissionCode = "pokedex:read",
                             RoleName = "Member"
                         },
                         new
                         {
-                            PermissionCode = "ticket-types:read",
-                            RoleName = "Member"
-                        },
-                        new
-                        {
-                            PermissionCode = "carts:read",
-                            RoleName = "Member"
-                        },
-                        new
-                        {
-                            PermissionCode = "carts:add",
-                            RoleName = "Member"
-                        },
-                        new
-                        {
-                            PermissionCode = "carts:remove",
-                            RoleName = "Member"
-                        },
-                        new
-                        {
-                            PermissionCode = "orders:read",
-                            RoleName = "Member"
-                        },
-                        new
-                        {
-                            PermissionCode = "orders:create",
-                            RoleName = "Member"
-                        },
-                        new
-                        {
-                            PermissionCode = "tickets:read",
-                            RoleName = "Member"
-                        },
-                        new
-                        {
-                            PermissionCode = "tickets:check-in",
+                            PermissionCode = "pokedex:update",
                             RoleName = "Member"
                         },
                         new
@@ -109,72 +74,22 @@ namespace PokeHub.Modules.Users.Infrastructure.Database.Migrations
                         },
                         new
                         {
-                            PermissionCode = "events:read",
+                            PermissionCode = "pokedex:read",
                             RoleName = "Administrator"
                         },
                         new
                         {
-                            PermissionCode = "events:search",
+                            PermissionCode = "pokedex:update",
                             RoleName = "Administrator"
                         },
                         new
                         {
-                            PermissionCode = "events:update",
+                            PermissionCode = "species:sync",
                             RoleName = "Administrator"
                         },
                         new
                         {
-                            PermissionCode = "ticket-types:read",
-                            RoleName = "Administrator"
-                        },
-                        new
-                        {
-                            PermissionCode = "categories:read",
-                            RoleName = "Administrator"
-                        },
-                        new
-                        {
-                            PermissionCode = "categories:update",
-                            RoleName = "Administrator"
-                        },
-                        new
-                        {
-                            PermissionCode = "carts:read",
-                            RoleName = "Administrator"
-                        },
-                        new
-                        {
-                            PermissionCode = "carts:add",
-                            RoleName = "Administrator"
-                        },
-                        new
-                        {
-                            PermissionCode = "carts:remove",
-                            RoleName = "Administrator"
-                        },
-                        new
-                        {
-                            PermissionCode = "orders:read",
-                            RoleName = "Administrator"
-                        },
-                        new
-                        {
-                            PermissionCode = "orders:create",
-                            RoleName = "Administrator"
-                        },
-                        new
-                        {
-                            PermissionCode = "tickets:read",
-                            RoleName = "Administrator"
-                        },
-                        new
-                        {
-                            PermissionCode = "tickets:check-in",
-                            RoleName = "Administrator"
-                        },
-                        new
-                        {
-                            PermissionCode = "event-statistics:read",
+                            PermissionCode = "pokemon:grant",
                             RoleName = "Administrator"
                         });
                 });
@@ -308,63 +223,19 @@ namespace PokeHub.Modules.Users.Infrastructure.Database.Migrations
                         },
                         new
                         {
-                            Code = "events:read"
+                            Code = "pokedex:read"
                         },
                         new
                         {
-                            Code = "events:search"
+                            Code = "pokedex:update"
                         },
                         new
                         {
-                            Code = "events:update"
+                            Code = "species:sync"
                         },
                         new
                         {
-                            Code = "ticket-types:read"
-                        },
-                        new
-                        {
-                            Code = "ticket-types:update"
-                        },
-                        new
-                        {
-                            Code = "categories:read"
-                        },
-                        new
-                        {
-                            Code = "categories:update"
-                        },
-                        new
-                        {
-                            Code = "carts:read"
-                        },
-                        new
-                        {
-                            Code = "carts:add"
-                        },
-                        new
-                        {
-                            Code = "carts:remove"
-                        },
-                        new
-                        {
-                            Code = "orders:read"
-                        },
-                        new
-                        {
-                            Code = "orders:create"
-                        },
-                        new
-                        {
-                            Code = "tickets:read"
-                        },
-                        new
-                        {
-                            Code = "tickets:check-in"
-                        },
-                        new
-                        {
-                            Code = "event-statistics:read"
+                            Code = "pokemon:grant"
                         });
                 });
 

@@ -3,9 +3,11 @@ using System.Data.Common;
 using Dapper;
 using PokeHub.Common.Application.Clock;
 using PokeHub.Common.Application.Data;
+using PokeHub.Common.Application.Messaging;
 using PokeHub.Common.Domain.Abstractions;
+using PokeHub.Common.Infrastructure.Outbox;
 using PokeHub.Common.Infrastructure.Serialization;
-using MediatR;
+using PokeHub.Modules.Pokedex.Application;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -44,13 +46,20 @@ internal sealed partial class ProcessOutboxJob(
 
                 using IServiceScope scope = serviceScopeFactory.CreateScope();
 
-                IPublisher publisher = scope.ServiceProvider.GetRequiredService<IPublisher>();
+                IEnumerable<IDomainEventHandler> domainEventHandlers = DomainEventHandlersFactory.GetHandlers(
+                    domainEvent.GetType(),
+                    scope.ServiceProvider,
+                    AssemblyReference.Assembly);
 
-                await publisher.Publish(domainEvent);
+                foreach (IDomainEventHandler domainEventHandler in domainEventHandlers)
+                {
+                    await domainEventHandler.Handle(domainEvent);
+                }
             }
             catch (Exception caughtException)
             {
-                logger.LogError(caughtException,
+                logger.LogError(
+                    caughtException,
                     "{Module} - Exception while processing outbox message {MessageId}",
                     ModuleName,
                     outboxMessage.Id);
@@ -58,13 +67,12 @@ internal sealed partial class ProcessOutboxJob(
                 exception = caughtException;
             }
 
-            await UpdateOutboxMessagesAsync(connection, transaction, outboxMessage, exception);
+            await UpdateOutboxMessageAsync(connection, transaction, outboxMessage, exception);
         }
-
 
         await transaction.CommitAsync();
 
-        LogModuleCompletedToProcessOutboxMessages(ModuleName);
+        LogModuleCompletedProcessingOutboxMessages(ModuleName);
     }
 
     private async Task<IReadOnlyList<OutboxMessageResponse>> GetOutboxMessagesAsync(
@@ -90,7 +98,7 @@ internal sealed partial class ProcessOutboxJob(
         return outboxMessages.ToList();
     }
 
-    private async Task UpdateOutboxMessagesAsync(
+    private async Task UpdateOutboxMessageAsync(
         IDbConnection connection,
         IDbTransaction transaction,
         OutboxMessageResponse outboxMessage,
@@ -98,10 +106,10 @@ internal sealed partial class ProcessOutboxJob(
     {
         const string sql =
             """
-               UPDATE pokedex.outbox_messages
-               SET processed_on_utc = @ProcessedOnUtc,
-                   error = @Error
-               WHERE id = @Id
+            UPDATE pokedex.outbox_messages
+            SET processed_on_utc = @ProcessedOnUtc,
+                error = @Error
+            WHERE id = @Id
             """;
 
         await connection.ExecuteAsync(
@@ -119,7 +127,7 @@ internal sealed partial class ProcessOutboxJob(
     partial void LogModuleBeginningToProcessOutboxMessages(string module);
 
     [LoggerMessage(LogLevel.Information, "{Module} - Completed processing outbox messages")]
-    partial void LogModuleCompletedToProcessOutboxMessages(string module);
+    partial void LogModuleCompletedProcessingOutboxMessages(string module);
 
     internal sealed record OutboxMessageResponse(Guid Id, string Content);
 }

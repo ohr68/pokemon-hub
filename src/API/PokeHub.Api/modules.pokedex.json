@@ -7,6 +7,13 @@
     "Inbox": {
       "IntervalInSeconds": 5,
       "BatchSize": 50
+    },
+    "PokeApi": {
+      "BaseUrl": "https://pokeapi.co/api/v2/"
+    },
+    "SpeciesSync": {
+      "Cron": "0 0 3 ? * SUN",
+      "SyncOnStartupWhenEmpty": true
     }
   }
 }
