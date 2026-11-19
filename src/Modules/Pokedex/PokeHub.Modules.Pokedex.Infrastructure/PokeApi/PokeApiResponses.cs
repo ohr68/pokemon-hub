@@ -26,3 +26,27 @@ internal sealed record TypeResponse(
 internal sealed record TypeSlot(
     [property: JsonPropertyName("slot")] int Slot,
     [property: JsonPropertyName("pokemon")] NamedResource Pokemon);
+
+internal sealed record EvolutionTriggerResponse(
+    [property: JsonPropertyName("pokemon_species")] IReadOnlyList<NamedResource> PokemonSpecies);
+
+internal sealed record SpeciesEvolutionResponse(
+    [property: JsonPropertyName("id")] int Id,
+    [property: JsonPropertyName("evolves_from_species")] NamedResource? EvolvesFromSpecies,
+    [property: JsonPropertyName("evolution_chain")] ApiResource EvolutionChain);
+
+internal sealed record ApiResource(
+    [property: JsonPropertyName("url")] Uri Url);
+
+internal sealed record EvolutionChainResponse(
+    [property: JsonPropertyName("chain")] ChainLink Chain);
+
+internal sealed record ChainLink(
+    [property: JsonPropertyName("species")] NamedResource Species,
+    [property: JsonPropertyName("evolution_details")] IReadOnlyList<EvolutionDetail> EvolutionDetails,
+    [property: JsonPropertyName("evolves_to")] IReadOnlyList<ChainLink> EvolvesTo);
+
+internal sealed record EvolutionDetail(
+    [property: JsonPropertyName("trigger")] NamedResource Trigger,
+    [property: JsonPropertyName("held_item")] NamedResource? HeldItem,
+    [property: JsonPropertyName("trade_species")] NamedResource? TradeSpecies);

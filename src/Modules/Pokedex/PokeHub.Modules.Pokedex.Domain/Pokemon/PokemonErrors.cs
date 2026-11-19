@@ -25,4 +25,8 @@ public static class PokemonErrors
             "Pokemon.InvalidLevel",
             $"The level {level} must be between {OwnedPokemon.MinLevel} and {OwnedPokemon.MaxLevel}.");
     }
+
+    public static readonly Error TradeConflict = Error.Conflict(
+        "Pokemon.TradeConflict",
+        "One of the Pokémon changed while the trade was being made. Try again.");
 }

@@ -92,6 +92,44 @@ public sealed class OwnedPokemon : Entity
         return Result.Success();
     }
 
+    /// <summary>
+    /// Moves the Pokémon to another trainer as part of a trade. The original trainer is kept,
+    /// like in the games, and the Pokémon evolves when its species evolves by trading.
+    /// </summary>
+    public Result TradeTo(
+        Guid currentTrainerId,
+        Guid newTrainerId,
+        Guid tradeId,
+        int? tradeEvolutionSpeciesId,
+        DateTime utcNow)
+    {
+        Result ownership = EnsureActiveAndOwnedBy(currentTrainerId);
+
+        if (ownership.IsFailure)
+        {
+            return ownership;
+        }
+
+        int fromSpeciesId = SpeciesId;
+
+        Record(OwnershipChange.TradedAway, currentTrainerId, utcNow, tradeId);
+
+        TrainerId = newTrainerId;
+
+        Record(OwnershipChange.ReceivedInTrade, newTrainerId, utcNow, tradeId);
+
+        if (tradeEvolutionSpeciesId is not null)
+        {
+            SpeciesId = tradeEvolutionSpeciesId.Value;
+
+            Record(OwnershipChange.EvolvedByTrade, newTrainerId, utcNow, tradeId);
+        }
+
+        Raise(new PokemonTradedDomainEvent(Id, tradeId, currentTrainerId, newTrainerId, fromSpeciesId, SpeciesId));
+
+        return Result.Success();
+    }
+
     public Result Rename(Guid trainerId, string? nickname)
     {
         Result ownership = EnsureActiveAndOwnedBy(trainerId);
@@ -118,8 +156,8 @@ public sealed class OwnedPokemon : Entity
             : Result.Failure(PokemonErrors.NotActive(Id));
     }
 
-    private void Record(OwnershipChange change, Guid trainerId, DateTime utcNow)
+    private void Record(OwnershipChange change, Guid trainerId, DateTime utcNow, Guid? tradeId = null)
     {
-        _history.Add(OwnershipRecord.Create(Id, trainerId, SpeciesId, change, utcNow));
+        _history.Add(OwnershipRecord.Create(Id, trainerId, SpeciesId, change, utcNow, tradeId));
     }
 }

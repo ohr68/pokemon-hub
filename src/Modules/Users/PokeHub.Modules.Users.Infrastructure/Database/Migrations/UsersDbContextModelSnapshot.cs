@@ -64,6 +64,16 @@ namespace PokeHub.Modules.Users.Infrastructure.Database.Migrations
                         },
                         new
                         {
+                            PermissionCode = "trades:read",
+                            RoleName = "Member"
+                        },
+                        new
+                        {
+                            PermissionCode = "trades:update",
+                            RoleName = "Member"
+                        },
+                        new
+                        {
                             PermissionCode = "users:read",
                             RoleName = "Administrator"
                         },
@@ -90,6 +100,16 @@ namespace PokeHub.Modules.Users.Infrastructure.Database.Migrations
                         new
                         {
                             PermissionCode = "pokemon:grant",
+                            RoleName = "Administrator"
+                        },
+                        new
+                        {
+                            PermissionCode = "trades:read",
+                            RoleName = "Administrator"
+                        },
+                        new
+                        {
+                            PermissionCode = "trades:update",
                             RoleName = "Administrator"
                         });
                 });
@@ -236,6 +256,14 @@ namespace PokeHub.Modules.Users.Infrastructure.Database.Migrations
                         new
                         {
                             Code = "pokemon:grant"
+                        },
+                        new
+                        {
+                            Code = "trades:read"
+                        },
+                        new
+                        {
+                            Code = "trades:update"
                         });
                 });
 

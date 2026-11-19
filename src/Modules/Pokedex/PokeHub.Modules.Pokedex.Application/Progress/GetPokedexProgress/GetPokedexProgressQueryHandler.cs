@@ -7,7 +7,7 @@ using PokeHub.Common.Domain.Abstractions;
 namespace PokeHub.Modules.Pokedex.Application.Progress.GetPokedexProgress;
 
 // Progress comes from the ownership history: a species counts as caught once the trainer has
-// obtained one, and releasing it later doesn't remove it from the Pokédex (like the games).
+// obtained, received or evolved one, and releasing it later doesn't remove it from the Pokédex (like the games).
 internal sealed class GetPokedexProgressQueryHandler(IDbConnectionFactory dbConnectionFactory)
     : IQueryHandler<GetPokedexProgressQuery, PokedexProgressResponse>
 {
@@ -21,7 +21,7 @@ internal sealed class GetPokedexProgressQueryHandler(IDbConnectionFactory dbConn
             """
             SELECT DISTINCT species_id
             FROM pokedex.ownership_history
-            WHERE trainer_id = @TrainerId AND change = 'Obtained'
+            WHERE trainer_id = @TrainerId AND change IN ('Obtained', 'ReceivedInTrade', 'EvolvedByTrade')
             ORDER BY species_id;
 
             SELECT COUNT(*) FROM pokedex.species;

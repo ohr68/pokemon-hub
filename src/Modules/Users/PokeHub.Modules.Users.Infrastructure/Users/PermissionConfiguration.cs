@@ -20,7 +20,9 @@ internal sealed class PermissionConfiguration : IEntityTypeConfiguration<Permiss
             Permission.ReadPokedex,
             Permission.UpdatePokedex,
             Permission.SyncSpecies,
-            Permission.GrantPokemon);
+            Permission.GrantPokemon,
+            Permission.ReadTrades,
+            Permission.UpdateTrades);
 
         builder
             .HasMany<Role>()
@@ -35,6 +37,8 @@ internal sealed class PermissionConfiguration : IEntityTypeConfiguration<Permiss
                     CreateRolePermission(Role.Member, Permission.ModifyUser),
                     CreateRolePermission(Role.Member, Permission.ReadPokedex),
                     CreateRolePermission(Role.Member, Permission.UpdatePokedex),
+                    CreateRolePermission(Role.Member, Permission.ReadTrades),
+                    CreateRolePermission(Role.Member, Permission.UpdateTrades),
 
                     // Admin permissions
                     CreateRolePermission(Role.Administrator, Permission.GetUser),
@@ -42,7 +46,9 @@ internal sealed class PermissionConfiguration : IEntityTypeConfiguration<Permiss
                     CreateRolePermission(Role.Administrator, Permission.ReadPokedex),
                     CreateRolePermission(Role.Administrator, Permission.UpdatePokedex),
                     CreateRolePermission(Role.Administrator, Permission.SyncSpecies),
-                    CreateRolePermission(Role.Administrator, Permission.GrantPokemon)
+                    CreateRolePermission(Role.Administrator, Permission.GrantPokemon),
+                    CreateRolePermission(Role.Administrator, Permission.ReadTrades),
+                    CreateRolePermission(Role.Administrator, Permission.UpdateTrades)
                 );
             });
     }

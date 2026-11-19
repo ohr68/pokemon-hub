@@ -9,6 +9,11 @@ public static class TrainerErrors
         return Error.NotFound("Trainers.NotFound", $"The trainer with the identifier {trainerId} was not found.");
     }
 
+    public static Error CodeNotFound(string code)
+    {
+        return Error.NotFound("Trainers.CodeNotFound", $"No trainer has the code {code}.");
+    }
+
     public static Error InvalidStarter(int speciesId)
     {
         return Error.Problem(

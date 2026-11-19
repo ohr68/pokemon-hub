@@ -176,6 +176,12 @@ namespace PokeHub.Modules.Pokedex.Infrastructure.Database.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("trainer_id");
 
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
                     b.HasKey("Id")
                         .HasName("pk_pokemon");
 
@@ -215,6 +221,10 @@ namespace PokeHub.Modules.Pokedex.Infrastructure.Database.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("species_id");
 
+                    b.Property<Guid?>("TradeId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("trade_id");
+
                     b.Property<Guid>("TrainerId")
                         .HasColumnType("uuid")
                         .HasColumnName("trainer_id");
@@ -227,6 +237,9 @@ namespace PokeHub.Modules.Pokedex.Infrastructure.Database.Migrations
 
                     b.HasIndex("SpeciesId")
                         .HasDatabaseName("ix_ownership_history_species_id");
+
+                    b.HasIndex("TradeId")
+                        .HasDatabaseName("ix_ownership_history_trade_id");
 
                     b.HasIndex("TrainerId", "Change", "SpeciesId")
                         .HasDatabaseName("ix_ownership_history_trainer_id_change_species_id");
@@ -265,6 +278,10 @@ namespace PokeHub.Modules.Pokedex.Infrastructure.Database.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("synced_on_utc");
 
+                    b.Property<int?>("TradeEvolutionSpeciesId")
+                        .HasColumnType("integer")
+                        .HasColumnName("trade_evolution_species_id");
+
                     b.HasKey("Id")
                         .HasName("pk_species");
 
@@ -280,6 +297,12 @@ namespace PokeHub.Modules.Pokedex.Infrastructure.Database.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(9)
+                        .HasColumnType("character varying(9)")
+                        .HasColumnName("code");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -292,6 +315,10 @@ namespace PokeHub.Modules.Pokedex.Infrastructure.Database.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_trainers");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasDatabaseName("ix_trainers_code");
 
                     b.HasIndex("StarterSpeciesId")
                         .HasDatabaseName("ix_trainers_starter_species_id");

@@ -8,6 +8,8 @@ public sealed class Permission
     public static readonly Permission UpdatePokedex = new("pokedex:update");
     public static readonly Permission SyncSpecies = new("species:sync");
     public static readonly Permission GrantPokemon = new("pokemon:grant");
+    public static readonly Permission ReadTrades = new("trades:read");
+    public static readonly Permission UpdateTrades = new("trades:update");
 
     public Permission(string code)
     {

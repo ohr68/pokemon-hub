@@ -39,7 +39,13 @@ internal sealed class SyncSpeciesCommandHandler(
         {
             if (existing.TryGetValue(data.Id, out PokemonSpecies? species))
             {
-                if (species.Update(data.Name, data.Generation, data.PrimaryType, data.SecondaryType, utcNow))
+                if (species.Update(
+                        data.Name,
+                        data.Generation,
+                        data.PrimaryType,
+                        data.SecondaryType,
+                        data.TradeEvolutionSpeciesId,
+                        utcNow))
                 {
                     updated++;
                 }
@@ -53,6 +59,7 @@ internal sealed class SyncSpeciesCommandHandler(
                 data.Generation,
                 data.PrimaryType,
                 data.SecondaryType,
+                data.TradeEvolutionSpeciesId,
                 utcNow));
 
             added++;

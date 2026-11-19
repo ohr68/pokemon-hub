@@ -18,6 +18,9 @@ public abstract class BaseTest
     protected static string IntegrationEventsNamespace(string module) =>
         $"{ModuleNamespace(module)}.IntegrationEvents";
 
+    protected static string PublicApiNamespace(string module) =>
+        $"{ModuleNamespace(module)}.PublicApi";
+
     // Loaded by name because a new module's projects can still be empty, leaving no type to use with typeof.
     protected static Assembly[] ModuleAssemblies(string module) =>
         ModuleLayers

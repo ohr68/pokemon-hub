@@ -128,6 +128,160 @@ namespace PokeHub.Modules.Trades.Infrastructure.Database.Migrations
 
                     b.ToTable("outbox_message_consumers", "trades");
                 });
+
+            modelBuilder.Entity("PokeHub.Modules.Trades.Domain.Trades.Trade", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedOnUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on_utc");
+
+                    b.Property<DateTime>("ExpiresOnUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_on_utc");
+
+                    b.Property<string>("FailureReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("failure_reason");
+
+                    b.Property<Guid>("ProposerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("proposer_id");
+
+                    b.Property<string>("ProposerName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("proposer_name");
+
+                    b.Property<Guid>("RecipientId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("recipient_id");
+
+                    b.Property<string>("RecipientName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("recipient_name");
+
+                    b.Property<DateTime?>("ResolvedOnUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("resolved_on_utc");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.HasKey("Id")
+                        .HasName("pk_trades");
+
+                    b.HasIndex("ProposerId", "CreatedOnUtc")
+                        .HasDatabaseName("ix_trades_proposer_id_created_on_utc");
+
+                    b.HasIndex("RecipientId", "CreatedOnUtc")
+                        .HasDatabaseName("ix_trades_recipient_id_created_on_utc");
+
+                    b.ToTable("trades", "trades");
+                });
+
+            modelBuilder.Entity("PokeHub.Modules.Trades.Domain.Trades.Trade", b =>
+                {
+                    b.OwnsOne("PokeHub.Modules.Trades.Domain.Trades.TradedPokemon", "Offered", b1 =>
+                        {
+                            b1.Property<Guid>("TradeId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<bool>("IsShiny")
+                                .HasColumnType("boolean")
+                                .HasColumnName("offered_is_shiny");
+
+                            b1.Property<int>("Level")
+                                .HasColumnType("integer")
+                                .HasColumnName("offered_level");
+
+                            b1.Property<string>("Nickname")
+                                .HasMaxLength(12)
+                                .HasColumnType("character varying(12)")
+                                .HasColumnName("offered_nickname");
+
+                            b1.Property<Guid>("PokemonId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("offered_pokemon_id");
+
+                            b1.Property<int>("SpeciesId")
+                                .HasColumnType("integer")
+                                .HasColumnName("offered_species_id");
+
+                            b1.Property<string>("SpeciesName")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("offered_species_name");
+
+                            b1.HasKey("TradeId");
+
+                            b1.ToTable("trades", "trades");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TradeId")
+                                .HasConstraintName("fk_trades_trades_id");
+                        });
+
+                    b.OwnsOne("PokeHub.Modules.Trades.Domain.Trades.TradedPokemon", "Requested", b1 =>
+                        {
+                            b1.Property<Guid>("TradeId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<bool>("IsShiny")
+                                .HasColumnType("boolean")
+                                .HasColumnName("requested_is_shiny");
+
+                            b1.Property<int>("Level")
+                                .HasColumnType("integer")
+                                .HasColumnName("requested_level");
+
+                            b1.Property<string>("Nickname")
+                                .HasMaxLength(12)
+                                .HasColumnType("character varying(12)")
+                                .HasColumnName("requested_nickname");
+
+                            b1.Property<Guid>("PokemonId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("requested_pokemon_id");
+
+                            b1.Property<int>("SpeciesId")
+                                .HasColumnType("integer")
+                                .HasColumnName("requested_species_id");
+
+                            b1.Property<string>("SpeciesName")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("requested_species_name");
+
+                            b1.HasKey("TradeId");
+
+                            b1.ToTable("trades", "trades");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TradeId")
+                                .HasConstraintName("fk_trades_trades_id");
+                        });
+
+                    b.Navigation("Offered")
+                        .IsRequired();
+
+                    b.Navigation("Requested")
+                        .IsRequired();
+                });
 #pragma warning restore 612, 618
         }
     }

@@ -22,12 +22,18 @@ public sealed class OwnershipRecord
 
     public DateTime OccurredOnUtc { get; private set; }
 
+    /// <summary>
+    /// The trade that caused this change, if any. Lets a repeated trade be detected.
+    /// </summary>
+    public Guid? TradeId { get; private set; }
+
     internal static OwnershipRecord Create(
         Guid pokemonId,
         Guid trainerId,
         int speciesId,
         OwnershipChange change,
-        DateTime utcNow)
+        DateTime utcNow,
+        Guid? tradeId = null)
     {
         return new OwnershipRecord
         {
@@ -37,6 +43,7 @@ public sealed class OwnershipRecord
             SpeciesId = speciesId,
             Change = change,
             OccurredOnUtc = utcNow,
+            TradeId = tradeId,
         };
     }
 }

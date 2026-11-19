@@ -18,6 +18,10 @@ internal sealed class TrainerConfiguration : IEntityTypeConfiguration<Trainer>
 
         builder.Property(t => t.Name).HasMaxLength(100);
 
+        builder.Property(t => t.Code).HasMaxLength(TrainerCode.Length);
+
+        builder.HasIndex(t => t.Code).IsUnique();
+
         builder.HasOne<PokemonSpecies>().WithMany().HasForeignKey(t => t.StarterSpeciesId);
     }
 }

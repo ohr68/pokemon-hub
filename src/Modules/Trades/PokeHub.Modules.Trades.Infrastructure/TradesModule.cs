@@ -2,7 +2,9 @@ using PokeHub.Common.Application.EventBus;
 using PokeHub.Common.Application.Messaging;
 using PokeHub.Common.Infrastructure.Outbox;
 using PokeHub.Modules.Trades.Application.Abstractions.Data;
+using PokeHub.Modules.Trades.Domain.Trades;
 using PokeHub.Modules.Trades.Infrastructure.Database;
+using PokeHub.Modules.Trades.Infrastructure.Trades;
 using PokeHub.Modules.Trades.Infrastructure.Inbox;
 using PokeHub.Modules.Trades.Infrastructure.Outbox;
 using PokeHub.Modules.Trades.Presentation;
@@ -45,6 +47,8 @@ public static class TradesModule
             services.Configure<InboxOptions>(configuration.GetSection("Trades:Inbox"));
 
             services.ConfigureOptions<ConfigureProcessInboxJob>();
+
+            services.AddScoped<ITradeRepository, TradeRepository>();
         }
 
         private void AddDomainEventHandlers()

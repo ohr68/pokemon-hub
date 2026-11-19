@@ -10,6 +10,7 @@ namespace PokeHub.Modules.Pokedex.Infrastructure.PokeApi;
 /// Builds the species catalog from about 30 PokéAPI requests instead of one per species:
 /// each generation lists its species, and each type lists the Pokémon that have it and in
 /// which slot. A species' types are those of its default form, whose id equals the species id.
+/// Trade evolutions add about 50 more requests.
 /// </summary>
 internal sealed partial class PokeApiClient(HttpClient httpClient, ILogger<PokeApiClient> logger) : IPokeApiClient
 {
@@ -20,6 +21,7 @@ internal sealed partial class PokeApiClient(HttpClient httpClient, ILogger<PokeA
         {
             Dictionary<int, (string Name, int Generation)> species = await GetSpeciesByGenerationAsync(cancellationToken);
             Dictionary<int, string[]> types = await GetTypesBySpeciesAsync(species, cancellationToken);
+            Dictionary<int, int> tradeEvolutions = await GetTradeEvolutionsAsync(species, cancellationToken);
 
             var catalog = new List<SpeciesData>(species.Count);
 
@@ -31,7 +33,13 @@ internal sealed partial class PokeApiClient(HttpClient httpClient, ILogger<PokeA
                     continue;
                 }
 
-                catalog.Add(new SpeciesData(id, name, generation, slots[0], slots[1]));
+                catalog.Add(new SpeciesData(
+                    id,
+                    name,
+                    generation,
+                    slots[0],
+                    slots[1],
+                    tradeEvolutions.TryGetValue(id, out int evolvesInto) ? evolvesInto : null));
             }
 
             return catalog;
@@ -84,6 +92,55 @@ internal sealed partial class PokeApiClient(HttpClient httpClient, ILogger<PokeA
         }
 
         return types;
+    }
+
+    /// <summary>
+    /// Maps each species to what it becomes when traded with no held item and no specific
+    /// partner (Kadabra to Alakazam, Machoke to Machamp, ...). PokéAPI lists every species
+    /// reached by trading; each one's evolution chain says what the trade requires.
+    /// </summary>
+    private async Task<Dictionary<int, int>> GetTradeEvolutionsAsync(
+        Dictionary<int, (string Name, int Generation)> species,
+        CancellationToken cancellationToken)
+    {
+        EvolutionTriggerResponse trade = await GetAsync<EvolutionTriggerResponse>("evolution-trigger/trade", cancellationToken);
+
+        (int From, int Into)?[] evolutions = await Task.WhenAll(trade.PokemonSpecies
+            .Where(target => species.ContainsKey(target.Id))
+            .Select(target => GetPlainTradeEvolutionAsync(target.Id, cancellationToken)));
+
+        return evolutions
+            .OfType<(int From, int Into)>()
+            .Where(e => species.ContainsKey(e.From))
+            .ToDictionary(e => e.From, e => e.Into);
+    }
+
+    private async Task<(int From, int Into)?> GetPlainTradeEvolutionAsync(int targetId, CancellationToken cancellationToken)
+    {
+        SpeciesEvolutionResponse target = await GetAsync<SpeciesEvolutionResponse>(
+            $"pokemon-species/{targetId}",
+            cancellationToken);
+
+        if (target.EvolvesFromSpecies is null)
+        {
+            return null;
+        }
+
+        EvolutionChainResponse chain = await httpClient.GetFromJsonAsync<EvolutionChainResponse>(
+            target.EvolutionChain.Url,
+            cancellationToken) ?? throw new HttpRequestException("PokéAPI returned an empty evolution chain.");
+
+        ChainLink? link = Find(chain.Chain, targetId);
+
+        bool plainTrade = link?.EvolutionDetails.Any(detail =>
+            detail.Trigger.Name == "trade" && detail.HeldItem is null && detail.TradeSpecies is null) ?? false;
+
+        return plainTrade ? (target.EvolvesFromSpecies.Id, targetId) : null;
+
+        static ChainLink? Find(ChainLink node, int speciesId) =>
+            node.Species.Id == speciesId
+                ? node
+                : node.EvolvesTo.Select(next => Find(next, speciesId)).FirstOrDefault(found => found is not null);
     }
 
     private async Task<T> GetAsync<T>(string path, CancellationToken cancellationToken)

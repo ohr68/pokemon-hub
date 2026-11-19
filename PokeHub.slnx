@@ -16,6 +16,7 @@
     <Project Path="src/Modules/Pokedex/PokeHub.Modules.Pokedex.Infrastructure/PokeHub.Modules.Pokedex.Infrastructure.csproj" />
     <Project Path="src/Modules/Pokedex/PokeHub.Modules.Pokedex.IntegrationEvents/PokeHub.Modules.Pokedex.IntegrationEvents.csproj" />
     <Project Path="src/Modules/Pokedex/PokeHub.Modules.Pokedex.Presentation/PokeHub.Modules.Pokedex.Presentation.csproj" />
+    <Project Path="src/Modules/Pokedex/PokeHub.Modules.Pokedex.PublicApi/PokeHub.Modules.Pokedex.PublicApi.csproj" />
   </Folder>
   <Folder Name="/src/Modules/Trades/">
     <Project Path="src/Modules/Trades/PokeHub.Modules.Trades.Application/PokeHub.Modules.Trades.Application.csproj" />

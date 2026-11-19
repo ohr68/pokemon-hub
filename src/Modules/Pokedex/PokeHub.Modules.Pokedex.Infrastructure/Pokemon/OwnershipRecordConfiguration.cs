@@ -24,6 +24,8 @@ internal sealed class OwnershipRecordConfiguration : IEntityTypeConfiguration<Ow
 
         builder.HasOne<PokemonSpecies>().WithMany().HasForeignKey(r => r.SpeciesId);
 
+        builder.HasIndex(r => r.TradeId);
+
         // Pokédex progress reads distinct species per trainer and change.
         builder.HasIndex(r => new { r.TrainerId, r.Change, r.SpeciesId });
     }

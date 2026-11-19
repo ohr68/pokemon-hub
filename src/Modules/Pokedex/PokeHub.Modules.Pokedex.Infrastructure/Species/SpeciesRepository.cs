@@ -11,6 +11,11 @@ internal sealed class SpeciesRepository(PokedexDbContext context) : ISpeciesRepo
         return await context.Species.ToListAsync(cancellationToken);
     }
 
+    public async Task<PokemonSpecies?> GetAsync(int speciesId, CancellationToken cancellationToken = default)
+    {
+        return await context.Species.SingleOrDefaultAsync(s => s.Id == speciesId, cancellationToken);
+    }
+
     public Task<bool> ExistsAsync(int speciesId, CancellationToken cancellationToken = default)
     {
         return context.Species.AnyAsync(s => s.Id == speciesId, cancellationToken);

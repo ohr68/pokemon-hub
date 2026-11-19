@@ -33,5 +33,10 @@ internal sealed class OwnedPokemonConfiguration : IEntityTypeConfiguration<Owned
         builder.Navigation(p => p.History).UsePropertyAccessMode(PropertyAccessMode.Field);
 
         builder.HasIndex(p => new { p.TrainerId, p.Status });
+
+        // PostgreSQL's xmin system column changes on every update. As a concurrency token it
+        // makes a save fail when the Pokémon changed since it was read, so two trades accepted
+        // at the same moment can't both move it.
+        builder.Property<uint>("Version").IsRowVersion();
     }
 }

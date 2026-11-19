@@ -31,6 +31,8 @@ public sealed class Trainer : Entity
 
     public string Name { get; private set; }
 
+    public string Code { get; private set; }
+
     public int? StarterSpeciesId { get; private set; }
 
     public static Trainer Create(Guid id, string name)
@@ -39,6 +41,7 @@ public sealed class Trainer : Entity
         {
             Id = id,
             Name = name,
+            Code = TrainerCode.New(),
         };
     }
 

@@ -17,6 +17,8 @@ using PokeHub.Modules.Pokedex.Infrastructure.Species;
 using PokeHub.Modules.Pokedex.Infrastructure.SpeciesSync;
 using PokeHub.Modules.Pokedex.Infrastructure.Trainers;
 using PokeHub.Modules.Pokedex.Presentation;
+using PokeHub.Modules.Pokedex.PublicApi;
+using PokeHub.Modules.Pokedex.Infrastructure.PublicApi;
 using PokeHub.Modules.Users.IntegrationEvents;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -83,6 +85,8 @@ public static class PokedexModule
             services.ConfigureOptions<ConfigureSyncSpeciesJob>();
 
             services.AddScoped<ISpeciesSyncScheduler, SpeciesSyncScheduler>();
+
+            services.AddScoped<IPokedexApi, PokedexApi>();
         }
 
         private void AddDomainEventHandlers()

@@ -22,6 +22,11 @@ public sealed class PokemonSpecies : Entity
 
     public string? SecondaryType { get; private set; }
 
+    /// <summary>
+    /// The species this one becomes when traded without a held item (Kadabra into Alakazam, ...).
+    /// </summary>
+    public int? TradeEvolutionSpeciesId { get; private set; }
+
     public DateTime SyncedOnUtc { get; private set; }
 
     public static PokemonSpecies Create(
@@ -30,6 +35,7 @@ public sealed class PokemonSpecies : Entity
         int generation,
         string primaryType,
         string? secondaryType,
+        int? tradeEvolutionSpeciesId,
         DateTime utcNow)
     {
         return new PokemonSpecies
@@ -39,6 +45,7 @@ public sealed class PokemonSpecies : Entity
             Generation = generation,
             PrimaryType = primaryType,
             SecondaryType = secondaryType,
+            TradeEvolutionSpeciesId = tradeEvolutionSpeciesId,
             SyncedOnUtc = utcNow,
         };
     }
@@ -46,12 +53,19 @@ public sealed class PokemonSpecies : Entity
     /// <summary>
     /// Applies data from a sync. Returns <c>true</c> when anything changed.
     /// </summary>
-    public bool Update(string name, int generation, string primaryType, string? secondaryType, DateTime utcNow)
+    public bool Update(
+        string name,
+        int generation,
+        string primaryType,
+        string? secondaryType,
+        int? tradeEvolutionSpeciesId,
+        DateTime utcNow)
     {
         if (Name == name &&
             Generation == generation &&
             PrimaryType == primaryType &&
-            SecondaryType == secondaryType)
+            SecondaryType == secondaryType &&
+            TradeEvolutionSpeciesId == tradeEvolutionSpeciesId)
         {
             return false;
         }
@@ -60,6 +74,7 @@ public sealed class PokemonSpecies : Entity
         Generation = generation;
         PrimaryType = primaryType;
         SecondaryType = secondaryType;
+        TradeEvolutionSpeciesId = tradeEvolutionSpeciesId;
         SyncedOnUtc = utcNow;
 
         return true;

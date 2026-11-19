@@ -19,6 +19,7 @@ internal sealed class GetTrainerQueryHandler(IDbConnectionFactory dbConnectionFa
              SELECT
                 id AS {nameof(TrainerResponse.Id)},
                 name AS {nameof(TrainerResponse.Name)},
+                code AS {nameof(TrainerResponse.Code)},
                 starter_species_id AS {nameof(TrainerResponse.StarterSpeciesId)}
              FROM pokedex.trainers
              WHERE id = @TrainerId

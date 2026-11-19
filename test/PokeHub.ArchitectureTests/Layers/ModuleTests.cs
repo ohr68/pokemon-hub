@@ -8,7 +8,8 @@ public class ModuleTests : BaseTest
     public static TheoryData<string> AllModules => [.. Modules];
 
     /// <summary>
-    /// A module may only talk to another module through that module's integration events.
+    /// A module may only talk to another module through that module's integration events or
+    /// its public API (in-process calls, like Trades asking the Pokédex to swap Pokémon).
     /// </summary>
     [Theory]
     [MemberData(nameof(AllModules))]
@@ -19,14 +20,14 @@ public class ModuleTests : BaseTest
             .Select(ModuleNamespace)
             .ToArray();
 
-        string[] otherIntegrationEvents = Modules
+        string[] allowedContracts = Modules
             .Where(other => other != module)
-            .Select(IntegrationEventsNamespace)
+            .SelectMany(other => new[] { IntegrationEventsNamespace(other), PublicApiNamespace(other) })
             .ToArray();
 
         Types.InAssemblies(ModuleAssemblies(module))
             .That()
-            .DoNotHaveDependencyOnAny(otherIntegrationEvents)
+            .DoNotHaveDependencyOnAny(allowedContracts)
             .Should()
             .NotHaveDependencyOnAny(otherModules)
             .GetResult()
