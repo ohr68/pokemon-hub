@@ -26,6 +26,13 @@
     <Project Path="src/Modules/Pokedex/PokeHub.Modules.Pokedex.Presentation/PokeHub.Modules.Pokedex.Presentation.csproj" />
     <Project Path="src/Modules/Pokedex/PokeHub.Modules.Pokedex.PublicApi/PokeHub.Modules.Pokedex.PublicApi.csproj" />
   </Folder>
+  <Folder Name="/src/Modules/Progression/">
+    <Project Path="src/Modules/Progression/PokeHub.Modules.Progression.Application/PokeHub.Modules.Progression.Application.csproj" />
+    <Project Path="src/Modules/Progression/PokeHub.Modules.Progression.Domain/PokeHub.Modules.Progression.Domain.csproj" />
+    <Project Path="src/Modules/Progression/PokeHub.Modules.Progression.Infrastructure/PokeHub.Modules.Progression.Infrastructure.csproj" />
+    <Project Path="src/Modules/Progression/PokeHub.Modules.Progression.IntegrationEvents/PokeHub.Modules.Progression.IntegrationEvents.csproj" />
+    <Project Path="src/Modules/Progression/PokeHub.Modules.Progression.Presentation/PokeHub.Modules.Progression.Presentation.csproj" />
+  </Folder>
   <Folder Name="/src/Modules/Trades/">
     <Project Path="src/Modules/Trades/PokeHub.Modules.Trades.Application/PokeHub.Modules.Trades.Application.csproj" />
     <Project Path="src/Modules/Trades/PokeHub.Modules.Trades.Domain/PokeHub.Modules.Trades.Domain.csproj" />

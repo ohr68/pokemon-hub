@@ -74,6 +74,11 @@ namespace PokeHub.Modules.Users.Infrastructure.Database.Migrations
                         },
                         new
                         {
+                            PermissionCode = "progression:read",
+                            RoleName = "Member"
+                        },
+                        new
+                        {
                             PermissionCode = "users:read",
                             RoleName = "Administrator"
                         },
@@ -115,6 +120,11 @@ namespace PokeHub.Modules.Users.Infrastructure.Database.Migrations
                         new
                         {
                             PermissionCode = "games:manage",
+                            RoleName = "Administrator"
+                        },
+                        new
+                        {
+                            PermissionCode = "progression:read",
                             RoleName = "Administrator"
                         });
                 });
@@ -273,6 +283,10 @@ namespace PokeHub.Modules.Users.Infrastructure.Database.Migrations
                         new
                         {
                             Code = "games:manage"
+                        },
+                        new
+                        {
+                            Code = "progression:read"
                         });
                 });
 

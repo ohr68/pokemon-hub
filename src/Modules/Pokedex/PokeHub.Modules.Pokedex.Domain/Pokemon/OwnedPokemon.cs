@@ -126,7 +126,7 @@ public sealed class OwnedPokemon : Entity
 
         pokemon.Record(OwnershipChange.Obtained, trainerId, utcNow, saveId: saveId);
 
-        pokemon.Raise(new PokemonObtainedDomainEvent(pokemon.Id, trainerId, speciesId, origin));
+        pokemon.Raise(new PokemonObtainedDomainEvent(pokemon.Id, trainerId, speciesId, origin, isShiny));
 
         return pokemon;
     }
@@ -233,6 +233,8 @@ public sealed class OwnedPokemon : Entity
             SpeciesId = tradeEvolutionSpeciesId.Value;
 
             Record(OwnershipChange.EvolvedByTrade, newTrainerId, utcNow, tradeId);
+
+            Raise(new PokemonEvolvedDomainEvent(Id, newTrainerId, fromSpeciesId, SpeciesId));
         }
 
         Raise(new PokemonTradedDomainEvent(Id, tradeId, currentTrainerId, newTrainerId, fromSpeciesId, SpeciesId));
@@ -392,9 +394,12 @@ public sealed class OwnedPokemon : Entity
 
         if (snapshot.SpeciesId != SpeciesId)
         {
+            int fromSpeciesId = SpeciesId;
             SpeciesId = snapshot.SpeciesId;
 
             Record(OwnershipChange.EvolvedInGame, trainerId, utcNow, saveId: save.Id);
+
+            Raise(new PokemonEvolvedDomainEvent(Id, trainerId, fromSpeciesId, SpeciesId));
         }
 
         Record(OwnershipChange.MovedToHub, trainerId, utcNow, saveId: save.Id);

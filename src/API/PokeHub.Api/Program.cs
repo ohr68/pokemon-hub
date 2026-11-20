@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Cors.Infrastructure;
 using PokeHub.Modules.Games.Infrastructure;
 using PokeHub.Modules.Games.PublicApi;
 using PokeHub.Modules.Pokedex.Infrastructure;
+using PokeHub.Modules.Progression.Infrastructure;
 using PokeHub.Modules.Trades.Infrastructure;
 using PokeHub.Modules.Users.Infrastructure;
 using Serilog;
@@ -47,6 +48,7 @@ Assembly[] moduleApplicationAssemblies =
     PokeHub.Modules.Pokedex.Application.AssemblyReference.Assembly,
     PokeHub.Modules.Trades.Application.AssemblyReference.Assembly,
     PokeHub.Modules.Games.Application.AssemblyReference.Assembly,
+    PokeHub.Modules.Progression.Application.AssemblyReference.Assembly,
 ];
 
 // FastEndpoints is registered once for the host and only scans the modules' presentation assemblies.
@@ -56,6 +58,7 @@ Assembly[] modulePresentationAssemblies =
     PokeHub.Modules.Pokedex.Presentation.AssemblyReference.Assembly,
     PokeHub.Modules.Trades.Presentation.AssemblyReference.Assembly,
     PokeHub.Modules.Games.Presentation.AssemblyReference.Assembly,
+    PokeHub.Modules.Progression.Presentation.AssemblyReference.Assembly,
 ];
 
 builder.Services.AddApplication(moduleApplicationAssemblies);
@@ -68,11 +71,12 @@ builder.Services.AddInfrastructure(
     [
         PokedexModule.ConfigureConsumers,
         GamesModule.ConfigureConsumers,
+        ProgressionModule.ConfigureConsumers,
     ],
     databaseConnectionString,
     redisConnectionString);
 
-builder.Configuration.AddModuleConfiguration(["users", "pokedex", "trades", "games"]);
+builder.Configuration.AddModuleConfiguration(["users", "pokedex", "trades", "games", "progression"]);
 
 Uri keyCloakHealthUrl = builder.Configuration.GetKeyCloakHealthUrl();
 
@@ -85,6 +89,7 @@ builder.Services.AddUsersModule(builder.Configuration);
 builder.Services.AddPokedexModule(builder.Configuration);
 builder.Services.AddTradesModule(builder.Configuration);
 builder.Services.AddGamesModule(builder.Configuration);
+builder.Services.AddProgressionModule(builder.Configuration);
 
 builder.Services.AddEndpoints(modulePresentationAssemblies);
 builder.Services.AddSwaggerDocumentation();

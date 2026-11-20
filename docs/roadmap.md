@@ -9,7 +9,7 @@
 | 4. Games platform | Done: registration, game API, files, rate limits, webhooks, turning games off, admin pages |
 | 5. FireRed | Done: play in the browser, sync, mirror, save backups, transfers both ways |
 | 6. Operations | Planned |
-| 7. Trainer progression: XP and levels, trophies, badges, coins | Planned |
+| 7. Trainer progression: XP and levels, trophies, badges, coins | In progress: XP and levels done |
 
 More ideas, not yet in a phase, are in the [backlog](#backlog).
 
@@ -138,8 +138,15 @@ another form).
 
 Trainers grow by playing, across every game connected to PokeHub:
 
-- **XP and trainer level**: trainers earn experience (catching, trading, syncing, winning
-  badges...) and level up.
+- **XP and trainer level** (done): a Progression module listens to the Pokédex's
+  integration events and awards XP: choosing the starter 50, each catch in a game 10, a
+  shiny 50 more, a species new to the trainer 25 more, each trade 20, each evolution 15
+  (granted Pokémon earn nothing). Each award is an entry with a source key, so nothing pays
+  twice. Levels: 100 XP from level 1 to 2, then 50 more each level, up to 100. Reaching a
+  level publishes `TrainerLeveledUp` for trophies and coins to build on. Trainers see their
+  level and latest XP in Meus Pokémons and the account menu (`api/progression/me`). Past
+  activity was backfilled by replaying the Pokédex's ownership history as the same events
+  (`api/pokedex/history/replay`, admins only; safe to repeat).
 - **Trophies**: achievements for milestones, such as a completed regional Pokédex, a first
   shiny or a hundred trades.
 - **Badges per game**: each game's gym badges synced to PokeHub (for FireRed, read from the
