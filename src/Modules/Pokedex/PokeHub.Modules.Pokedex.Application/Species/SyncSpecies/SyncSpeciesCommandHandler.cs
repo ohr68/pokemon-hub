@@ -36,6 +36,7 @@ internal sealed class SyncSpeciesCommandHandler(
         int updated = 0;
 
         await SyncGrowthRatesAsync(catalog.Value.GrowthRates, cancellationToken);
+        await SyncMovesAsync(catalog.Value.Moves, cancellationToken);
 
         foreach (SpeciesData data in catalog.Value.Species)
         {
@@ -49,6 +50,7 @@ internal sealed class SyncSpeciesCommandHandler(
                         data.TradeEvolutionSpeciesId,
                         data.GrowthRate,
                         data.Gen3Index,
+                        ToLevelUpMoves(data.Gen3LevelUpMoves),
                         utcNow))
                 {
                     updated++;
@@ -66,6 +68,7 @@ internal sealed class SyncSpeciesCommandHandler(
                 data.TradeEvolutionSpeciesId,
                 data.GrowthRate,
                 data.Gen3Index,
+                ToLevelUpMoves(data.Gen3LevelUpMoves),
                 utcNow));
 
             added++;
@@ -90,5 +93,26 @@ internal sealed class SyncSpeciesCommandHandler(
 
             speciesRepository.Insert(GrowthRate.Create(data.Name, data.ExperienceByLevel));
         }
+    }
+
+    private async Task SyncMovesAsync(IReadOnlyCollection<MoveData> moves, CancellationToken cancellationToken)
+    {
+        var existing = (await speciesRepository.GetMovesAsync(cancellationToken)).ToDictionary(m => m.Id);
+
+        foreach (MoveData data in moves)
+        {
+            if (existing.TryGetValue(data.Id, out Move? move))
+            {
+                move.Update(data.Name, data.Pp);
+                continue;
+            }
+
+            speciesRepository.Insert(Move.Create(data.Id, data.Name, data.Pp));
+        }
+    }
+
+    private static List<LevelUpMove> ToLevelUpMoves(IReadOnlyList<LevelUpMoveData> moves)
+    {
+        return moves.Select((m, index) => new LevelUpMove(index, m.Level, m.MoveId)).ToList();
     }
 }

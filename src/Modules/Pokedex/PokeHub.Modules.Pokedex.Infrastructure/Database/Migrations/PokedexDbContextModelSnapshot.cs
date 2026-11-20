@@ -135,14 +135,27 @@ namespace PokeHub.Modules.Pokedex.Infrastructure.Database.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<bool>("AwaitingDelivery")
+                        .HasColumnType("boolean")
+                        .HasColumnName("awaiting_delivery");
+
                     b.Property<string>("CatchKey")
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)")
                         .HasColumnName("catch_key");
 
-                    b.Property<Guid?>("CaughtInGameId")
+                    b.Property<Guid?>("CatchKeyGameId")
                         .HasColumnType("uuid")
-                        .HasColumnName("caught_in_game_id");
+                        .HasColumnName("catch_key_game_id");
+
+                    b.Property<byte[]>("GameData")
+                        .HasColumnType("bytea")
+                        .HasColumnName("game_data");
+
+                    b.Property<string>("GameDataFormat")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("game_data_format");
 
                     b.Property<bool>("IsShiny")
                         .HasColumnType("boolean")
@@ -207,9 +220,9 @@ namespace PokeHub.Modules.Pokedex.Infrastructure.Database.Migrations
                     b.HasIndex("SpeciesId")
                         .HasDatabaseName("ix_pokemon_species_id");
 
-                    b.HasIndex("CaughtInGameId", "CatchKey")
+                    b.HasIndex("CatchKeyGameId", "CatchKey")
                         .IsUnique()
-                        .HasDatabaseName("ix_pokemon_caught_in_game_id_catch_key")
+                        .HasDatabaseName("ix_pokemon_catch_key_game_id_catch_key")
                         .HasFilter("catch_key IS NOT NULL");
 
                     b.HasIndex("TrainerId", "Status")
@@ -322,6 +335,28 @@ namespace PokeHub.Modules.Pokedex.Infrastructure.Database.Migrations
                         .HasName("pk_growth_rates");
 
                     b.ToTable("growth_rates", "pokedex");
+                });
+
+            modelBuilder.Entity("PokeHub.Modules.Pokedex.Domain.Species.Move", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("name");
+
+                    b.Property<int>("Pp")
+                        .HasColumnType("integer")
+                        .HasColumnName("pp");
+
+                    b.HasKey("Id")
+                        .HasName("pk_moves");
+
+                    b.ToTable("moves", "pokedex");
                 });
 
             modelBuilder.Entity("PokeHub.Modules.Pokedex.Domain.Species.PokemonSpecies", b =>
@@ -477,6 +512,49 @@ namespace PokeHub.Modules.Pokedex.Infrastructure.Database.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_saves_trainers_trainer_id");
+                });
+
+            modelBuilder.Entity("PokeHub.Modules.Pokedex.Domain.Species.PokemonSpecies", b =>
+                {
+                    b.OwnsMany("PokeHub.Modules.Pokedex.Domain.Species.LevelUpMove", "Gen3LevelUpMoves", b1 =>
+                        {
+                            b1.Property<int>("SpeciesId")
+                                .HasColumnType("integer")
+                                .HasColumnName("species_id");
+
+                            b1.Property<int>("Order")
+                                .HasColumnType("integer")
+                                .HasColumnName("order");
+
+                            b1.Property<int>("Level")
+                                .HasColumnType("integer")
+                                .HasColumnName("level");
+
+                            b1.Property<int>("MoveId")
+                                .HasColumnType("integer")
+                                .HasColumnName("move_id");
+
+                            b1.HasKey("SpeciesId", "Order")
+                                .HasName("pk_species_gen3_level_up_moves");
+
+                            b1.HasIndex("MoveId")
+                                .HasDatabaseName("ix_species_gen3_level_up_moves_move_id");
+
+                            b1.ToTable("species_gen3_level_up_moves", "pokedex");
+
+                            b1.HasOne("PokeHub.Modules.Pokedex.Domain.Species.Move", null)
+                                .WithMany()
+                                .HasForeignKey("MoveId")
+                                .OnDelete(DeleteBehavior.Restrict)
+                                .IsRequired()
+                                .HasConstraintName("fk_species_gen3_level_up_moves_move_move_id");
+
+                            b1.WithOwner()
+                                .HasForeignKey("SpeciesId")
+                                .HasConstraintName("fk_species_gen3_level_up_moves_species_species_id");
+                        });
+
+                    b.Navigation("Gen3LevelUpMoves");
                 });
 
             modelBuilder.Entity("PokeHub.Modules.Pokedex.Domain.Trainers.Trainer", b =>

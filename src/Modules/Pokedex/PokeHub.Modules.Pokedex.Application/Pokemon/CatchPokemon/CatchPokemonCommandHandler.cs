@@ -22,11 +22,12 @@ internal sealed class CatchPokemonCommandHandler(
     public async Task<Result<Guid>> Handle(CatchPokemonCommand request, CancellationToken cancellationToken)
     {
         // A repeated request (the game retried after a timeout) gets the Pokémon it already created.
+        // The key may also belong to a Pokémon the trainer received in a trade and delivered here.
         OwnedPokemon? existing = await pokemonRepository.GetByCatchKeyAsync(request.GameId, request.CatchKey, cancellationToken);
 
         if (existing is not null)
         {
-            return existing.OriginalTrainerId == request.TrainerId
+            return existing.TrainerId == request.TrainerId
                 ? existing.Id
                 : Result.Failure<Guid>(PokemonErrors.CatchKeyInUse(request.CatchKey));
         }

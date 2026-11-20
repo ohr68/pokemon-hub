@@ -26,5 +26,17 @@ internal sealed class SpeciesConfiguration : IEntityTypeConfiguration<PokemonSpe
         builder.Property(s => s.GrowthRate).HasMaxLength(30);
 
         builder.HasIndex(s => s.Gen3Index);
+
+        // One row per move, replaced as a whole when a sync changes the learnset.
+        builder.OwnsMany(s => s.Gen3LevelUpMoves, moves =>
+        {
+            moves.ToTable("species_gen3_level_up_moves");
+            moves.WithOwner().HasForeignKey("SpeciesId");
+            moves.HasKey("SpeciesId", nameof(LevelUpMove.Order));
+            moves.Property(m => m.Order).ValueGeneratedNever();
+            moves.HasOne<Move>().WithMany().HasForeignKey(m => m.MoveId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        builder.Navigation(s => s.Gen3LevelUpMoves).UsePropertyAccessMode(PropertyAccessMode.Field);
     }
 }

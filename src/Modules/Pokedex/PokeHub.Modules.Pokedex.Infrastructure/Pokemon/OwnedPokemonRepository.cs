@@ -22,11 +22,11 @@ internal sealed class OwnedPokemonRepository(PokedexDbContext context) : IOwnedP
         CancellationToken cancellationToken = default)
     {
         return await context.Pokemon.SingleOrDefaultAsync(
-            p => p.CaughtInGameId == gameId && p.CatchKey == catchKey,
+            p => p.CatchKeyGameId == gameId && p.CatchKey == catchKey,
             cancellationToken);
     }
 
-    public async Task<IReadOnlyList<OwnedPokemon>> GetCaughtInSaveAsync(
+    public async Task<IReadOnlyList<OwnedPokemon>> GetInsideGameAsync(
         Guid saveId,
         Guid gameId,
         CancellationToken cancellationToken = default)
@@ -34,8 +34,18 @@ internal sealed class OwnedPokemonRepository(PokedexDbContext context) : IOwnedP
         return await context.Pokemon
             .Where(p => p.SaveId == saveId
                         && p.Status == PokemonStatus.Active
-                        && p.CaughtInGameId == gameId
+                        && !p.AwaitingDelivery
+                        && p.CatchKeyGameId == gameId
                         && p.CatchKey != null)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<OwnedPokemon>> GetAwaitingDeliveryAsync(
+        Guid saveId,
+        CancellationToken cancellationToken = default)
+    {
+        return await context.Pokemon
+            .Where(p => p.SaveId == saveId && p.Status == PokemonStatus.Active && p.AwaitingDelivery)
             .ToListAsync(cancellationToken);
     }
 

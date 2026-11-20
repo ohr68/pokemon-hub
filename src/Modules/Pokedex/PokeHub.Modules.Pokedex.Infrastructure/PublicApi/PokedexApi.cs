@@ -8,7 +8,10 @@ using PokeHub.Modules.Pokedex.Application.Pokemon.GetTrainerPokemon;
 using PokeHub.Modules.Pokedex.Application.Pokemon.ReleasePokemon;
 using PokeHub.Modules.Pokedex.Application.Saves;
 using PokeHub.Modules.Pokedex.Application.Saves.GetOrCreateSave;
+using PokeHub.Modules.Pokedex.Application.Saves.DeliverPokemon;
+using PokeHub.Modules.Pokedex.Application.Saves.GetAwaitingDelivery;
 using PokeHub.Modules.Pokedex.Application.Saves.ReconcileSave;
+using PokeHub.Modules.Pokedex.Application.Saves.WithdrawPokemon;
 using PokeHub.Modules.Pokedex.Application.Pokemon.TradePokemon;
 using PokeHub.Modules.Pokedex.Application.Trainers.GetTrainer;
 using PokeHub.Modules.Pokedex.Domain.Pokemon;
@@ -152,5 +155,79 @@ internal sealed class PokedexApi(ISender sender) : IPokedexApi
         CancellationToken cancellationToken = default)
     {
         return sender.Send(new ReleasePokemonCommand(trainerId, pokemonId, gameId), cancellationToken);
+    }
+
+    public async Task<Result<IReadOnlyCollection<DeliveryInfo>>> GetAwaitingDeliveryAsync(
+        Guid trainerId,
+        Guid gameId,
+        CancellationToken cancellationToken = default)
+    {
+        Result<IReadOnlyCollection<AwaitingDeliveryResponse>> result = await sender.Send(
+            new GetAwaitingDeliveryQuery(trainerId, gameId),
+            cancellationToken);
+
+        if (result.IsFailure)
+        {
+            return Result.Failure<IReadOnlyCollection<DeliveryInfo>>(result.Error);
+        }
+
+        return result.Value
+            .Select(p => new DeliveryInfo(
+                p.Id,
+                p.SpeciesId,
+                p.SpeciesName,
+                p.Nickname,
+                p.Level,
+                p.IsShiny,
+                p.IsOriginalTrainer,
+                p.OriginalTrainerId,
+                p.OriginalTrainerName,
+                p.GameDataFormat,
+                p.GameData))
+            .ToList();
+    }
+
+    public async Task<Result> DeliverPokemonAsync(
+        Guid trainerId,
+        Guid gameId,
+        IReadOnlyCollection<DeliveredPokemon> deliveries,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return await sender.Send(
+                new DeliverPokemonCommand(
+                    trainerId,
+                    gameId,
+                    deliveries.Select(d => new Delivery(d.PokemonId, d.CatchKey)).ToList()),
+                cancellationToken);
+        }
+        catch (PokeHubException exception) when (exception.InnerException is DbUpdateConcurrencyException)
+        {
+            return Result.Failure(PokemonErrors.ChangedMeanwhile);
+        }
+    }
+
+    public async Task<Result<IReadOnlyCollection<Guid>>> WithdrawPokemonAsync(
+        Guid trainerId,
+        Guid gameId,
+        IReadOnlyCollection<WithdrawnPokemon> withdrawals,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return await sender.Send(
+                new WithdrawPokemonCommand(
+                    trainerId,
+                    gameId,
+                    withdrawals
+                        .Select(w => new Withdrawal(w.CatchKey, w.SpeciesId, w.Level, w.Nickname, w.DataFormat, w.Data))
+                        .ToList()),
+                cancellationToken);
+        }
+        catch (PokeHubException exception) when (exception.InnerException is DbUpdateConcurrencyException)
+        {
+            return Result.Failure<IReadOnlyCollection<Guid>>(PokemonErrors.ChangedMeanwhile);
+        }
     }
 }

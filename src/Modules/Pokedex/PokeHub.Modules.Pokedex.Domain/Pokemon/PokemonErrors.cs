@@ -39,6 +39,14 @@ public static class PokemonErrors
         "Pokemon.NotInThisSave",
         "The Pokémon is not in this game's save.");
 
+    public static readonly Error InsideGame = Error.Conflict(
+        "Pokemon.InsideGame",
+        "The Pokémon is inside the game's own save. Send it to PokeHub from inside the game.");
+
+    public static readonly Error NotAwaitingDelivery = Error.Conflict(
+        "Pokemon.NotAwaitingDelivery",
+        "The Pokémon isn't waiting to be delivered into this game.");
+
     public static readonly Error AlreadyThere = Error.Conflict(
         "Pokemon.AlreadyThere",
         "The Pokémon is already there.");
@@ -46,4 +54,8 @@ public static class PokemonErrors
     public static readonly Error TradeConflict = Error.Conflict(
         "Pokemon.TradeConflict",
         "One of the Pokémon changed while the trade was being made. Try again.");
+
+    public static readonly Error ChangedMeanwhile = Error.Conflict(
+        "Pokemon.ChangedMeanwhile",
+        "One of the Pokémon changed on PokeHub at the same time. Try again.");
 }

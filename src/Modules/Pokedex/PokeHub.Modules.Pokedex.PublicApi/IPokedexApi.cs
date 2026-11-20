@@ -39,7 +39,7 @@ public interface IPokedexApi
     Task<Result<Guid>> CatchPokemonAsync(CatchRequest request, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Mirrors the game's save: Pokémon the game caught that are in its save on PokeHub but no
+    /// Mirrors the game's save: Pokémon inside the game (caught or delivered) that are in its save on PokeHub but no
     /// longer among <paramref name="presentCatchKeys"/> left the game and are removed. With
     /// <paramref name="dryRun"/>, only reports them.
     /// </summary>
@@ -57,5 +57,32 @@ public interface IPokedexApi
         Guid trainerId,
         Guid gameId,
         Guid pokemonId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Pokémon the trainer moved into their save for this game on PokeHub, which the game
+    /// still has to write into its own save.
+    /// </summary>
+    Task<Result<IReadOnlyCollection<DeliveryInfo>>> GetAwaitingDeliveryAsync(
+        Guid trainerId,
+        Guid gameId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// The game wrote these Pokémon into its own save. All are recorded, or none.
+    /// </summary>
+    Task<Result> DeliverPokemonAsync(
+        Guid trainerId,
+        Guid gameId,
+        IReadOnlyCollection<DeliveredPokemon> deliveries,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// The game took these Pokémon out of its own save; they move to the hub. All move, or none.
+    /// </summary>
+    Task<Result<IReadOnlyCollection<Guid>>> WithdrawPokemonAsync(
+        Guid trainerId,
+        Guid gameId,
+        IReadOnlyCollection<WithdrawnPokemon> withdrawals,
         CancellationToken cancellationToken = default);
 }

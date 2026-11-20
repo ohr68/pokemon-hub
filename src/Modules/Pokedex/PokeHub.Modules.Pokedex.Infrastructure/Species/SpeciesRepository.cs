@@ -8,7 +8,7 @@ internal sealed class SpeciesRepository(PokedexDbContext context) : ISpeciesRepo
 {
     public async Task<IReadOnlyList<PokemonSpecies>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        return await context.Species.ToListAsync(cancellationToken);
+        return await context.Species.Include(s => s.Gen3LevelUpMoves).ToListAsync(cancellationToken);
     }
 
     public async Task<PokemonSpecies?> GetAsync(int speciesId, CancellationToken cancellationToken = default)
@@ -39,5 +39,15 @@ internal sealed class SpeciesRepository(PokedexDbContext context) : ISpeciesRepo
     public void Insert(GrowthRate growthRate)
     {
         context.Set<GrowthRate>().Add(growthRate);
+    }
+
+    public async Task<IReadOnlyList<Move>> GetMovesAsync(CancellationToken cancellationToken = default)
+    {
+        return await context.Set<Move>().ToListAsync(cancellationToken);
+    }
+
+    public void Insert(Move move)
+    {
+        context.Set<Move>().Add(move);
     }
 }

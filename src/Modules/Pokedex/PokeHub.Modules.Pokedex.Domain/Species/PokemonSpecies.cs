@@ -8,6 +8,8 @@ namespace PokeHub.Modules.Pokedex.Domain.Species;
 /// </summary>
 public sealed class PokemonSpecies : Entity
 {
+    private readonly List<LevelUpMove> _gen3LevelUpMoves = [];
+
     private PokemonSpecies()
     {
     }
@@ -38,6 +40,12 @@ public sealed class PokemonSpecies : Entity
     /// </summary>
     public int? Gen3Index { get; private set; }
 
+    /// <summary>
+    /// The moves the species learns by level in FireRed and LeafGreen, used to give a Pokémon
+    /// sent into those games the moves it would know. Empty for species introduced later.
+    /// </summary>
+    public IReadOnlyCollection<LevelUpMove> Gen3LevelUpMoves => _gen3LevelUpMoves.AsReadOnly();
+
     public DateTime SyncedOnUtc { get; private set; }
 
     public static PokemonSpecies Create(
@@ -49,9 +57,10 @@ public sealed class PokemonSpecies : Entity
         int? tradeEvolutionSpeciesId,
         string? growthRate,
         int? gen3Index,
+        IReadOnlyCollection<LevelUpMove> gen3LevelUpMoves,
         DateTime utcNow)
     {
-        return new PokemonSpecies
+        var species = new PokemonSpecies
         {
             Id = id,
             Name = name,
@@ -63,6 +72,10 @@ public sealed class PokemonSpecies : Entity
             Gen3Index = gen3Index,
             SyncedOnUtc = utcNow,
         };
+
+        species._gen3LevelUpMoves.AddRange(gen3LevelUpMoves);
+
+        return species;
     }
 
     /// <summary>
@@ -76,6 +89,7 @@ public sealed class PokemonSpecies : Entity
         int? tradeEvolutionSpeciesId,
         string? growthRate,
         int? gen3Index,
+        IReadOnlyCollection<LevelUpMove> gen3LevelUpMoves,
         DateTime utcNow)
     {
         if (Name == name &&
@@ -84,7 +98,8 @@ public sealed class PokemonSpecies : Entity
             SecondaryType == secondaryType &&
             TradeEvolutionSpeciesId == tradeEvolutionSpeciesId &&
             GrowthRate == growthRate &&
-            Gen3Index == gen3Index)
+            Gen3Index == gen3Index &&
+            _gen3LevelUpMoves.SequenceEqual(gen3LevelUpMoves))
         {
             return false;
         }
@@ -97,6 +112,12 @@ public sealed class PokemonSpecies : Entity
         GrowthRate = growthRate;
         Gen3Index = gen3Index;
         SyncedOnUtc = utcNow;
+
+        if (!_gen3LevelUpMoves.SequenceEqual(gen3LevelUpMoves))
+        {
+            _gen3LevelUpMoves.Clear();
+            _gen3LevelUpMoves.AddRange(gen3LevelUpMoves);
+        }
 
         return true;
     }

@@ -37,5 +37,6 @@ public sealed class PokedexDbContext(DbContextOptions<PokedexDbContext> options)
         modelBuilder.ApplyConfiguration(new OwnershipRecordConfiguration());
         modelBuilder.ApplyConfiguration(new SaveConfiguration());
         modelBuilder.ApplyConfiguration(new GrowthRateConfiguration());
+        modelBuilder.ApplyConfiguration(new MoveConfiguration());
     }
 }

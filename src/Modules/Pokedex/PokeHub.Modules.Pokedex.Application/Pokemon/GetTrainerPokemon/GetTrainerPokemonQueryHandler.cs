@@ -30,7 +30,9 @@ internal sealed class GetTrainerPokemonQueryHandler(IDbConnectionFactory dbConne
                 p.original_trainer_id = p.trainer_id AS {nameof(PokemonResponse.IsOriginalTrainer)},
                 p.obtained_on_utc AS {nameof(PokemonResponse.ObtainedOnUtc)},
                 p.save_id AS {nameof(PokemonResponse.SaveId)},
-                sv.game_name AS {nameof(PokemonResponse.GameName)}
+                sv.game_name AS {nameof(PokemonResponse.GameName)},
+                p.awaiting_delivery AS {nameof(PokemonResponse.IsAwaitingDelivery)},
+                (p.save_id IS NOT NULL AND NOT p.awaiting_delivery AND p.catch_key IS NOT NULL) AS {nameof(PokemonResponse.IsInsideGame)}
              FROM pokedex.pokemon p
              JOIN pokedex.species s ON s.id = p.species_id
              LEFT JOIN pokedex.saves sv ON sv.id = p.save_id

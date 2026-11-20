@@ -10,7 +10,8 @@ namespace PokeHub.Modules.Pokedex.Infrastructure.PokeApi;
 /// Builds the species catalog from about 30 PokéAPI requests instead of one per species:
 /// each generation lists its species, and each type lists the Pokémon that have it and in
 /// which slot. A species' types are those of its default form, whose id equals the species id.
-/// Trade evolutions add about 50 more requests.
+/// Trade evolutions add about 50 more requests, and the Generation III data (game numbers and
+/// FireRed/LeafGreen learnsets) one per species up to #386 plus one per move they learn.
 /// </summary>
 internal sealed partial class PokeApiClient(HttpClient httpClient, ILogger<PokeApiClient> logger) : IPokeApiClient
 {
@@ -18,6 +19,9 @@ internal sealed partial class PokeApiClient(HttpClient httpClient, ILogger<PokeA
     // species 1 to 251 the same way; Hoenn species (252 to 386) have their own numbers there.
     private const int LastGen2Species = 251;
     private const int LastGen3Species = 386;
+
+    // PokéAPI's name for FireRed and LeafGreen, which share their learnsets.
+    private const string FireRedLeafGreen = "firered-leafgreen";
 
     // Keeps PokéAPI from receiving more than this many requests at once.
     private const int MaxParallelRequests = 10;
@@ -31,7 +35,10 @@ internal sealed partial class PokeApiClient(HttpClient httpClient, ILogger<PokeA
             Dictionary<int, string[]> types = await GetTypesBySpeciesAsync(species, cancellationToken);
             Dictionary<int, int> tradeEvolutions = await GetTradeEvolutionsAsync(species, cancellationToken);
             GrowthRateResponse[] growthRates = await GetGrowthRatesAsync(cancellationToken);
-            Dictionary<int, int> gen3Indices = await GetGen3IndicesAsync(species, cancellationToken);
+            Gen3Data gen3 = await GetGen3DataAsync(species, cancellationToken);
+            IReadOnlyCollection<MoveData> moves = await GetMovesAsync(
+                gen3.LevelUpMoves.Values.SelectMany(learnset => learnset.Select(m => m.MoveId)).ToHashSet(),
+                cancellationToken);
 
             var growthRateBySpecies = growthRates
                 .SelectMany(rate => rate.PokemonSpecies.Select(s => (s.Id, rate.Name)))
@@ -55,7 +62,8 @@ internal sealed partial class PokeApiClient(HttpClient httpClient, ILogger<PokeA
                     slots[1],
                     tradeEvolutions.TryGetValue(id, out int evolvesInto) ? evolvesInto : null,
                     growthRateBySpecies.GetValueOrDefault(id),
-                    gen3Indices.TryGetValue(id, out int gen3Index) ? gen3Index : null));
+                    gen3.Indices.TryGetValue(id, out int gen3Index) ? gen3Index : null,
+                    gen3.LevelUpMoves.GetValueOrDefault(id) ?? []));
             }
 
             return new SpeciesCatalog(
@@ -64,7 +72,8 @@ internal sealed partial class PokeApiClient(HttpClient httpClient, ILogger<PokeA
                     .Select(rate => new GrowthRateData(
                         rate.Name,
                         rate.Levels.OrderBy(l => l.Level).Select(l => l.Experience).ToArray()))
-                    .ToList());
+                    .ToList(),
+                moves);
         }
         catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException
                                               or System.Text.Json.JsonException)
@@ -174,47 +183,84 @@ internal sealed partial class PokeApiClient(HttpClient httpClient, ILogger<PokeA
     }
 
     /// <summary>
-    /// Each species' number inside Generation III games: the same as the national number up to
-    /// #251, read from PokéAPI's FireRed game index for #252 to #386.
+    /// For species 1 to 386: the number inside Generation III games (the same as the national
+    /// number up to #251, FireRed's game index after that) and the FireRed/LeafGreen level-up
+    /// learnset.
     /// </summary>
-    private async Task<Dictionary<int, int>> GetGen3IndicesAsync(
+    private async Task<Gen3Data> GetGen3DataAsync(
         Dictionary<int, (string Name, int Generation)> species,
         CancellationToken cancellationToken)
     {
-        var indices = species.Keys
-            .Where(id => id <= LastGen2Species)
-            .ToDictionary(id => id, id => id);
+        PokemonResponse[] pokemon = await ThrottledAsync(
+            species.Keys.Where(id => id <= LastGen3Species),
+            id => GetAsync<PokemonResponse>($"pokemon/{id}", cancellationToken),
+            cancellationToken);
 
-        using var throttle = new SemaphoreSlim(MaxParallelRequests);
+        var indices = new Dictionary<int, int>();
+        var levelUpMoves = new Dictionary<int, IReadOnlyList<LevelUpMoveData>>();
 
-        PokemonGameIndicesResponse[] hoenn = await Task.WhenAll(species.Keys
-            .Where(id => id is > LastGen2Species and <= LastGen3Species)
-            .Select(async id =>
-            {
-                await throttle.WaitAsync(cancellationToken);
-
-                try
-                {
-                    return await GetAsync<PokemonGameIndicesResponse>($"pokemon/{id}", cancellationToken);
-                }
-                finally
-                {
-                    throttle.Release();
-                }
-            }));
-
-        foreach (PokemonGameIndicesResponse pokemon in hoenn)
+        foreach (PokemonResponse p in pokemon)
         {
-            GameIndex? fireRed = pokemon.GameIndices.FirstOrDefault(g => g.Version.Name == "firered");
+            GameIndex? fireRed = p.GameIndices.FirstOrDefault(g => g.Version.Name == "firered");
 
-            if (fireRed is not null)
+            if (p.Id <= LastGen2Species)
             {
-                indices[pokemon.Id] = fireRed.Index;
+                indices[p.Id] = p.Id;
             }
+            else if (fireRed is not null)
+            {
+                indices[p.Id] = fireRed.Index;
+            }
+
+            // PokéAPI lists moves by move, not by level; the game learns them by level.
+            levelUpMoves[p.Id] = p.Moves
+                .SelectMany(move => move.VersionGroupDetails
+                    .Where(d => d.VersionGroup.Name == FireRedLeafGreen && d.MoveLearnMethod.Name == "level-up")
+                    .Select(d => new LevelUpMoveData(d.LevelLearnedAt, move.Move.Id)))
+                .OrderBy(m => m.Level)
+                .ToList();
         }
 
-        return indices;
+        return new Gen3Data(indices, levelUpMoves);
     }
+
+    private async Task<IReadOnlyCollection<MoveData>> GetMovesAsync(
+        IReadOnlyCollection<int> moveIds,
+        CancellationToken cancellationToken)
+    {
+        MoveResponse[] moves = await ThrottledAsync(
+            moveIds,
+            id => GetAsync<MoveResponse>($"move/{id}", cancellationToken),
+            cancellationToken);
+
+        return moves.Select(m => new MoveData(m.Id, m.Name, m.Pp ?? 0)).ToList();
+    }
+
+    private static async Task<TResult[]> ThrottledAsync<TResult>(
+        IEnumerable<int> ids,
+        Func<int, Task<TResult>> request,
+        CancellationToken cancellationToken)
+    {
+        using var throttle = new SemaphoreSlim(MaxParallelRequests);
+
+        return await Task.WhenAll(ids.Select(async id =>
+        {
+            await throttle.WaitAsync(cancellationToken);
+
+            try
+            {
+                return await request(id);
+            }
+            finally
+            {
+                throttle.Release();
+            }
+        }));
+    }
+
+    private sealed record Gen3Data(
+        Dictionary<int, int> Indices,
+        Dictionary<int, IReadOnlyList<LevelUpMoveData>> LevelUpMoves);
 
     private async Task<T> GetAsync<T>(string path, CancellationToken cancellationToken)
     {

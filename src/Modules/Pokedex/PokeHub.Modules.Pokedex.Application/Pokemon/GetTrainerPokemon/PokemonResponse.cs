@@ -13,4 +13,6 @@ public sealed record PokemonResponse(
     bool IsOriginalTrainer,
     DateTime ObtainedOnUtc,
     Guid? SaveId,
-    string? GameName);
+    string? GameName,
+    bool IsAwaitingDelivery,
+    bool IsInsideGame);

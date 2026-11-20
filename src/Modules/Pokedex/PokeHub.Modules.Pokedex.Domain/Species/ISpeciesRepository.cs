@@ -15,4 +15,8 @@ public interface ISpeciesRepository
     Task<IReadOnlyList<GrowthRate>> GetGrowthRatesAsync(CancellationToken cancellationToken = default);
 
     void Insert(GrowthRate growthRate);
+
+    Task<IReadOnlyList<Move>> GetMovesAsync(CancellationToken cancellationToken = default);
+
+    void Insert(Move move);
 }

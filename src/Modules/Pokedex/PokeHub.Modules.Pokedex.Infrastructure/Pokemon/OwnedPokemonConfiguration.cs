@@ -40,8 +40,10 @@ internal sealed class OwnedPokemonConfiguration : IEntityTypeConfiguration<Owned
 
         builder.Property(p => p.CatchKey).HasMaxLength(100);
 
-        // A game can't record the same catch twice.
-        builder.HasIndex(p => new { p.CaughtInGameId, p.CatchKey })
+        builder.Property(p => p.GameDataFormat).HasMaxLength(20);
+
+        // A game can't know two Pokémon by the same key.
+        builder.HasIndex(p => new { p.CatchKeyGameId, p.CatchKey })
             .IsUnique()
             .HasFilter("catch_key IS NOT NULL");
 

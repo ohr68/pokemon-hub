@@ -16,4 +16,7 @@ public enum OwnershipChange
     // Gone from the game it was caught in (released or traded away inside the game), found
     // when PokeHub mirrors the game's save.
     LeftGame = 8,
+
+    // It evolved while in a game, found when the game sent it back to the hub.
+    EvolvedInGame = 9,
 }

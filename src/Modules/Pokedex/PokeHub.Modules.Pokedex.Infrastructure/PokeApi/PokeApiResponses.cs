@@ -60,9 +60,24 @@ internal sealed record GrowthRateLevel(
     [property: JsonPropertyName("level")] int Level,
     [property: JsonPropertyName("experience")] int Experience);
 
-internal sealed record PokemonGameIndicesResponse(
+internal sealed record PokemonResponse(
     [property: JsonPropertyName("id")] int Id,
-    [property: JsonPropertyName("game_indices")] IReadOnlyList<GameIndex> GameIndices);
+    [property: JsonPropertyName("game_indices")] IReadOnlyList<GameIndex> GameIndices,
+    [property: JsonPropertyName("moves")] IReadOnlyList<PokemonMove> Moves);
+
+internal sealed record PokemonMove(
+    [property: JsonPropertyName("move")] NamedResource Move,
+    [property: JsonPropertyName("version_group_details")] IReadOnlyList<MoveLearnDetail> VersionGroupDetails);
+
+internal sealed record MoveLearnDetail(
+    [property: JsonPropertyName("level_learned_at")] int LevelLearnedAt,
+    [property: JsonPropertyName("move_learn_method")] NamedResource MoveLearnMethod,
+    [property: JsonPropertyName("version_group")] NamedResource VersionGroup);
+
+internal sealed record MoveResponse(
+    [property: JsonPropertyName("id")] int Id,
+    [property: JsonPropertyName("name")] string Name,
+    [property: JsonPropertyName("pp")] int? Pp);
 
 internal sealed record GameIndex(
     [property: JsonPropertyName("game_index")] int Index,

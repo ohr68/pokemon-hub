@@ -28,7 +28,7 @@ internal sealed class ReconcileSaveCommandHandler(
 
         var present = request.PresentCatchKeys.ToHashSet(StringComparer.Ordinal);
 
-        var left = (await pokemonRepository.GetCaughtInSaveAsync(save.Id, request.GameId, cancellationToken))
+        var left = (await pokemonRepository.GetInsideGameAsync(save.Id, request.GameId, cancellationToken))
             .Where(p => !present.Contains(p.CatchKey!))
             .ToList();
 

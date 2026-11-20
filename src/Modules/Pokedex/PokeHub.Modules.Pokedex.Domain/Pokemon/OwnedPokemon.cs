@@ -46,15 +46,37 @@ public sealed class OwnedPokemon : Entity
     public Guid? SaveId { get; private set; }
 
     /// <summary>
-    /// The game it was caught in, for Pokémon caught in a game.
+    /// The game that knows this Pokémon by <see cref="CatchKey"/>: the game it was caught in,
+    /// or the last game it was delivered into.
     /// </summary>
-    public Guid? CaughtInGameId { get; private set; }
+    public Guid? CatchKeyGameId { get; private set; }
 
     /// <summary>
-    /// The game's own identifier for the catch. A game that repeats a request (after a
+    /// The game's own identifier for the Pokémon. A game that repeats a request (after a
     /// timeout, say) sends the same key and gets the same Pokémon back instead of a second one.
+    /// Kept when the Pokémon leaves the game, so it is recognized if it comes back.
     /// </summary>
     public string? CatchKey { get; private set; }
+
+    /// <summary>
+    /// Moved into a save on PokeHub, but not yet written into the game's own save. The game
+    /// delivers it (<see cref="Deliver"/>) the next time the player opens it.
+    /// </summary>
+    public bool AwaitingDelivery { get; private set; }
+
+    /// <summary>
+    /// The Pokémon exactly as the last game that held it stored it (moves, stats, ...), in
+    /// <see cref="GameDataFormat"/> (pk3 for Generation III). A game that reads the format
+    /// writes it back unchanged when the Pokémon returns.
+    /// </summary>
+    public string? GameDataFormat { get; private set; }
+
+    public byte[]? GameData { get; private set; }
+
+    /// <summary>
+    /// In a save and in the game's own save too: only the game can take it out.
+    /// </summary>
+    public bool IsInsideGame => SaveId is not null && !AwaitingDelivery && CatchKey is not null;
 
     public bool IsInHub => SaveId is null;
 
@@ -135,7 +157,7 @@ public sealed class OwnedPokemon : Entity
             return caught;
         }
 
-        caught.Value.CaughtInGameId = save.GameId;
+        caught.Value.CatchKeyGameId = save.GameId;
         caught.Value.CatchKey = catchKey;
         caught.Value.Nickname = string.IsNullOrWhiteSpace(nickname) ? null : nickname.Trim();
 
@@ -242,7 +264,9 @@ public sealed class OwnedPokemon : Entity
 
     /// <summary>
     /// Moves the Pokémon into one of the trainer's saves, or back to the hub when
-    /// <paramref name="save"/> is empty. Moving between two games goes through the hub.
+    /// <paramref name="save"/> is empty. Moving between two games goes through the hub. A
+    /// Pokémon moved into a save waits there until the game delivers it; one already inside a
+    /// game can only be taken out by that game (<see cref="Withdraw"/>).
     /// </summary>
     public Result MoveTo(Guid trainerId, Save? save, DateTime utcNow)
     {
@@ -268,15 +292,94 @@ public sealed class OwnedPokemon : Entity
             return Result.Failure(PokemonErrors.NotInHub);
         }
 
+        if (IsInsideGame)
+        {
+            return Result.Failure(PokemonErrors.InsideGame);
+        }
+
         Guid? previousSaveId = SaveId;
 
         SaveId = save?.Id;
+        AwaitingDelivery = save is not null;
 
         Record(
             save is null ? OwnershipChange.MovedToHub : OwnershipChange.MovedToSave,
             trainerId,
             utcNow,
             saveId: save?.Id ?? previousSaveId);
+
+        return Result.Success();
+    }
+
+    /// <summary>
+    /// The game wrote the Pokémon into its own save, where it knows it by
+    /// <paramref name="catchKey"/>. Repeating the same delivery changes nothing.
+    /// </summary>
+    public Result Deliver(Guid trainerId, Save save, string catchKey)
+    {
+        Result ownership = EnsureActiveAndOwnedBy(trainerId);
+
+        if (ownership.IsFailure)
+        {
+            return ownership;
+        }
+
+        if (SaveId != save.Id)
+        {
+            return Result.Failure(PokemonErrors.NotInThisSave);
+        }
+
+        if (!AwaitingDelivery)
+        {
+            return CatchKeyGameId == save.GameId && CatchKey == catchKey
+                ? Result.Success()
+                : Result.Failure(PokemonErrors.NotAwaitingDelivery);
+        }
+
+        CatchKeyGameId = save.GameId;
+        CatchKey = catchKey;
+        AwaitingDelivery = false;
+
+        return Result.Success();
+    }
+
+    /// <summary>
+    /// The game took the Pokémon out of its own save and sent it to the hub, with what it
+    /// stored about it: it may have grown, evolved or been renamed while in the game.
+    /// </summary>
+    public Result Withdraw(Guid trainerId, Save save, GameSnapshot snapshot, DateTime utcNow)
+    {
+        Result ownership = EnsureActiveAndOwnedBy(trainerId);
+
+        if (ownership.IsFailure)
+        {
+            return ownership;
+        }
+
+        if (SaveId != save.Id || !IsInsideGame)
+        {
+            return Result.Failure(PokemonErrors.NotInThisSave);
+        }
+
+        if (snapshot.Level is < MinLevel or > MaxLevel)
+        {
+            return Result.Failure(PokemonErrors.InvalidLevel(snapshot.Level));
+        }
+
+        SaveId = null;
+        Level = snapshot.Level;
+        Nickname = string.IsNullOrWhiteSpace(snapshot.Nickname) ? null : snapshot.Nickname.Trim();
+        GameDataFormat = snapshot.DataFormat;
+        GameData = snapshot.Data;
+
+        if (snapshot.SpeciesId != SpeciesId)
+        {
+            SpeciesId = snapshot.SpeciesId;
+
+            Record(OwnershipChange.EvolvedInGame, trainerId, utcNow, saveId: save.Id);
+        }
+
+        Record(OwnershipChange.MovedToHub, trainerId, utcNow, saveId: save.Id);
 
         return Result.Success();
     }
