@@ -7,8 +7,11 @@
 | 2. Frontend integration: Keycloak sign-in, catalog list, Meus Pokémons | Done |
 | 3. Trades | Done: trades between trainers, and moving Pokémon between saves through the hub |
 | 4. Games platform | Done: registration, game API, files, rate limits, webhooks, turning games off, admin pages |
-| 5. FireRed | Done: play your own ROM, sync, mirror, save backups, transfers both ways |
+| 5. FireRed | Done: play in the browser, sync, mirror, save backups, transfers both ways |
 | 6. Operations | Planned |
+| 7. Trainer progression: XP and levels, trophies, badges, coins | Planned |
+
+More ideas, not yet in a phase, are in the [backlog](#backlog).
 
 Tests for the Pokédex, Trades and Games modules, a shared integration-test base and CI are
 still to do. Known gaps are tracked in [tech-debt.md](tech-debt.md).
@@ -130,3 +133,28 @@ Pokémon back unchanged when it saves.
 **Open:** the summary screen of a delivered Pokémon (original trainer, met location) is
 still to check in the game, and Deoxys has no FireRed learnset yet (PokéAPI lists it under
 another form).
+
+## 7. Trainer progression
+
+Trainers grow by playing, across every game connected to PokeHub:
+
+- **XP and trainer level**: trainers earn experience (catching, trading, syncing, winning
+  badges...) and level up.
+- **Trophies**: achievements for milestones, such as a completed regional Pokédex, a first
+  shiny or a hundred trades.
+- **Badges per game**: each game's gym badges synced to PokeHub (for FireRed, read from the
+  save), shown on the trainer's profile.
+- **Coins**: earned for catching shiny or rare Pokémon, winning badges and other
+  achievements, and spent in the hub on items or Pokémon to send into the games.
+
+## Backlog
+
+- **Automatic sync**: sync a game's Pokémon on their own, at an interval each trainer
+  chooses.
+- **Custom SVG type icons**: check whether drawing our own icon for each type (instead of
+  the closest Lucide icon) is worth it. The icons are components in one map, so they can be
+  swapped; the open question is where the artwork comes from.
+- **Saves between consoles and emulators**: move a save from a real console or another
+  emulator into PokeHub and back. To study: how to do it without building native apps (for
+  example from the browser, with the files the player exports from their device or flash
+  cart).
