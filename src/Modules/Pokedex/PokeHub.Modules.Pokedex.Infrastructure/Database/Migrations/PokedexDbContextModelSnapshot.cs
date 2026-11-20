@@ -306,15 +306,42 @@ namespace PokeHub.Modules.Pokedex.Infrastructure.Database.Migrations
                     b.ToTable("saves", "pokedex");
                 });
 
+            modelBuilder.Entity("PokeHub.Modules.Pokedex.Domain.Species.GrowthRate", b =>
+                {
+                    b.Property<string>("Name")
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("name");
+
+                    b.PrimitiveCollection<int[]>("ExperienceByLevel")
+                        .IsRequired()
+                        .HasColumnType("integer[]")
+                        .HasColumnName("experience_by_level");
+
+                    b.HasKey("Name")
+                        .HasName("pk_growth_rates");
+
+                    b.ToTable("growth_rates", "pokedex");
+                });
+
             modelBuilder.Entity("PokeHub.Modules.Pokedex.Domain.Species.PokemonSpecies", b =>
                 {
                     b.Property<int>("Id")
                         .HasColumnType("integer")
                         .HasColumnName("id");
 
+                    b.Property<int?>("Gen3Index")
+                        .HasColumnType("integer")
+                        .HasColumnName("gen3index");
+
                     b.Property<int>("Generation")
                         .HasColumnType("integer")
                         .HasColumnName("generation");
+
+                    b.Property<string>("GrowthRate")
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("growth_rate");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -343,6 +370,9 @@ namespace PokeHub.Modules.Pokedex.Infrastructure.Database.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_species");
+
+                    b.HasIndex("Gen3Index")
+                        .HasDatabaseName("ix_species_gen3index");
 
                     b.HasIndex("Name")
                         .HasDatabaseName("ix_species_name");

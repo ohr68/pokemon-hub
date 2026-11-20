@@ -12,5 +12,7 @@ internal sealed class CatchPokemonCommandValidator : AbstractValidator<CatchPoke
         RuleFor(c => c.Level).InclusiveBetween(OwnedPokemon.MinLevel, OwnedPokemon.MaxLevel);
 
         RuleFor(c => c.CatchKey).NotEmpty().MaximumLength(100);
+
+        RuleFor(c => c.Nickname).MaximumLength(12);
     }
 }

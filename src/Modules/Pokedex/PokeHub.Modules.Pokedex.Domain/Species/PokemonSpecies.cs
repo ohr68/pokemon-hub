@@ -27,6 +27,17 @@ public sealed class PokemonSpecies : Entity
     /// </summary>
     public int? TradeEvolutionSpeciesId { get; private set; }
 
+    /// <summary>
+    /// How much experience the species needs per level (slow, medium, fast, ...), see <see cref="GrowthRate"/>.
+    /// </summary>
+    public string? GrowthRate { get; private set; }
+
+    /// <summary>
+    /// The species' number inside Generation III games (Ruby to FireRed), which differs from
+    /// the national number after #251. Empty for species introduced later.
+    /// </summary>
+    public int? Gen3Index { get; private set; }
+
     public DateTime SyncedOnUtc { get; private set; }
 
     public static PokemonSpecies Create(
@@ -36,6 +47,8 @@ public sealed class PokemonSpecies : Entity
         string primaryType,
         string? secondaryType,
         int? tradeEvolutionSpeciesId,
+        string? growthRate,
+        int? gen3Index,
         DateTime utcNow)
     {
         return new PokemonSpecies
@@ -46,6 +59,8 @@ public sealed class PokemonSpecies : Entity
             PrimaryType = primaryType,
             SecondaryType = secondaryType,
             TradeEvolutionSpeciesId = tradeEvolutionSpeciesId,
+            GrowthRate = growthRate,
+            Gen3Index = gen3Index,
             SyncedOnUtc = utcNow,
         };
     }
@@ -59,13 +74,17 @@ public sealed class PokemonSpecies : Entity
         string primaryType,
         string? secondaryType,
         int? tradeEvolutionSpeciesId,
+        string? growthRate,
+        int? gen3Index,
         DateTime utcNow)
     {
         if (Name == name &&
             Generation == generation &&
             PrimaryType == primaryType &&
             SecondaryType == secondaryType &&
-            TradeEvolutionSpeciesId == tradeEvolutionSpeciesId)
+            TradeEvolutionSpeciesId == tradeEvolutionSpeciesId &&
+            GrowthRate == growthRate &&
+            Gen3Index == gen3Index)
         {
             return false;
         }
@@ -75,6 +94,8 @@ public sealed class PokemonSpecies : Entity
         PrimaryType = primaryType;
         SecondaryType = secondaryType;
         TradeEvolutionSpeciesId = tradeEvolutionSpeciesId;
+        GrowthRate = growthRate;
+        Gen3Index = gen3Index;
         SyncedOnUtc = utcNow;
 
         return true;

@@ -21,7 +21,7 @@ internal sealed class SyncSpeciesCommandHandler(
             return new SpeciesSyncResponse(0, 0, 0, Skipped: true);
         }
 
-        Result<IReadOnlyCollection<SpeciesData>> catalog = await pokeApiClient.GetSpeciesCatalogAsync(cancellationToken);
+        Result<SpeciesCatalog> catalog = await pokeApiClient.GetSpeciesCatalogAsync(cancellationToken);
 
         if (catalog.IsFailure)
         {
@@ -35,7 +35,9 @@ internal sealed class SyncSpeciesCommandHandler(
         int added = 0;
         int updated = 0;
 
-        foreach (SpeciesData data in catalog.Value)
+        await SyncGrowthRatesAsync(catalog.Value.GrowthRates, cancellationToken);
+
+        foreach (SpeciesData data in catalog.Value.Species)
         {
             if (existing.TryGetValue(data.Id, out PokemonSpecies? species))
             {
@@ -45,6 +47,8 @@ internal sealed class SyncSpeciesCommandHandler(
                         data.PrimaryType,
                         data.SecondaryType,
                         data.TradeEvolutionSpeciesId,
+                        data.GrowthRate,
+                        data.Gen3Index,
                         utcNow))
                 {
                     updated++;
@@ -60,6 +64,8 @@ internal sealed class SyncSpeciesCommandHandler(
                 data.PrimaryType,
                 data.SecondaryType,
                 data.TradeEvolutionSpeciesId,
+                data.GrowthRate,
+                data.Gen3Index,
                 utcNow));
 
             added++;
@@ -67,6 +73,22 @@ internal sealed class SyncSpeciesCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return new SpeciesSyncResponse(added, updated, catalog.Value.Count);
+        return new SpeciesSyncResponse(added, updated, catalog.Value.Species.Count);
+    }
+
+    private async Task SyncGrowthRatesAsync(IReadOnlyCollection<GrowthRateData> growthRates, CancellationToken cancellationToken)
+    {
+        var existing = (await speciesRepository.GetGrowthRatesAsync(cancellationToken)).ToDictionary(r => r.Name);
+
+        foreach (GrowthRateData data in growthRates)
+        {
+            if (existing.TryGetValue(data.Name, out GrowthRate? growthRate))
+            {
+                growthRate.Update(data.ExperienceByLevel);
+                continue;
+            }
+
+            speciesRepository.Insert(GrowthRate.Create(data.Name, data.ExperienceByLevel));
+        }
     }
 }

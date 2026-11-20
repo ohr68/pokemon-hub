@@ -56,7 +56,8 @@ internal sealed class CatchPokemonCommandHandler(
             request.Level,
             request.IsShiny,
             request.CatchKey,
-            dateTimeProvider.UtcNow);
+            dateTimeProvider.UtcNow,
+            request.Nickname);
 
         if (pokemon.IsFailure)
         {

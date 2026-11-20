@@ -22,5 +22,9 @@ internal sealed class SpeciesConfiguration : IEntityTypeConfiguration<PokemonSpe
         builder.Property(s => s.SecondaryType).HasMaxLength(20);
 
         builder.HasIndex(s => s.Name);
+
+        builder.Property(s => s.GrowthRate).HasMaxLength(30);
+
+        builder.HasIndex(s => s.Gen3Index);
     }
 }

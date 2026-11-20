@@ -118,7 +118,8 @@ internal sealed class PokedexApi(ISender sender) : IPokedexApi
                 request.SpeciesId,
                 request.Level,
                 request.IsShiny,
-                request.CatchKey),
+                request.CatchKey,
+                request.Nickname),
             cancellationToken);
     }
 

@@ -11,4 +11,8 @@ public interface ISpeciesRepository
     Task<bool> AnyAsync(CancellationToken cancellationToken = default);
 
     void Insert(PokemonSpecies species);
+
+    Task<IReadOnlyList<GrowthRate>> GetGrowthRatesAsync(CancellationToken cancellationToken = default);
+
+    void Insert(GrowthRate growthRate);
 }

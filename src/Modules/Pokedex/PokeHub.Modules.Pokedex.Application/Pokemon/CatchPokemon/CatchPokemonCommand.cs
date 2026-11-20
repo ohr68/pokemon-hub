@@ -3,6 +3,7 @@ using PokeHub.Common.Application.Messaging;
 namespace PokeHub.Modules.Pokedex.Application.Pokemon.CatchPokemon;
 
 /// <param name="CatchKey">The game's identifier for this catch; repeating it returns the same Pokémon.</param>
+/// <param name="Nickname">The name the player gave it in the game, if any.</param>
 public sealed record CatchPokemonCommand(
     Guid TrainerId,
     Guid GameId,
@@ -10,4 +11,5 @@ public sealed record CatchPokemonCommand(
     int SpeciesId,
     int Level,
     bool IsShiny,
-    string CatchKey) : ICommand<Guid>;
+    string CatchKey,
+    string? Nickname = null) : ICommand<Guid>;

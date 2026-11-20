@@ -118,7 +118,8 @@ public sealed class OwnedPokemon : Entity
         int level,
         bool isShiny,
         string catchKey,
-        DateTime utcNow)
+        DateTime utcNow,
+        string? nickname = null)
     {
         Result<OwnedPokemon> caught = Obtain(
             save.TrainerId,
@@ -136,6 +137,7 @@ public sealed class OwnedPokemon : Entity
 
         caught.Value.CaughtInGameId = save.GameId;
         caught.Value.CatchKey = catchKey;
+        caught.Value.Nickname = string.IsNullOrWhiteSpace(nickname) ? null : nickname.Trim();
 
         return caught;
     }

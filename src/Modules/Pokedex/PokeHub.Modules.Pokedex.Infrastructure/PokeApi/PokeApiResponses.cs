@@ -50,3 +50,20 @@ internal sealed record EvolutionDetail(
     [property: JsonPropertyName("trigger")] NamedResource Trigger,
     [property: JsonPropertyName("held_item")] NamedResource? HeldItem,
     [property: JsonPropertyName("trade_species")] NamedResource? TradeSpecies);
+
+internal sealed record GrowthRateResponse(
+    [property: JsonPropertyName("name")] string Name,
+    [property: JsonPropertyName("levels")] IReadOnlyList<GrowthRateLevel> Levels,
+    [property: JsonPropertyName("pokemon_species")] IReadOnlyList<NamedResource> PokemonSpecies);
+
+internal sealed record GrowthRateLevel(
+    [property: JsonPropertyName("level")] int Level,
+    [property: JsonPropertyName("experience")] int Experience);
+
+internal sealed record PokemonGameIndicesResponse(
+    [property: JsonPropertyName("id")] int Id,
+    [property: JsonPropertyName("game_indices")] IReadOnlyList<GameIndex> GameIndices);
+
+internal sealed record GameIndex(
+    [property: JsonPropertyName("game_index")] int Index,
+    [property: JsonPropertyName("version")] NamedResource Version);

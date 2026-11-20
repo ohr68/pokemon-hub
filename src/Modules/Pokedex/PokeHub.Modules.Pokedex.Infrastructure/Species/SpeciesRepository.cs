@@ -30,4 +30,14 @@ internal sealed class SpeciesRepository(PokedexDbContext context) : ISpeciesRepo
     {
         context.Species.Add(species);
     }
+
+    public async Task<IReadOnlyList<GrowthRate>> GetGrowthRatesAsync(CancellationToken cancellationToken = default)
+    {
+        return await context.Set<GrowthRate>().ToListAsync(cancellationToken);
+    }
+
+    public void Insert(GrowthRate growthRate)
+    {
+        context.Set<GrowthRate>().Add(growthRate);
+    }
 }

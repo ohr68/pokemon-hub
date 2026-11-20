@@ -14,7 +14,15 @@ namespace PokeHub.Modules.Pokedex.Infrastructure.PokeApi;
 /// </summary>
 internal sealed partial class PokeApiClient(HttpClient httpClient, ILogger<PokeApiClient> logger) : IPokeApiClient
 {
-    public async Task<Result<IReadOnlyCollection<SpeciesData>>> GetSpeciesCatalogAsync(
+    // Generation III games were the first after the national dex reached 386, and number
+    // species 1 to 251 the same way; Hoenn species (252 to 386) have their own numbers there.
+    private const int LastGen2Species = 251;
+    private const int LastGen3Species = 386;
+
+    // Keeps PokéAPI from receiving more than this many requests at once.
+    private const int MaxParallelRequests = 10;
+
+    public async Task<Result<SpeciesCatalog>> GetSpeciesCatalogAsync(
         CancellationToken cancellationToken = default)
     {
         try
@@ -22,6 +30,12 @@ internal sealed partial class PokeApiClient(HttpClient httpClient, ILogger<PokeA
             Dictionary<int, (string Name, int Generation)> species = await GetSpeciesByGenerationAsync(cancellationToken);
             Dictionary<int, string[]> types = await GetTypesBySpeciesAsync(species, cancellationToken);
             Dictionary<int, int> tradeEvolutions = await GetTradeEvolutionsAsync(species, cancellationToken);
+            GrowthRateResponse[] growthRates = await GetGrowthRatesAsync(cancellationToken);
+            Dictionary<int, int> gen3Indices = await GetGen3IndicesAsync(species, cancellationToken);
+
+            var growthRateBySpecies = growthRates
+                .SelectMany(rate => rate.PokemonSpecies.Select(s => (s.Id, rate.Name)))
+                .ToDictionary(s => s.Id, s => s.Name);
 
             var catalog = new List<SpeciesData>(species.Count);
 
@@ -39,17 +53,25 @@ internal sealed partial class PokeApiClient(HttpClient httpClient, ILogger<PokeA
                     generation,
                     slots[0],
                     slots[1],
-                    tradeEvolutions.TryGetValue(id, out int evolvesInto) ? evolvesInto : null));
+                    tradeEvolutions.TryGetValue(id, out int evolvesInto) ? evolvesInto : null,
+                    growthRateBySpecies.GetValueOrDefault(id),
+                    gen3Indices.TryGetValue(id, out int gen3Index) ? gen3Index : null));
             }
 
-            return catalog;
+            return new SpeciesCatalog(
+                catalog,
+                growthRates
+                    .Select(rate => new GrowthRateData(
+                        rate.Name,
+                        rate.Levels.OrderBy(l => l.Level).Select(l => l.Experience).ToArray()))
+                    .ToList());
         }
         catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException
                                               or System.Text.Json.JsonException)
         {
             LogCatalogFailed(exception);
 
-            return Result.Failure<IReadOnlyCollection<SpeciesData>>(SpeciesErrors.CatalogUnavailable);
+            return Result.Failure<SpeciesCatalog>(SpeciesErrors.CatalogUnavailable);
         }
     }
 
@@ -141,6 +163,57 @@ internal sealed partial class PokeApiClient(HttpClient httpClient, ILogger<PokeA
             node.Species.Id == speciesId
                 ? node
                 : node.EvolvesTo.Select(next => Find(next, speciesId)).FirstOrDefault(found => found is not null);
+    }
+
+    private async Task<GrowthRateResponse[]> GetGrowthRatesAsync(CancellationToken cancellationToken)
+    {
+        ResourceList rates = await GetAsync<ResourceList>("growth-rate?limit=20", cancellationToken);
+
+        return await Task.WhenAll(rates.Results.Select(rate =>
+            GetAsync<GrowthRateResponse>($"growth-rate/{rate.Name}", cancellationToken)));
+    }
+
+    /// <summary>
+    /// Each species' number inside Generation III games: the same as the national number up to
+    /// #251, read from PokéAPI's FireRed game index for #252 to #386.
+    /// </summary>
+    private async Task<Dictionary<int, int>> GetGen3IndicesAsync(
+        Dictionary<int, (string Name, int Generation)> species,
+        CancellationToken cancellationToken)
+    {
+        var indices = species.Keys
+            .Where(id => id <= LastGen2Species)
+            .ToDictionary(id => id, id => id);
+
+        using var throttle = new SemaphoreSlim(MaxParallelRequests);
+
+        PokemonGameIndicesResponse[] hoenn = await Task.WhenAll(species.Keys
+            .Where(id => id is > LastGen2Species and <= LastGen3Species)
+            .Select(async id =>
+            {
+                await throttle.WaitAsync(cancellationToken);
+
+                try
+                {
+                    return await GetAsync<PokemonGameIndicesResponse>($"pokemon/{id}", cancellationToken);
+                }
+                finally
+                {
+                    throttle.Release();
+                }
+            }));
+
+        foreach (PokemonGameIndicesResponse pokemon in hoenn)
+        {
+            GameIndex? fireRed = pokemon.GameIndices.FirstOrDefault(g => g.Version.Name == "firered");
+
+            if (fireRed is not null)
+            {
+                indices[pokemon.Id] = fireRed.Index;
+            }
+        }
+
+        return indices;
     }
 
     private async Task<T> GetAsync<T>(string path, CancellationToken cancellationToken)

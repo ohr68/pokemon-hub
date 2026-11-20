@@ -12,7 +12,8 @@ public sealed record CatchPokemonInGameCommand(
     int SpeciesId,
     int Level,
     bool IsShiny,
-    string CatchKey) : ICommand<Guid>;
+    string CatchKey,
+    string? Nickname = null) : ICommand<Guid>;
 
 internal sealed class CatchPokemonInGameCommandHandler(IGameRepository gameRepository, IPokedexApi pokedexApi)
     : ICommandHandler<CatchPokemonInGameCommand, Guid>
@@ -34,7 +35,8 @@ internal sealed class CatchPokemonInGameCommandHandler(IGameRepository gameRepos
                 request.SpeciesId,
                 request.Level,
                 request.IsShiny,
-                request.CatchKey),
+                request.CatchKey,
+                request.Nickname),
             cancellationToken);
     }
 }
