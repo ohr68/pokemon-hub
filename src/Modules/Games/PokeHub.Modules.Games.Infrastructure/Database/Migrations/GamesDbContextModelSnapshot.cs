@@ -129,6 +129,62 @@ namespace PokeHub.Modules.Games.Infrastructure.Database.Migrations
                     b.ToTable("outbox_message_consumers", "games");
                 });
 
+            modelBuilder.Entity("PokeHub.Modules.Games.Domain.GameFiles.GameFile", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<byte[]>("Content")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("content");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("content_type");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("file_name");
+
+                    b.Property<Guid>("GameId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("game_id");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("kind");
+
+                    b.Property<string>("Sha256")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("sha256");
+
+                    b.Property<int>("SizeBytes")
+                        .HasColumnType("integer")
+                        .HasColumnName("size_bytes");
+
+                    b.Property<DateTime>("UploadedOnUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("uploaded_on_utc");
+
+                    b.HasKey("Id")
+                        .HasName("pk_game_files");
+
+                    b.HasIndex("GameId", "Kind")
+                        .HasDatabaseName("ix_game_files_game_id_kind");
+
+                    b.ToTable("game_files", "games");
+                });
+
             modelBuilder.Entity("PokeHub.Modules.Games.Domain.Games.Game", b =>
                 {
                     b.Property<Guid>("Id")
@@ -141,6 +197,11 @@ namespace PokeHub.Modules.Games.Infrastructure.Database.Migrations
                         .HasColumnType("character varying(50)")
                         .HasColumnName("client_id");
 
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("description");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean")
                         .HasColumnName("is_active");
@@ -150,6 +211,12 @@ namespace PokeHub.Modules.Games.Infrastructure.Database.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)")
                         .HasColumnName("name");
+
+                    b.Property<int>("RateLimitPerMinute")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(600)
+                        .HasColumnName("rate_limit_per_minute");
 
                     b.Property<DateTime>("RegisteredOnUtc")
                         .HasColumnType("timestamp with time zone")
@@ -171,6 +238,16 @@ namespace PokeHub.Modules.Games.Infrastructure.Database.Migrations
                         .IsRequired()
                         .HasColumnType("text[]")
                         .HasColumnName("web_origins");
+
+                    b.Property<string>("WebhookSecret")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("webhook_secret");
+
+                    b.Property<string>("WebhookUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("webhook_url");
 
                     b.HasKey("Id")
                         .HasName("pk_games");
@@ -231,6 +308,75 @@ namespace PokeHub.Modules.Games.Infrastructure.Database.Migrations
                     b.ToTable("save_files", "games");
                 });
 
+            modelBuilder.Entity("PokeHub.Modules.Games.Domain.Webhooks.WebhookDelivery", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<int>("Attempts")
+                        .HasColumnType("integer")
+                        .HasColumnName("attempts");
+
+                    b.Property<DateTime>("CreatedOnUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on_utc");
+
+                    b.Property<DateTime?>("DeliveredOnUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("delivered_on_utc");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("event_type");
+
+                    b.Property<Guid>("GameId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("game_id");
+
+                    b.Property<string>("LastError")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("last_error");
+
+                    b.Property<int?>("LastStatusCode")
+                        .HasColumnType("integer")
+                        .HasColumnName("last_status_code");
+
+                    b.Property<DateTime?>("NextAttemptOnUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("next_attempt_on_utc");
+
+                    b.Property<string>("Payload")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("payload");
+
+                    b.HasKey("Id")
+                        .HasName("pk_webhook_deliveries");
+
+                    b.HasIndex("NextAttemptOnUtc")
+                        .HasDatabaseName("ix_webhook_deliveries_next_attempt_on_utc")
+                        .HasFilter("next_attempt_on_utc IS NOT NULL");
+
+                    b.HasIndex("GameId", "CreatedOnUtc")
+                        .HasDatabaseName("ix_webhook_deliveries_game_id_created_on_utc");
+
+                    b.ToTable("webhook_deliveries", "games");
+                });
+
+            modelBuilder.Entity("PokeHub.Modules.Games.Domain.GameFiles.GameFile", b =>
+                {
+                    b.HasOne("PokeHub.Modules.Games.Domain.Games.Game", null)
+                        .WithMany()
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_game_files_games_game_id");
+                });
+
             modelBuilder.Entity("PokeHub.Modules.Games.Domain.SaveFiles.SaveFile", b =>
                 {
                     b.HasOne("PokeHub.Modules.Games.Domain.Games.Game", null)
@@ -239,6 +385,16 @@ namespace PokeHub.Modules.Games.Infrastructure.Database.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_save_files_games_game_id");
+                });
+
+            modelBuilder.Entity("PokeHub.Modules.Games.Domain.Webhooks.WebhookDelivery", b =>
+                {
+                    b.HasOne("PokeHub.Modules.Games.Domain.Games.Game", null)
+                        .WithMany()
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_webhook_deliveries_games_game_id");
                 });
 #pragma warning restore 612, 618
         }

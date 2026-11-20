@@ -54,6 +54,39 @@ internal sealed partial class GameClientService(HttpClient httpClient, ILogger<G
         }
     }
 
+    public async Task<Result> SetEnabledAsync(string clientId, bool enabled, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            // Keycloak's own id for the client, looked up by its client id.
+            ClientIdRepresentation[] clients = await httpClient.GetFromJsonAsync<ClientIdRepresentation[]>(
+                new Uri($"clients?clientId={Uri.EscapeDataString(clientId)}", UriKind.Relative),
+                cancellationToken) ?? [];
+
+            if (clients.Length == 0)
+            {
+                return Result.Failure(GameErrors.ClientNotUpdated);
+            }
+
+            // Keycloak only changes the fields sent.
+            using HttpResponseMessage response = await httpClient.PutAsJsonAsync(
+                new Uri($"clients/{clients[0].Id}", UriKind.Relative),
+                new EnabledRepresentation(enabled),
+                cancellationToken);
+
+            return Result.Success();
+        }
+        catch (HttpRequestException exception)
+        {
+            LogClientUpdateFailed(exception, clientId);
+
+            return Result.Failure(GameErrors.ClientNotUpdated);
+        }
+    }
+
+    [LoggerMessage(LogLevel.Error, "Updating the Keycloak client {ClientId} failed")]
+    private partial void LogClientUpdateFailed(Exception exception, string clientId);
+
     [LoggerMessage(LogLevel.Error, "Creating the Keycloak client {ClientId} failed")]
     private partial void LogClientCreationFailed(Exception exception, string clientId);
 
@@ -68,4 +101,8 @@ internal sealed partial class GameClientService(HttpClient httpClient, ILogger<G
         [property: JsonPropertyName("redirectUris")] IReadOnlyList<string> RedirectUris,
         [property: JsonPropertyName("webOrigins")] IReadOnlyList<string> WebOrigins,
         [property: JsonPropertyName("attributes")] IReadOnlyDictionary<string, string> Attributes);
+
+    private sealed record ClientIdRepresentation([property: JsonPropertyName("id")] string Id);
+
+    private sealed record EnabledRepresentation([property: JsonPropertyName("enabled")] bool Enabled);
 }

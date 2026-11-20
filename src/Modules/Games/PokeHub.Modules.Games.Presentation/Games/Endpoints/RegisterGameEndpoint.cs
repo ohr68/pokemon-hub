@@ -23,7 +23,7 @@ internal sealed class RegisterGameEndpoint(ISender sender) : EndpointBase<Regist
     public override async Task HandleAsync(RegisterGameRequest req, CancellationToken ct)
     {
         Result<RegisteredGameResponse> result = await sender.Send(
-            new RegisterGameCommand(req.Name, req.Slug, req.Url, req.RedirectUris, req.WebOrigins),
+            new RegisterGameCommand(req.Name, req.Slug, req.Description, req.Url, req.RedirectUris, req.WebOrigins),
             ct);
 
         await SendResultAsync(result, game => Results.Ok(game));

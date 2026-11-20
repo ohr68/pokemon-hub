@@ -11,13 +11,13 @@ using PokeHub.Modules.Games.PublicApi;
 namespace PokeHub.Modules.Games.Infrastructure.Games;
 
 /// <summary>
-/// Keeps the browser origins of active games in memory. CORS checks run on every
-/// cross-origin request and can't wait on the database, so the list is reloaded in the
-/// background every minute, and right away when a game is registered.
+/// Keeps the browser origins and rate limits of active games in memory. CORS checks and the
+/// rate limiter run on every request and can't wait on the database, so they are reloaded in
+/// the background every minute, and right away when a game is registered or changed.
 /// </summary>
 // A singleton, so it opens a scope for each refresh: the connection factory is scoped.
 internal sealed partial class GameOriginCache(IServiceScopeFactory serviceScopeFactory, ILogger<GameOriginCache> logger)
-    : BackgroundService, IGameOriginCache, IGameOriginPolicy
+    : BackgroundService, IGameOriginCache, IGameOriginPolicy, IGameRateLimits
 {
     private static readonly TimeSpan RefreshInterval = TimeSpan.FromMinutes(1);
 
@@ -25,7 +25,13 @@ internal sealed partial class GameOriginCache(IServiceScopeFactory serviceScopeF
 
     private FrozenSet<string> _origins = FrozenSet<string>.Empty;
 
+    private FrozenDictionary<string, int> _rateLimits = FrozenDictionary<string, int>.Empty;
+
     public bool IsAllowed(string origin) => _origins.Contains(origin);
+
+    // A game not known yet gets the default until the next refresh.
+    public int GetLimitPerMinute(string clientId) =>
+        _rateLimits.GetValueOrDefault(clientId, Domain.Games.Game.DefaultRateLimitPerMinute);
 
     public void Invalidate() => _refreshNow.Release();
 
@@ -72,6 +78,11 @@ internal sealed partial class GameOriginCache(IServiceScopeFactory serviceScopeF
             "SELECT DISTINCT unnest(web_origins) FROM games.games WHERE is_active");
 
         _origins = origins.ToFrozenSet(StringComparer.OrdinalIgnoreCase);
+
+        IEnumerable<(string ClientId, int Limit)> limits = await connection.QueryAsync<(string, int)>(
+            "SELECT client_id, rate_limit_per_minute FROM games.games WHERE is_active");
+
+        _rateLimits = limits.ToFrozenDictionary(l => l.ClientId, l => l.Limit, StringComparer.Ordinal);
     }
 
     [LoggerMessage(LogLevel.Warning, "Loading the origins of registered games failed")]

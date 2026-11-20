@@ -6,6 +6,11 @@ namespace PokeHub.Modules.Games.Infrastructure.Games;
 
 internal sealed class GameRepository(GamesDbContext context) : IGameRepository
 {
+    public async Task<Game?> GetAsync(Guid gameId, CancellationToken cancellationToken = default)
+    {
+        return await context.Games.SingleOrDefaultAsync(g => g.Id == gameId, cancellationToken);
+    }
+
     public async Task<Game?> GetByClientIdAsync(string clientId, CancellationToken cancellationToken = default)
     {
         return await context.Games.SingleOrDefaultAsync(g => g.ClientId == clientId, cancellationToken);

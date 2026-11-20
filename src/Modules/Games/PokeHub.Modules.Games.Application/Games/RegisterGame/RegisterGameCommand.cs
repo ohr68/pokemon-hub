@@ -5,9 +5,11 @@ namespace PokeHub.Modules.Games.Application.Games.RegisterGame;
 /// <param name="Slug">Short url-friendly name, used in the client id game-{slug}.</param>
 /// <param name="RedirectUris">Where players come back after signing in, e.g. https://my-game.example/*.</param>
 /// <param name="WebOrigins">Origins the game runs on, e.g. https://my-game.example.</param>
+/// <param name="Description">Shown to trainers in the games list.</param>
 public sealed record RegisterGameCommand(
     string Name,
     string Slug,
+    string? Description,
     Uri Url,
     IReadOnlyCollection<string> RedirectUris,
     IReadOnlyCollection<string> WebOrigins) : ICommand<RegisteredGameResponse>;

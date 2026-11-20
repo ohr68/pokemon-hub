@@ -188,6 +188,11 @@ public sealed class OwnedPokemon : Entity
 
         Raise(new PokemonReleasedDomainEvent(Id, trainerId, SpeciesId));
 
+        if (fromSaveId is not null)
+        {
+            RaiseSaveChanged(fromSaveId.Value, SaveChange.Released);
+        }
+
         return Result.Success();
     }
 
@@ -257,6 +262,8 @@ public sealed class OwnedPokemon : Entity
 
         Record(OwnershipChange.LeftGame, trainerId, utcNow, saveId: saveId);
 
+        RaiseSaveChanged(saveId, SaveChange.LeftGame);
+
         Raise(new PokemonReleasedDomainEvent(Id, trainerId, SpeciesId));
 
         return Result.Success();
@@ -308,6 +315,15 @@ public sealed class OwnedPokemon : Entity
             utcNow,
             saveId: save?.Id ?? previousSaveId);
 
+        if (save is not null)
+        {
+            RaiseSaveChanged(save.Id, SaveChange.MovedIn);
+        }
+        else if (previousSaveId is not null)
+        {
+            RaiseSaveChanged(previousSaveId.Value, SaveChange.MovedOut);
+        }
+
         return Result.Success();
     }
 
@@ -339,6 +355,8 @@ public sealed class OwnedPokemon : Entity
         CatchKeyGameId = save.GameId;
         CatchKey = catchKey;
         AwaitingDelivery = false;
+
+        RaiseSaveChanged(save.Id, SaveChange.Delivered);
 
         return Result.Success();
     }
@@ -381,6 +399,8 @@ public sealed class OwnedPokemon : Entity
 
         Record(OwnershipChange.MovedToHub, trainerId, utcNow, saveId: save.Id);
 
+        RaiseSaveChanged(save.Id, SaveChange.Withdrawn);
+
         return Result.Success();
     }
 
@@ -397,6 +417,9 @@ public sealed class OwnedPokemon : Entity
 
         return Result.Success();
     }
+
+    private void RaiseSaveChanged(Guid saveId, SaveChange change) =>
+        Raise(new PokemonSaveChangedDomainEvent(Id, TrainerId, SpeciesId, saveId, change));
 
     private Result EnsureActiveAndOwnedBy(Guid trainerId)
     {

@@ -8,6 +8,11 @@ namespace PokeHub.Modules.Games.Application.Abstractions.Identity;
 public interface IGameClientService
 {
     Task<Result> CreateClientAsync(GameClient client, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// A disabled client can't sign anyone in, and its tokens stop being refreshed.
+    /// </summary>
+    Task<Result> SetEnabledAsync(string clientId, bool enabled, CancellationToken cancellationToken = default);
 }
 
 /// <param name="RedirectUris">Where the identity provider may send players back after sign-in.</param>

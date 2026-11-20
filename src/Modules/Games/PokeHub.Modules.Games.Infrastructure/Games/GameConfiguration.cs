@@ -16,6 +16,14 @@ internal sealed class GameConfiguration : IEntityTypeConfiguration<Game>
 
         builder.Property(g => g.Name).HasMaxLength(100);
 
+        builder.Property(g => g.Description).HasMaxLength(1000);
+
+        builder.Property(g => g.RateLimitPerMinute).HasDefaultValue(Game.DefaultRateLimitPerMinute);
+
+        builder.Property(g => g.WebhookUrl).HasMaxLength(500);
+
+        builder.Property(g => g.WebhookSecret).HasMaxLength(64);
+
         builder.Property(g => g.Slug).HasMaxLength(40);
 
         builder.Property(g => g.ClientId).HasMaxLength(50);

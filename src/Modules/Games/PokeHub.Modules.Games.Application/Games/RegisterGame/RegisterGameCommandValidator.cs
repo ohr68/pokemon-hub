@@ -14,6 +14,8 @@ internal sealed class RegisterGameCommandValidator : AbstractValidator<RegisterG
             .WithMessage("Use lowercase letters, numbers and dashes, like my-first-game.")
             .MaximumLength(40);
 
+        RuleFor(c => c.Description).MaximumLength(1000);
+
         RuleFor(c => c.Url).NotNull().Must(url => url.IsAbsoluteUri);
 
         RuleFor(c => c.RedirectUris).NotEmpty();

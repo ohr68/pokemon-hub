@@ -25,6 +25,7 @@ internal sealed class RegisterGameCommandHandler(
         var game = Game.Register(
             request.Name,
             request.Slug,
+            string.IsNullOrWhiteSpace(request.Description) ? null : request.Description.Trim(),
             request.Url,
             [.. request.WebOrigins],
             dateTimeProvider.UtcNow);

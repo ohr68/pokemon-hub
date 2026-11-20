@@ -19,6 +19,9 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseSerilog((context, loggerConfig) => loggerConfig.ReadFrom.Configuration(context.Configuration));
 
+// Game ROMs are uploaded through the API (up to 64 MB).
+builder.WebHost.ConfigureKestrel(options => options.Limits.MaxRequestBodySize = 80 * 1024 * 1024);
+
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
@@ -32,7 +35,11 @@ builder.Services.AddOptions<CorsOptions>()
     .Configure<IGameOriginPolicy>((options, gameOrigins) => options.AddDefaultPolicy(policy => policy
         .SetIsOriginAllowed(origin => allowedOrigins.Contains(origin) || gameOrigins.IsAllowed(origin))
         .AllowAnyHeader()
-        .AllowAnyMethod()));
+        .AllowAnyMethod()
+        // Lets browser games read how long to wait after 429, and a ROM's version.
+        .WithExposedHeaders("Retry-After", "ETag")));
+
+builder.Services.AddGameRateLimiting();
 
 Assembly[] moduleApplicationAssemblies =
 [
@@ -60,6 +67,7 @@ string redisConnectionString = builder.Configuration.GetConnectionString("Cache"
 builder.Services.AddInfrastructure(
     [
         PokedexModule.ConfigureConsumers,
+        GamesModule.ConfigureConsumers,
     ],
     databaseConnectionString,
     redisConnectionString);
@@ -102,6 +110,9 @@ app.UseCors();
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+// After authentication: the limits are per game and player, read from the token.
+app.UseRateLimiter();
 
 app.MapEndpoints();
 

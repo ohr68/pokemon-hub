@@ -16,4 +16,22 @@ public static class GameErrors
     public static readonly Error ClientNotCreated = Error.Problem(
         "Games.ClientNotCreated",
         "The game's sign-in client could not be created in the identity provider.");
+
+    public static Error NotFound(Guid gameId)
+    {
+        return Error.NotFound("Games.NotFound", $"No game {gameId} was found.");
+    }
+
+    public static Error NotFound(string slug)
+    {
+        return Error.NotFound("Games.NotFound", $"No game {slug} was found.");
+    }
+
+    public static readonly Error NoWebhook = Error.Problem(
+        "Games.NoWebhook",
+        "The game has no webhook. Set its URL first.");
+
+    public static readonly Error ClientNotUpdated = Error.Problem(
+        "Games.ClientNotUpdated",
+        "The game's sign-in client could not be updated in the identity provider.");
 }

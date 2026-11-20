@@ -4,7 +4,11 @@ using PokeHub.Common.Infrastructure.Outbox;
 using PokeHub.Modules.Games.Application.Abstractions.Data;
 using PokeHub.Modules.Games.Application.Abstractions.Identity;
 using PokeHub.Modules.Games.Domain.Games;
+using PokeHub.Modules.Games.Domain.GameFiles;
 using PokeHub.Modules.Games.Domain.SaveFiles;
+using PokeHub.Modules.Games.Domain.Webhooks;
+using PokeHub.Modules.Games.Infrastructure.GameFiles;
+using PokeHub.Modules.Games.Infrastructure.Webhooks;
 using PokeHub.Modules.Games.Infrastructure.Database;
 using PokeHub.Modules.Games.Infrastructure.Games;
 using PokeHub.Modules.Games.Infrastructure.Identity;
@@ -19,11 +23,19 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using MassTransit;
+using PokeHub.Modules.Pokedex.IntegrationEvents;
 
 namespace PokeHub.Modules.Games.Infrastructure;
 
 public static class GamesModule
 {
+    public static void ConfigureConsumers(IRegistrationConfigurator registrationConfigurator)
+    {
+        // The Pokédex publishes PokemonSaveChanged; the inbox turns each into a webhook event.
+        registrationConfigurator.AddConsumer<IntegrationEventConsumer<PokemonSaveChangedIntegrationEvent>>();
+    }
+
     extension(IServiceCollection services)
     {
         public void AddGamesModule(IConfiguration configuration)
@@ -58,6 +70,19 @@ public static class GamesModule
 
             services.AddScoped<ISaveFileRepository, SaveFileRepository>();
 
+            services.AddScoped<IGameFileRepository, GameFileRepository>();
+
+            services.AddScoped<IWebhookDeliveryRepository, WebhookDeliveryRepository>();
+
+            services.ConfigureOptions<ConfigureDeliverWebhooksJob>();
+
+            // A game that doesn't answer quickly is retried later rather than waited on.
+            services.AddHttpClient(DeliverWebhooksJob.HttpClientName, client =>
+            {
+                client.Timeout = TimeSpan.FromSeconds(10);
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("PokeHub-Webhooks/1.0");
+            });
+
             services.Configure<GamesKeyCloakOptions>(configuration.GetSection("Games:KeyCloak"));
 
             services.AddTransient<KeyCloakAuthDelegatingHandler>();
@@ -75,6 +100,7 @@ public static class GamesModule
             services.AddSingleton<GameOriginCache>();
             services.AddSingleton<IGameOriginCache>(sp => sp.GetRequiredService<GameOriginCache>());
             services.AddSingleton<IGameOriginPolicy>(sp => sp.GetRequiredService<GameOriginCache>());
+            services.AddSingleton<IGameRateLimits>(sp => sp.GetRequiredService<GameOriginCache>());
             services.AddHostedService(sp => sp.GetRequiredService<GameOriginCache>());
         }
 

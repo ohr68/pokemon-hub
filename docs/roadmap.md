@@ -6,7 +6,7 @@
 | 1. Pokédex: species catalog and sync, trainers, starters, collection, ownership history, progress | Done |
 | 2. Frontend integration: Keycloak sign-in, catalog list, Meus Pokémons | Done |
 | 3. Trades | Done: trades between trainers, and moving Pokémon between saves through the hub |
-| 4. Games platform | In progress: first slice done |
+| 4. Games platform | Done: registration, game API, files, rate limits, webhooks, turning games off, admin pages |
 | 5. FireRed | Done: play your own ROM, sync, mirror, save backups, transfers both ways |
 | 6. Operations | Planned |
 
@@ -68,21 +68,39 @@ Pokémon HOME.
 game's save (`api/game/save/reconcile`), and transfers between the hub and the game's own
 save (`api/game/save/deliveries`, `api/game/save/withdrawals`).
 
-**Next slices:**
+**Second slice (done):**
 
-- Webhooks to tell games about changes (a Pokémon moved into or out of their save).
-- Per-game rate limits.
-- Turning a game off, and an admin page for games.
+- **Admin pages** (pokemon-web, `/admin/games`, for `games:manage`): create a game with its
+  icon; edit its name, description and rate limit; upload its cover, icon, screenshots and
+  ROM (`api/games/{id}/files/{kind}`, stored in Postgres); turn it on or off; set its webhook.
+- **Games list and play page** for trainers (`/play`, `/play/{slug}`): covers, icons and
+  screenshots (public, cacheable image URLs); a game with a ROM runs in the emulator, the
+  ROM downloaded once by signed-in players (`api/games/{slug}/rom`) and cached in the
+  browser until a new one is uploaded. Games without a ROM open on their own site.
+- **Turning a game off** (`api/games/{id}/turn-off`, `turn-on`): it leaves the list, its
+  Keycloak client is disabled, and the game API and CORS stop accepting it. Players' Pokémon
+  and saves stay.
+- **Per-game rate limits**: each player gets the game's own number of game API requests per
+  minute (600 by default), counted per game; over it, `429` with `Retry-After`.
+- **Webhooks**: the Pokédex publishes `PokemonSaveChanged`, and the Games module sends it to
+  the game as `pokemon.moved_in`, `moved_out`, `delivered`, `withdrawn`, `released` or
+  `left_game` (plus `ping` for tests). Requests are signed (`PokeHub-Signature:
+  t=…,v1=HMAC-SHA256 of "t.body"` with the game's secret), retried with growing waits for
+  about an hour, and listed on the admin page.
+
+**Room to grow:** signing in to non-FireRed games from pokemon-web (each would need its own
+client session), and admin-chosen emulator cores for other consoles.
 
 ## 5. FireRed
 
 Pokémon FireRed connected to PokeHub, as the first real game. It runs in pokemon-web's
 Jogar page and signs in as its own game, `game-firered`.
 
-- **5a. Play your own ROM** (done): the player picks their own FireRed ROM; it stays in
-  their browser (IndexedDB) and is never uploaded. EmulatorJS (mGBA core) runs it in its own
-  page inside the app. In-game saves are written to the browser every 15 seconds and when
-  leaving the page.
+- **5a. Play in the browser** (done): EmulatorJS (mGBA core) runs the game in its own page
+  inside the app. At first the player picked their own ROM, kept only in their browser; now
+  the admin uploads it once (phase 4, second slice) and players download it from PokeHub. A
+  personal setup: PokeHub isn't meant to be deployed publicly with a commercial ROM. In-game
+  saves are written to the browser every 15 seconds and when leaving the page.
 - **5b. Sync to PokeHub** (done): pokemon-web reads the Generation III save itself (party and
   PC boxes, decrypted from the documented format) and records each Pokémon as a catch. Its
   personality value and original trainer id make the catch key, so syncing again never
