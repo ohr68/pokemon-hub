@@ -39,6 +39,18 @@ public interface IPokedexApi
     Task<Result<Guid>> CatchPokemonAsync(CatchRequest request, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Mirrors the game's save: Pokémon the game caught that are in its save on PokeHub but no
+    /// longer among <paramref name="presentCatchKeys"/> left the game and are removed. With
+    /// <paramref name="dryRun"/>, only reports them.
+    /// </summary>
+    Task<Result<IReadOnlyCollection<LeftGameInfo>>> ReconcileSaveAsync(
+        Guid trainerId,
+        Guid gameId,
+        IReadOnlyCollection<string> presentCatchKeys,
+        bool dryRun,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Releases a Pokémon that is in the trainer's save for this game.
     /// </summary>
     Task<Result> ReleaseFromSaveAsync(

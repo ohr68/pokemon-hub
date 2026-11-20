@@ -1,0 +1,12 @@
+using FastEndpoints;
+
+namespace PokeHub.Modules.Games.Presentation.Play.Docs;
+
+internal sealed class ReconcileSaveEndpointSummary : EndpointSummary
+{
+    public ReconcileSaveEndpointSummary()
+    {
+        Summary = "Mirrors the game's save";
+        Description = "Send the catch keys of every Pokémon in the player's save right now. Pokémon your game caught that are still in its save on PokeHub but missing from that list left the game, and are removed. Use dryRun to see them first. Pokémon moved in from or out to the hub are never touched.";
+    }
+}

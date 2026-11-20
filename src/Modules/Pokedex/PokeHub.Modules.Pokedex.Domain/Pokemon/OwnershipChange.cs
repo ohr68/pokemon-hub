@@ -12,4 +12,8 @@ public enum OwnershipChange
     // Location changes: the trainer keeps the Pokémon, it just moves between hub and a save.
     MovedToSave = 6,
     MovedToHub = 7,
+
+    // Gone from the game it was caught in (released or traded away inside the game), found
+    // when PokeHub mirrors the game's save.
+    LeftGame = 8,
 }

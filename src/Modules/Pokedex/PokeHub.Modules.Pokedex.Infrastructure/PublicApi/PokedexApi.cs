@@ -8,6 +8,7 @@ using PokeHub.Modules.Pokedex.Application.Pokemon.GetTrainerPokemon;
 using PokeHub.Modules.Pokedex.Application.Pokemon.ReleasePokemon;
 using PokeHub.Modules.Pokedex.Application.Saves;
 using PokeHub.Modules.Pokedex.Application.Saves.GetOrCreateSave;
+using PokeHub.Modules.Pokedex.Application.Saves.ReconcileSave;
 using PokeHub.Modules.Pokedex.Application.Pokemon.TradePokemon;
 using PokeHub.Modules.Pokedex.Application.Trainers.GetTrainer;
 using PokeHub.Modules.Pokedex.Domain.Pokemon;
@@ -121,6 +122,27 @@ internal sealed class PokedexApi(ISender sender) : IPokedexApi
                 request.CatchKey,
                 request.Nickname),
             cancellationToken);
+    }
+
+    public async Task<Result<IReadOnlyCollection<LeftGameInfo>>> ReconcileSaveAsync(
+        Guid trainerId,
+        Guid gameId,
+        IReadOnlyCollection<string> presentCatchKeys,
+        bool dryRun,
+        CancellationToken cancellationToken = default)
+    {
+        Result<IReadOnlyCollection<LeftGameResponse>> result = await sender.Send(
+            new ReconcileSaveCommand(trainerId, gameId, presentCatchKeys, dryRun),
+            cancellationToken);
+
+        if (result.IsFailure)
+        {
+            return Result.Failure<IReadOnlyCollection<LeftGameInfo>>(result.Error);
+        }
+
+        return result.Value
+            .Select(p => new LeftGameInfo(p.Id, p.SpeciesId, p.Nickname, p.Level, p.IsShiny))
+            .ToList();
     }
 
     public Task<Result> ReleaseFromSaveAsync(

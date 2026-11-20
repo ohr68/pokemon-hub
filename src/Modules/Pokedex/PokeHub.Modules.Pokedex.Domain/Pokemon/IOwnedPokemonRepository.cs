@@ -8,5 +8,10 @@ public interface IOwnedPokemonRepository
 
     Task<OwnedPokemon?> GetByCatchKeyAsync(Guid gameId, string catchKey, CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Active Pokémon in the save that were caught by the save's game (they have a catch key).
+    /// </summary>
+    Task<IReadOnlyList<OwnedPokemon>> GetCaughtInSaveAsync(Guid saveId, Guid gameId, CancellationToken cancellationToken = default);
+
     void Insert(OwnedPokemon pokemon);
 }

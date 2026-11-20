@@ -214,6 +214,33 @@ public sealed class OwnedPokemon : Entity
     }
 
     /// <summary>
+    /// The game reports the Pokémon is no longer in its save (released or traded away there).
+    /// Only applies to a Pokémon that is in that game's save on PokeHub.
+    /// </summary>
+    public Result LeaveGame(Guid trainerId, Guid saveId, DateTime utcNow)
+    {
+        Result ownership = EnsureActiveAndOwnedBy(trainerId);
+
+        if (ownership.IsFailure)
+        {
+            return ownership;
+        }
+
+        if (SaveId != saveId)
+        {
+            return Result.Failure(PokemonErrors.NotInThisSave);
+        }
+
+        Status = PokemonStatus.Released;
+
+        Record(OwnershipChange.LeftGame, trainerId, utcNow, saveId: saveId);
+
+        Raise(new PokemonReleasedDomainEvent(Id, trainerId, SpeciesId));
+
+        return Result.Success();
+    }
+
+    /// <summary>
     /// Moves the Pokémon into one of the trainer's saves, or back to the hub when
     /// <paramref name="save"/> is empty. Moving between two games goes through the hub.
     /// </summary>

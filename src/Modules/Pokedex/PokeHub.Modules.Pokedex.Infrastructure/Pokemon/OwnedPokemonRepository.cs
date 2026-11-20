@@ -26,6 +26,19 @@ internal sealed class OwnedPokemonRepository(PokedexDbContext context) : IOwnedP
             cancellationToken);
     }
 
+    public async Task<IReadOnlyList<OwnedPokemon>> GetCaughtInSaveAsync(
+        Guid saveId,
+        Guid gameId,
+        CancellationToken cancellationToken = default)
+    {
+        return await context.Pokemon
+            .Where(p => p.SaveId == saveId
+                        && p.Status == PokemonStatus.Active
+                        && p.CaughtInGameId == gameId
+                        && p.CatchKey != null)
+            .ToListAsync(cancellationToken);
+    }
+
     public void Insert(OwnedPokemon pokemon)
     {
         context.Pokemon.Add(pokemon);

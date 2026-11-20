@@ -185,6 +185,61 @@ namespace PokeHub.Modules.Games.Infrastructure.Database.Migrations
 
                     b.ToTable("games", "games");
                 });
+
+            modelBuilder.Entity("PokeHub.Modules.Games.Domain.SaveFiles.SaveFile", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<byte[]>("Content")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("content");
+
+                    b.Property<Guid>("GameId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("game_id");
+
+                    b.Property<string>("Sha256")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("sha256");
+
+                    b.Property<int>("SizeBytes")
+                        .HasColumnType("integer")
+                        .HasColumnName("size_bytes");
+
+                    b.Property<Guid>("TrainerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("trainer_id");
+
+                    b.Property<DateTime>("UploadedOnUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("uploaded_on_utc");
+
+                    b.HasKey("Id")
+                        .HasName("pk_save_files");
+
+                    b.HasIndex("GameId")
+                        .HasDatabaseName("ix_save_files_game_id");
+
+                    b.HasIndex("TrainerId", "GameId", "UploadedOnUtc")
+                        .HasDatabaseName("ix_save_files_trainer_id_game_id_uploaded_on_utc");
+
+                    b.ToTable("save_files", "games");
+                });
+
+            modelBuilder.Entity("PokeHub.Modules.Games.Domain.SaveFiles.SaveFile", b =>
+                {
+                    b.HasOne("PokeHub.Modules.Games.Domain.Games.Game", null)
+                        .WithMany()
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_save_files_games_game_id");
+                });
 #pragma warning restore 612, 618
         }
     }
