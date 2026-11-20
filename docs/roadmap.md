@@ -5,8 +5,8 @@
 | 0. Foundation: modular structure, Users, Keycloak, Docker | Done |
 | 1. Pokédex: species catalog and sync, trainers, starters, collection, ownership history, progress | Done |
 | 2. Frontend integration: Keycloak sign-in, catalog list, Meus Pokémons | Done |
-| 3. Trades | In progress |
-| 4. Games platform | Planned |
+| 3. Trades | Step 1 done; step 2 comes with the games |
+| 4. Games platform | In progress: first slice done |
 | 5. First original games | Planned |
 | 6. Operations | Planned |
 
@@ -43,3 +43,29 @@ main-series games. Before designing save-to-save transfers, study how it:
 It is a reference for how games store and validate Pokémon, which our own games' saves
 will need too. PKHeX is GPL-3.0: reading it for ideas is fine, but referencing or copying
 its code (for example the `PKHeX.Core` package) would require PokeHub to be GPL as well.
+
+## 4. Games platform
+
+Browser games connect to PokeHub, and Pokémon live in the hub or in a game save, like
+Pokémon HOME.
+
+**First slice (done):**
+
+- Admins register a game (`POST api/games`, `games:manage`); PokeHub creates its Keycloak
+  public client (`game-{slug}`, PKCE) and allows its origins through CORS right away.
+- Players sign in from the game with "Sign in with PokeHub". The token's `azp` claim tells
+  PokeHub which game is calling; the game API (`api/game/...`) only accepts registered,
+  active games.
+- Each trainer has one save per game, created on first use. Games read their save, catch
+  Pokémon into it (with a catch key, so a repeated request never creates a duplicate) and
+  release Pokémon from it.
+- In pokemon-web, trainers move Pokémon between the hub and their game saves. Trades only
+  use hub Pokémon. Every catch and move is recorded in the ownership history.
+- `tools/game-sandbox` is a one-page stand-in for a game, and the smallest example of
+  what a browser game needs to do.
+
+**Next slices:**
+
+- Webhooks to tell games about changes (a Pokémon moved into or out of their save).
+- Per-game rate limits.
+- Turning a game off, and an admin page for games.

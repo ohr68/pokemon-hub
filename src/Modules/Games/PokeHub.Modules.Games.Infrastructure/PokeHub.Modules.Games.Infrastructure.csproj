@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\..\Common\PokeHub.Common.Infrastructure\PokeHub.Common.Infrastructure.csproj"/>
+        <ProjectReference Include="..\PokeHub.Modules.Games.Application\PokeHub.Modules.Games.Application.csproj"/>
+        <ProjectReference Include="..\PokeHub.Modules.Games.Presentation\PokeHub.Modules.Games.Presentation.csproj"/>
+        <ProjectReference Include="..\PokeHub.Modules.Games.PublicApi\PokeHub.Modules.Games.PublicApi.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Folder Include="Database\Migrations\"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Update="SonarAnalyzer.CSharp" Version="10.22.0.136894">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
+
+</Project>

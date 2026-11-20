@@ -11,4 +11,6 @@ public sealed record PokemonResponse(
     bool IsShiny,
     string Origin,
     bool IsOriginalTrainer,
-    DateTime ObtainedOnUtc);
+    DateTime ObtainedOnUtc,
+    Guid? SaveId,
+    string? GameName);

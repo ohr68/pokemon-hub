@@ -2,7 +2,12 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PokeHub.Common.Application.Exceptions;
 using PokeHub.Common.Domain.Abstractions;
+using PokeHub.Modules.Pokedex.Application.Pokemon.CatchPokemon;
 using PokeHub.Modules.Pokedex.Application.Pokemon.GetPokemon;
+using PokeHub.Modules.Pokedex.Application.Pokemon.GetTrainerPokemon;
+using PokeHub.Modules.Pokedex.Application.Pokemon.ReleasePokemon;
+using PokeHub.Modules.Pokedex.Application.Saves;
+using PokeHub.Modules.Pokedex.Application.Saves.GetOrCreateSave;
 using PokeHub.Modules.Pokedex.Application.Pokemon.TradePokemon;
 using PokeHub.Modules.Pokedex.Application.Trainers.GetTrainer;
 using PokeHub.Modules.Pokedex.Domain.Pokemon;
@@ -31,7 +36,8 @@ internal sealed class PokedexApi(ISender sender) : IPokedexApi
             pokemon.Nickname,
             pokemon.Level,
             pokemon.IsShiny,
-            pokemon.IsActive);
+            pokemon.IsActive,
+            pokemon.IsInHub);
     }
 
     public async Task<TrainerInfo?> GetTrainerAsync(Guid trainerId, CancellationToken cancellationToken = default)
@@ -59,5 +65,69 @@ internal sealed class PokedexApi(ISender sender) : IPokedexApi
             // One of the Pokémon changed after it was read (another trade or a release won).
             return Result.Failure(PokemonErrors.TradeConflict);
         }
+    }
+
+    public async Task<Result<SaveInfo>> GetOrCreateSaveAsync(
+        Guid trainerId,
+        Guid gameId,
+        string gameName,
+        CancellationToken cancellationToken = default)
+    {
+        Result<SaveResponse> result = await sender.Send(
+            new GetOrCreateSaveCommand(trainerId, gameId, gameName),
+            cancellationToken);
+
+        return result.IsFailure
+            ? Result.Failure<SaveInfo>(result.Error)
+            : new SaveInfo(result.Value.Id, result.Value.GameId, result.Value.GameName, result.Value.CreatedOnUtc);
+    }
+
+    public async Task<Result<IReadOnlyCollection<SavePokemonInfo>>> GetSavePokemonAsync(
+        Guid trainerId,
+        Guid gameId,
+        CancellationToken cancellationToken = default)
+    {
+        Result<IReadOnlyCollection<PokemonResponse>> result = await sender.Send(
+            new GetTrainerPokemonQuery(trainerId, GameId: gameId),
+            cancellationToken);
+
+        if (result.IsFailure)
+        {
+            return Result.Failure<IReadOnlyCollection<SavePokemonInfo>>(result.Error);
+        }
+
+        return result.Value
+            .Select(p => new SavePokemonInfo(
+                p.Id,
+                p.SpeciesId,
+                p.SpeciesName,
+                p.Nickname,
+                p.Level,
+                p.IsShiny,
+                p.IsOriginalTrainer))
+            .ToList();
+    }
+
+    public Task<Result<Guid>> CatchPokemonAsync(CatchRequest request, CancellationToken cancellationToken = default)
+    {
+        return sender.Send(
+            new CatchPokemonCommand(
+                request.TrainerId,
+                request.GameId,
+                request.GameName,
+                request.SpeciesId,
+                request.Level,
+                request.IsShiny,
+                request.CatchKey),
+            cancellationToken);
+    }
+
+    public Task<Result> ReleaseFromSaveAsync(
+        Guid trainerId,
+        Guid gameId,
+        Guid pokemonId,
+        CancellationToken cancellationToken = default)
+    {
+        return sender.Send(new ReleasePokemonCommand(trainerId, pokemonId, gameId), cancellationToken);
     }
 }

@@ -69,7 +69,8 @@ internal sealed class ProposeTradeCommandHandler(
     {
         PokemonInfo? pokemon = await pokedexApi.GetPokemonAsync(pokemonId, cancellationToken);
 
-        return pokemon is { IsActive: true } && pokemon.TrainerId == trainerId ? pokemon : null;
+        // Trades happen from the hub: a Pokémon inside a game save has to be moved out first.
+        return pokemon is { IsActive: true, IsInHub: true } && pokemon.TrainerId == trainerId ? pokemon : null;
     }
 
     private static TradedPokemon ToSnapshot(PokemonInfo pokemon)

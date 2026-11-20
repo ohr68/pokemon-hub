@@ -17,4 +17,33 @@ public interface IPokedexApi
     /// by trading. Safe to repeat for the same trade.
     /// </summary>
     Task<Result> TradePokemonAsync(TradeRequest request, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// The trainer's save for a game, created on first use.
+    /// </summary>
+    Task<Result<SaveInfo>> GetOrCreateSaveAsync(
+        Guid trainerId,
+        Guid gameId,
+        string gameName,
+        CancellationToken cancellationToken = default);
+
+    Task<Result<IReadOnlyCollection<SavePokemonInfo>>> GetSavePokemonAsync(
+        Guid trainerId,
+        Guid gameId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Records a Pokémon caught in a game, into the trainer's save for it. Repeating the same
+    /// catch key returns the same Pokémon.
+    /// </summary>
+    Task<Result<Guid>> CatchPokemonAsync(CatchRequest request, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Releases a Pokémon that is in the trainer's save for this game.
+    /// </summary>
+    Task<Result> ReleaseFromSaveAsync(
+        Guid trainerId,
+        Guid gameId,
+        Guid pokemonId,
+        CancellationToken cancellationToken = default);
 }

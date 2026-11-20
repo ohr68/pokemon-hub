@@ -6,5 +6,7 @@ public interface IOwnedPokemonRepository
 
     Task<bool> IsTradeCompletedAsync(Guid tradeId, CancellationToken cancellationToken = default);
 
+    Task<OwnedPokemon?> GetByCatchKeyAsync(Guid gameId, string catchKey, CancellationToken cancellationToken = default);
+
     void Insert(OwnedPokemon pokemon);
 }

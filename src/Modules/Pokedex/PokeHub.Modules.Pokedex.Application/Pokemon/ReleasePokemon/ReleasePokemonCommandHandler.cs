@@ -3,11 +3,13 @@ using PokeHub.Common.Application.Messaging;
 using PokeHub.Common.Domain.Abstractions;
 using PokeHub.Modules.Pokedex.Application.Abstractions.Data;
 using PokeHub.Modules.Pokedex.Domain.Pokemon;
+using PokeHub.Modules.Pokedex.Domain.Saves;
 
 namespace PokeHub.Modules.Pokedex.Application.Pokemon.ReleasePokemon;
 
 internal sealed class ReleasePokemonCommandHandler(
     IOwnedPokemonRepository pokemonRepository,
+    ISaveRepository saveRepository,
     IDateTimeProvider dateTimeProvider,
     IUnitOfWork unitOfWork)
     : ICommandHandler<ReleasePokemonCommand>
@@ -22,7 +24,21 @@ internal sealed class ReleasePokemonCommandHandler(
             return Result.Failure(PokemonErrors.NotFound(request.PokemonId));
         }
 
-        Result result = pokemon.Release(request.TrainerId, dateTimeProvider.UtcNow);
+        Guid? fromSaveId = null;
+
+        if (request.GameId is not null)
+        {
+            Save? save = await saveRepository.GetForGameAsync(request.TrainerId, request.GameId.Value, cancellationToken);
+
+            if (save is null)
+            {
+                return Result.Failure(PokemonErrors.NotInThisSave);
+            }
+
+            fromSaveId = save.Id;
+        }
+
+        Result result = pokemon.Release(request.TrainerId, dateTimeProvider.UtcNow, fromSaveId);
 
         if (result.IsFailure)
         {

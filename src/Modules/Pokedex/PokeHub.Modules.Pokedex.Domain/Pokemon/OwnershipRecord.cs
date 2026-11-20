@@ -27,13 +27,19 @@ public sealed class OwnershipRecord
     /// </summary>
     public Guid? TradeId { get; private set; }
 
+    /// <summary>
+    /// The save involved, if any: where a Pokémon was caught or moved to or from.
+    /// </summary>
+    public Guid? SaveId { get; private set; }
+
     internal static OwnershipRecord Create(
         Guid pokemonId,
         Guid trainerId,
         int speciesId,
         OwnershipChange change,
         DateTime utcNow,
-        Guid? tradeId = null)
+        Guid? tradeId = null,
+        Guid? saveId = null)
     {
         return new OwnershipRecord
         {
@@ -44,6 +50,7 @@ public sealed class OwnershipRecord
             Change = change,
             OccurredOnUtc = utcNow,
             TradeId = tradeId,
+            SaveId = saveId,
         };
     }
 }

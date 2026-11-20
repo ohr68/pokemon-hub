@@ -36,12 +36,16 @@
         <Content Update="modules.trades.Development.json">
             <DependentUpon>modules.trades.json</DependentUpon>
         </Content>
+        <Content Update="modules.games.Development.json">
+            <DependentUpon>modules.games.json</DependentUpon>
+        </Content>
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\..\Modules\Users\PokeHub.Modules.Users.Infrastructure\PokeHub.Modules.Users.Infrastructure.csproj"/>
         <ProjectReference Include="..\..\Modules\Pokedex\PokeHub.Modules.Pokedex.Infrastructure\PokeHub.Modules.Pokedex.Infrastructure.csproj"/>
         <ProjectReference Include="..\..\Modules\Trades\PokeHub.Modules.Trades.Infrastructure\PokeHub.Modules.Trades.Infrastructure.csproj"/>
+        <ProjectReference Include="..\..\Modules\Games\PokeHub.Modules.Games.Infrastructure\PokeHub.Modules.Games.Infrastructure.csproj"/>
     </ItemGroup>
 
 </Project>

@@ -6,6 +6,8 @@ using PokeHub.Modules.Pokedex.Application.Abstractions.Data;
 using PokeHub.Modules.Pokedex.Application.Abstractions.PokeApi;
 using PokeHub.Modules.Pokedex.Application.Abstractions.Sync;
 using PokeHub.Modules.Pokedex.Domain.Pokemon;
+using PokeHub.Modules.Pokedex.Domain.Saves;
+using PokeHub.Modules.Pokedex.Infrastructure.Saves;
 using PokeHub.Modules.Pokedex.Domain.Species;
 using PokeHub.Modules.Pokedex.Domain.Trainers;
 using PokeHub.Modules.Pokedex.Infrastructure.Database;
@@ -70,6 +72,7 @@ public static class PokedexModule
             services.AddScoped<ISpeciesRepository, SpeciesRepository>();
             services.AddScoped<ITrainerRepository, TrainerRepository>();
             services.AddScoped<IOwnedPokemonRepository, OwnedPokemonRepository>();
+            services.AddScoped<ISaveRepository, SaveRepository>();
 
             services.Configure<PokeApiOptions>(configuration.GetSection("Pokedex:PokeApi"));
 

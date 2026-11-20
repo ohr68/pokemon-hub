@@ -111,6 +111,11 @@ namespace PokeHub.Modules.Users.Infrastructure.Database.Migrations
                         {
                             PermissionCode = "trades:update",
                             RoleName = "Administrator"
+                        },
+                        new
+                        {
+                            PermissionCode = "games:manage",
+                            RoleName = "Administrator"
                         });
                 });
 
@@ -264,6 +269,10 @@ namespace PokeHub.Modules.Users.Infrastructure.Database.Migrations
                         new
                         {
                             Code = "trades:update"
+                        },
+                        new
+                        {
+                            Code = "games:manage"
                         });
                 });
 

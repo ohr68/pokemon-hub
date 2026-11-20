@@ -1,0 +1,18 @@
+{
+  "Games": {
+    "Outbox": {
+      "IntervalInSeconds": 15,
+      "BatchSize": 20
+    },
+    "Inbox": {
+      "IntervalInSeconds": 15,
+      "BatchSize": 20
+    },
+    "KeyCloak": {
+      "AdminUrl": "http://pokehub.identity:8080/admin/realms/pokehub/",
+      "TokenUrl": "http://pokehub.identity:8080/realms/pokehub/protocol/openid-connect/token",
+      "ConfidentialClientId": "pokehub-confidential-client",
+      "ConfidentialClientSecret": "PzotcrvZRF9BHCKcUxdKfHWlIPECG49k"
+    }
+  }
+}

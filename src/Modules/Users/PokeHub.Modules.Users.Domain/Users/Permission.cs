@@ -10,6 +10,7 @@ public sealed class Permission
     public static readonly Permission GrantPokemon = new("pokemon:grant");
     public static readonly Permission ReadTrades = new("trades:read");
     public static readonly Permission UpdateTrades = new("trades:update");
+    public static readonly Permission ManageGames = new("games:manage");
 
     public Permission(string code)
     {

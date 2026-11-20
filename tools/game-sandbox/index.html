@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PokeHub Game Sandbox</title>
+  <style>
+    :root { --bg: #0f1115; --panel: #181b22; --text: #e8e8ea; --muted: #9aa0aa; --accent: #ef4444; --line: #2a2f3a; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.5 system-ui, sans-serif; }
+    main { max-width: 880px; margin: 0 auto; padding: 24px 16px; display: grid; gap: 16px; }
+    h1 { margin: 0; font-size: 20px; }
+    section { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: grid; gap: 12px; }
+    .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .muted { color: var(--muted); }
+    button { background: var(--accent); color: white; border: 0; border-radius: 8px; padding: 8px 12px; font: inherit; cursor: pointer; }
+    button.secondary { background: transparent; border: 1px solid var(--line); color: var(--text); }
+    button:disabled { opacity: .5; cursor: default; }
+    input { background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; font: inherit; width: 110px; }
+    .box { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
+    .mon { border: 1px solid var(--line); border-radius: 10px; padding: 8px; display: grid; justify-items: center; gap: 4px; text-align: center; }
+    .mon img { width: 72px; height: 72px; object-fit: contain; }
+    pre { margin: 0; max-height: 220px; overflow: auto; white-space: pre-wrap; font-size: 12px; color: var(--muted); }
+  </style>
+</head>
+<body>
+<main>
+  <div class="row" style="justify-content: space-between">
+    <h1>PokeHub Game Sandbox</h1>
+    <span class="muted" id="client"></span>
+  </div>
+
+  <section>
+    <div class="row">
+      <button id="signin">Sign in with PokeHub</button>
+      <button id="signout" class="secondary" hidden>Sign out</button>
+      <span id="who" class="muted">Not signed in.</span>
+    </div>
+  </section>
+
+  <section>
+    <div class="row" style="justify-content: space-between">
+      <strong id="save-title">Save</strong>
+      <button id="load" class="secondary" disabled>Load save</button>
+    </div>
+    <div class="box" id="box"><span class="muted">Sign in and load the save.</span></div>
+  </section>
+
+  <section>
+    <strong>Catch a Pokémon</strong>
+    <div class="row">
+      <label>Species # <input id="species" type="number" min="1" value="25"></label>
+      <label>Level <input id="level" type="number" min="1" max="100" value="5"></label>
+      <label><input id="shiny" type="checkbox" style="width:auto"> Shiny</label>
+      <button id="catch" disabled>Catch</button>
+      <button id="repeat" class="secondary" disabled title="Sends the last catch again with the same key">Repeat last catch</button>
+    </div>
+    <span class="muted">Each catch sends a new catch key; repeating sends the same key, so PokeHub returns the same Pokémon.</span>
+  </section>
+
+  <section>
+    <strong>Log</strong>
+    <pre id="log"></pre>
+  </section>
+</main>
+
+<script type="module">
+  import { UserManager, WebStorageStateStore } from 'https://cdn.jsdelivr.net/npm/oidc-client-ts@3.5.0/+esm'
+
+  const params = new URLSearchParams(location.search)
+  const config = {
+    authority: params.get('authority') ?? 'http://localhost:18080/realms/pokehub',
+    clientId: params.get('clientId') ?? 'game-sandbox',
+    api: params.get('api') ?? 'http://localhost:5100/api/'
+  }
+
+  const userManager = new UserManager({
+    authority: config.authority,
+    client_id: config.clientId,
+    redirect_uri: `${location.origin}/`,
+    post_logout_redirect_uri: `${location.origin}/`,
+    scope: 'openid profile email',
+    userStore: new WebStorageStateStore({ store: localStorage })
+  })
+
+  const $ = (id) => document.getElementById(id)
+  const log = (label, value) => {
+    $('log').textContent = `${new Date().toLocaleTimeString()} ${label}\n${typeof value === 'string' ? value : JSON.stringify(value, null, 2)}\n\n` + $('log').textContent
+  }
+  let lastCatch = null
+
+  async function api (path, options = {}) {
+    const user = await userManager.getUser()
+    const response = await fetch(new URL(path, config.api), {
+      ...options,
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${user?.access_token}`, ...options.headers }
+    })
+    const body = response.status === 204 ? null : await response.json().catch(() => null)
+    log(`${options.method ?? 'GET'} ${path} → ${response.status}`, body ?? '')
+    if (!response.ok) throw new Error(body?.detail ?? `HTTP ${response.status}`)
+    return body
+  }
+
+  function sprite (id, shiny) {
+    return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/${shiny ? 'shiny/' : ''}${id}.png`
+  }
+
+  async function loadSave () {
+    const save = await api('game/save')
+    $('save-title').textContent = `${save.gameName} save (${save.pokemon.length} Pokémon)`
+    $('box').replaceChildren(...(save.pokemon.length ? save.pokemon.map(renderMon) : [Object.assign(document.createElement('span'), { className: 'muted', textContent: 'Empty. Catch something!' })]))
+  }
+
+  function renderMon (p) {
+    const card = document.createElement('div')
+    card.className = 'mon'
+    card.innerHTML = `<img alt="" src="${sprite(p.speciesId, p.isShiny)}"><strong></strong><span class="muted"></span>`
+    card.querySelector('strong').textContent = `${p.nickname ?? p.speciesName}${p.isShiny ? ' ✨' : ''}`
+    card.querySelector('.muted').textContent = `Lv. ${p.level}${p.isOriginalTrainer ? '' : ' · traded'}`
+    const release = document.createElement('button')
+    release.className = 'secondary'
+    release.textContent = 'Release'
+    release.onclick = () => api(`game/save/pokemon/${p.id}/release`, { method: 'POST' }).then(loadSave).catch(() => {})
+    card.append(release)
+    return card
+  }
+
+  async function sendCatch (request) {
+    lastCatch = request
+    $('repeat').disabled = false
+    await api('game/save/pokemon', { method: 'POST', body: JSON.stringify(request) })
+    await loadSave()
+  }
+
+  $('client').textContent = `client: ${config.clientId}`
+  $('signin').onclick = () => userManager.signinRedirect()
+  $('signout').onclick = () => userManager.signoutRedirect()
+  $('load').onclick = () => loadSave().catch(() => {})
+  $('catch').onclick = () => sendCatch({
+    speciesId: Number($('species').value),
+    level: Number($('level').value),
+    isShiny: $('shiny').checked,
+    catchKey: crypto.randomUUID()
+  }).catch(() => {})
+  $('repeat').onclick = () => lastCatch && sendCatch(lastCatch).catch(() => {})
+
+  // Back from Keycloak with a code: finish signing in and clean the URL.
+  if (params.has('code') && params.has('state')) {
+    await userManager.signinRedirectCallback().catch((error) => log('Sign-in failed', error.message))
+    history.replaceState(null, '', '/')
+  }
+
+  const user = await userManager.getUser()
+  if (user && !user.expired) {
+    $('who').textContent = `Signed in as ${user.profile.given_name ?? user.profile.email}`
+    $('signin').hidden = true
+    $('signout').hidden = false
+    for (const id of ['load', 'catch']) $(id).disabled = false
+    loadSave().catch(() => {})
+  }
+</script>
+</body>
+</html>

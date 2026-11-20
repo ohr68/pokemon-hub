@@ -1,0 +1,12 @@
+### Registers the sandbox as a game. Needs an administrator's access token.
+POST http://localhost:5100/api/games
+Authorization: Bearer {{admin_token}}
+Content-Type: application/json
+
+{
+  "name": "Game Sandbox",
+  "slug": "sandbox",
+  "url": "http://localhost:5180",
+  "redirectUris": ["http://localhost:5180/*"],
+  "webOrigins": ["http://localhost:5180"]
+}

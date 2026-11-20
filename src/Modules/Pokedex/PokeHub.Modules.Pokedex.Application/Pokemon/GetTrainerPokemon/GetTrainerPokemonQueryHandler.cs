@@ -28,10 +28,15 @@ internal sealed class GetTrainerPokemonQueryHandler(IDbConnectionFactory dbConne
                 p.is_shiny AS {nameof(PokemonResponse.IsShiny)},
                 p.origin AS {nameof(PokemonResponse.Origin)},
                 p.original_trainer_id = p.trainer_id AS {nameof(PokemonResponse.IsOriginalTrainer)},
-                p.obtained_on_utc AS {nameof(PokemonResponse.ObtainedOnUtc)}
+                p.obtained_on_utc AS {nameof(PokemonResponse.ObtainedOnUtc)},
+                p.save_id AS {nameof(PokemonResponse.SaveId)},
+                sv.game_name AS {nameof(PokemonResponse.GameName)}
              FROM pokedex.pokemon p
              JOIN pokedex.species s ON s.id = p.species_id
+             LEFT JOIN pokedex.saves sv ON sv.id = p.save_id
              WHERE p.trainer_id = @TrainerId AND p.status = 'Active'
+               AND (NOT @HubOnly OR p.save_id IS NULL)
+               AND (@GameId IS NULL OR sv.game_id = @GameId)
              ORDER BY p.species_id, p.obtained_on_utc
              """;
 

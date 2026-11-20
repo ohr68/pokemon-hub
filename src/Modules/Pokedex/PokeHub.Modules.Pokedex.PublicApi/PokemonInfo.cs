@@ -8,4 +8,5 @@ public sealed record PokemonInfo(
     string? Nickname,
     int Level,
     bool IsShiny,
-    bool IsActive);
+    bool IsActive,
+    bool IsInHub);

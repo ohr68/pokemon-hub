@@ -24,7 +24,8 @@ internal sealed class GetPokemonQueryHandler(IDbConnectionFactory dbConnectionFa
                 p.nickname AS {nameof(PokemonDetailsResponse.Nickname)},
                 p.level AS {nameof(PokemonDetailsResponse.Level)},
                 p.is_shiny AS {nameof(PokemonDetailsResponse.IsShiny)},
-                p.status = 'Active' AS {nameof(PokemonDetailsResponse.IsActive)}
+                p.status = 'Active' AS {nameof(PokemonDetailsResponse.IsActive)},
+                p.save_id IS NULL AS {nameof(PokemonDetailsResponse.IsInHub)}
              FROM pokedex.pokemon p
              JOIN pokedex.species s ON s.id = p.species_id
              WHERE p.id = @PokemonId

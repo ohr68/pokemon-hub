@@ -135,6 +135,15 @@ namespace PokeHub.Modules.Pokedex.Infrastructure.Database.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<string>("CatchKey")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("catch_key");
+
+                    b.Property<Guid?>("CaughtInGameId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("caught_in_game_id");
+
                     b.Property<bool>("IsShiny")
                         .HasColumnType("boolean")
                         .HasColumnName("is_shiny");
@@ -162,6 +171,10 @@ namespace PokeHub.Modules.Pokedex.Infrastructure.Database.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("original_trainer_id");
 
+                    b.Property<Guid?>("SaveId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("save_id");
+
                     b.Property<int>("SpeciesId")
                         .HasColumnType("integer")
                         .HasColumnName("species_id");
@@ -188,8 +201,16 @@ namespace PokeHub.Modules.Pokedex.Infrastructure.Database.Migrations
                     b.HasIndex("OriginalTrainerId")
                         .HasDatabaseName("ix_pokemon_original_trainer_id");
 
+                    b.HasIndex("SaveId")
+                        .HasDatabaseName("ix_pokemon_save_id");
+
                     b.HasIndex("SpeciesId")
                         .HasDatabaseName("ix_pokemon_species_id");
+
+                    b.HasIndex("CaughtInGameId", "CatchKey")
+                        .IsUnique()
+                        .HasDatabaseName("ix_pokemon_caught_in_game_id_catch_key")
+                        .HasFilter("catch_key IS NOT NULL");
 
                     b.HasIndex("TrainerId", "Status")
                         .HasDatabaseName("ix_pokemon_trainer_id_status");
@@ -216,6 +237,10 @@ namespace PokeHub.Modules.Pokedex.Infrastructure.Database.Migrations
                     b.Property<Guid>("PokemonId")
                         .HasColumnType("uuid")
                         .HasColumnName("pokemon_id");
+
+                    b.Property<Guid?>("SaveId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("save_id");
 
                     b.Property<int>("SpeciesId")
                         .HasColumnType("integer")
@@ -245,6 +270,40 @@ namespace PokeHub.Modules.Pokedex.Infrastructure.Database.Migrations
                         .HasDatabaseName("ix_ownership_history_trainer_id_change_species_id");
 
                     b.ToTable("ownership_history", "pokedex");
+                });
+
+            modelBuilder.Entity("PokeHub.Modules.Pokedex.Domain.Saves.Save", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedOnUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on_utc");
+
+                    b.Property<Guid>("GameId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("game_id");
+
+                    b.Property<string>("GameName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("game_name");
+
+                    b.Property<Guid>("TrainerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("trainer_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_saves");
+
+                    b.HasIndex("TrainerId", "GameId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_saves_trainer_id_game_id");
+
+                    b.ToTable("saves", "pokedex");
                 });
 
             modelBuilder.Entity("PokeHub.Modules.Pokedex.Domain.Species.PokemonSpecies", b =>
@@ -335,6 +394,12 @@ namespace PokeHub.Modules.Pokedex.Infrastructure.Database.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_pokemon_trainers_original_trainer_id");
 
+                    b.HasOne("PokeHub.Modules.Pokedex.Domain.Saves.Save", null)
+                        .WithMany()
+                        .HasForeignKey("SaveId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_pokemon_saves_save_id");
+
                     b.HasOne("PokeHub.Modules.Pokedex.Domain.Species.PokemonSpecies", null)
                         .WithMany()
                         .HasForeignKey("SpeciesId")
@@ -372,6 +437,16 @@ namespace PokeHub.Modules.Pokedex.Infrastructure.Database.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_ownership_history_trainers_trainer_id");
+                });
+
+            modelBuilder.Entity("PokeHub.Modules.Pokedex.Domain.Saves.Save", b =>
+                {
+                    b.HasOne("PokeHub.Modules.Pokedex.Domain.Trainers.Trainer", null)
+                        .WithMany()
+                        .HasForeignKey("TrainerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_saves_trainers_trainer_id");
                 });
 
             modelBuilder.Entity("PokeHub.Modules.Pokedex.Domain.Trainers.Trainer", b =>

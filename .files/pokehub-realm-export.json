@@ -472,7 +472,9 @@
       ],
       "clientRoles": {
         "realm-management": [
-          "manage-users"
+          "manage-users",
+          "manage-clients",
+          "view-clients"
         ]
       },
       "notBefore": 0,

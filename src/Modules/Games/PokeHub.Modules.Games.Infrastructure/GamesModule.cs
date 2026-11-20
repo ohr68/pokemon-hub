@@ -1,0 +1,125 @@
+using PokeHub.Common.Application.EventBus;
+using PokeHub.Common.Application.Messaging;
+using PokeHub.Common.Infrastructure.Outbox;
+using PokeHub.Modules.Games.Application.Abstractions.Data;
+using PokeHub.Modules.Games.Application.Abstractions.Identity;
+using PokeHub.Modules.Games.Domain.Games;
+using PokeHub.Modules.Games.Infrastructure.Database;
+using PokeHub.Modules.Games.Infrastructure.Games;
+using PokeHub.Modules.Games.Infrastructure.Identity;
+using PokeHub.Modules.Games.PublicApi;
+using Microsoft.Extensions.Options;
+using PokeHub.Modules.Games.Infrastructure.Inbox;
+using PokeHub.Modules.Games.Infrastructure.Outbox;
+using PokeHub.Modules.Games.Presentation;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+
+namespace PokeHub.Modules.Games.Infrastructure;
+
+public static class GamesModule
+{
+    extension(IServiceCollection services)
+    {
+        public void AddGamesModule(IConfiguration configuration)
+        {
+            services.AddDomainEventHandlers();
+
+            services.AddIntegrationEventHandlers();
+
+            services.AddInfrastructure(configuration);
+        }
+
+        private void AddInfrastructure(IConfiguration configuration)
+        {
+            services.AddDbContext<GamesDbContext>((sp, options) =>
+                options.UseNpgsql(configuration.GetConnectionString("Database"),
+                        npgsqlOptions => npgsqlOptions
+                            .MigrationsHistoryTable(HistoryRepository.DefaultTableName, Schemas.Games))
+                    .AddInterceptors(sp.GetRequiredService<InsertOutboxMessagesInterceptor>())
+                    .UseSnakeCaseNamingConvention());
+
+            services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<GamesDbContext>());
+
+            services.Configure<OutboxOptions>(configuration.GetSection("Games:Outbox"));
+
+            services.ConfigureOptions<ConfigureProcessOutboxJob>();
+
+            services.Configure<InboxOptions>(configuration.GetSection("Games:Inbox"));
+
+            services.ConfigureOptions<ConfigureProcessInboxJob>();
+
+            services.AddScoped<IGameRepository, GameRepository>();
+
+            services.Configure<GamesKeyCloakOptions>(configuration.GetSection("Games:KeyCloak"));
+
+            services.AddTransient<KeyCloakAuthDelegatingHandler>();
+
+            services.AddHttpClient<IGameClientService, GameClientService>((serviceProvider, httpClient) =>
+                {
+                    GamesKeyCloakOptions keyCloakOptions = serviceProvider
+                        .GetRequiredService<IOptions<GamesKeyCloakOptions>>().Value;
+
+                    httpClient.BaseAddress = new Uri(keyCloakOptions.AdminUrl);
+                })
+                .AddHttpMessageHandler<KeyCloakAuthDelegatingHandler>();
+
+            // One instance: refreshed in the background, read by CORS, invalidated on registration.
+            services.AddSingleton<GameOriginCache>();
+            services.AddSingleton<IGameOriginCache>(sp => sp.GetRequiredService<GameOriginCache>());
+            services.AddSingleton<IGameOriginPolicy>(sp => sp.GetRequiredService<GameOriginCache>());
+            services.AddHostedService(sp => sp.GetRequiredService<GameOriginCache>());
+        }
+
+        private void AddDomainEventHandlers()
+        {
+            Type[] domainEventHandlers = Application.AssemblyReference.Assembly
+                .GetTypes()
+                .Where(t => t.IsAssignableTo(typeof(IDomainEventHandler)))
+                .ToArray();
+
+            foreach (Type domainEventHandler in domainEventHandlers)
+            {
+                services.TryAddScoped(domainEventHandler);
+
+                Type domainEvent = domainEventHandler
+                    .GetInterfaces()
+                    .Single(i => i.IsGenericType)
+                    .GetGenericArguments()
+                    .Single();
+
+                Type closedIdempotentHandler = typeof(IdempotentDomainEventHandler<>).MakeGenericType(domainEvent);
+
+                services.Decorate(domainEventHandler, closedIdempotentHandler);
+            }
+        }
+
+
+        private void AddIntegrationEventHandlers()
+        {
+            Type[] integrationEventHandlers = AssemblyReference.Assembly
+                .GetTypes()
+                .Where(t => t.IsAssignableTo(typeof(IIntegrationEventHandler)))
+                .ToArray();
+
+            foreach (Type integrationEventHandler in integrationEventHandlers)
+            {
+                services.TryAddScoped(integrationEventHandler);
+
+                Type integrationEvent = integrationEventHandler
+                    .GetInterfaces()
+                    .Single(i => i.IsGenericType)
+                    .GetGenericArguments()
+                    .Single();
+
+                Type closedIdempotentHandler =
+                    typeof(IdempotentIntegrationEventHandler<>).MakeGenericType(integrationEvent);
+
+                services.Decorate(integrationEventHandler, closedIdempotentHandler);
+            }
+        }
+    }
+}

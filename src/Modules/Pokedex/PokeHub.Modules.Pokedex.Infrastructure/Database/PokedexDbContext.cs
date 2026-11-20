@@ -3,6 +3,8 @@ using PokeHub.Common.Infrastructure.Inbox;
 using PokeHub.Common.Infrastructure.Outbox;
 using PokeHub.Modules.Pokedex.Application.Abstractions.Data;
 using PokeHub.Modules.Pokedex.Domain.Pokemon;
+using PokeHub.Modules.Pokedex.Domain.Saves;
+using PokeHub.Modules.Pokedex.Infrastructure.Saves;
 using PokeHub.Modules.Pokedex.Domain.Species;
 using PokeHub.Modules.Pokedex.Domain.Trainers;
 using PokeHub.Modules.Pokedex.Infrastructure.Pokemon;
@@ -19,6 +21,8 @@ public sealed class PokedexDbContext(DbContextOptions<PokedexDbContext> options)
 
     internal DbSet<OwnedPokemon> Pokemon { get; set; }
 
+    internal DbSet<Save> Saves { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema(Schemas.Pokedex);
@@ -31,5 +35,6 @@ public sealed class PokedexDbContext(DbContextOptions<PokedexDbContext> options)
         modelBuilder.ApplyConfiguration(new TrainerConfiguration());
         modelBuilder.ApplyConfiguration(new OwnedPokemonConfiguration());
         modelBuilder.ApplyConfiguration(new OwnershipRecordConfiguration());
+        modelBuilder.ApplyConfiguration(new SaveConfiguration());
     }
 }

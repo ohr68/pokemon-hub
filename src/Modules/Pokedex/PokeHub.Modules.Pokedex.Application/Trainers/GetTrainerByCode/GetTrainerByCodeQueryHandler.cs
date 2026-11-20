@@ -23,7 +23,7 @@ internal sealed class GetTrainerByCodeQueryHandler(ITrainerRepository trainerRep
         }
 
         Result<IReadOnlyCollection<PokemonResponse>> pokemon = await sender.Send(
-            new GetTrainerPokemonQuery(trainer.Id),
+            new GetTrainerPokemonQuery(trainer.Id, HubOnly: true),
             cancellationToken);
 
         if (pokemon.IsFailure)

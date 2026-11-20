@@ -16,6 +16,16 @@ internal sealed class OwnedPokemonRepository(PokedexDbContext context) : IOwnedP
         return context.Set<OwnershipRecord>().AnyAsync(r => r.TradeId == tradeId, cancellationToken);
     }
 
+    public async Task<OwnedPokemon?> GetByCatchKeyAsync(
+        Guid gameId,
+        string catchKey,
+        CancellationToken cancellationToken = default)
+    {
+        return await context.Pokemon.SingleOrDefaultAsync(
+            p => p.CaughtInGameId == gameId && p.CatchKey == catchKey,
+            cancellationToken);
+    }
+
     public void Insert(OwnedPokemon pokemon)
     {
         context.Pokemon.Add(pokemon);

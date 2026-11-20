@@ -7,6 +7,9 @@ using PokeHub.Api.Middleware;
 using PokeHub.Common.Application;
 using PokeHub.Common.Infrastructure;
 using PokeHub.Common.Presentation.Endpoints;
+using Microsoft.AspNetCore.Cors.Infrastructure;
+using PokeHub.Modules.Games.Infrastructure;
+using PokeHub.Modules.Games.PublicApi;
 using PokeHub.Modules.Pokedex.Infrastructure;
 using PokeHub.Modules.Trades.Infrastructure;
 using PokeHub.Modules.Users.Infrastructure;
@@ -20,18 +23,23 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
 // Browser apps (the pokemon-web frontend) call the API from another origin.
+// Allowed: the configured origins, plus the origins of every registered game, which can
+// change at runtime as games are registered.
 string[] allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
 
-builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy
-    .WithOrigins(allowedOrigins)
-    .AllowAnyHeader()
-    .AllowAnyMethod()));
+builder.Services.AddCors();
+builder.Services.AddOptions<CorsOptions>()
+    .Configure<IGameOriginPolicy>((options, gameOrigins) => options.AddDefaultPolicy(policy => policy
+        .SetIsOriginAllowed(origin => allowedOrigins.Contains(origin) || gameOrigins.IsAllowed(origin))
+        .AllowAnyHeader()
+        .AllowAnyMethod()));
 
 Assembly[] moduleApplicationAssemblies =
 [
     PokeHub.Modules.Users.Application.AssemblyReference.Assembly,
     PokeHub.Modules.Pokedex.Application.AssemblyReference.Assembly,
     PokeHub.Modules.Trades.Application.AssemblyReference.Assembly,
+    PokeHub.Modules.Games.Application.AssemblyReference.Assembly,
 ];
 
 // FastEndpoints is registered once for the host and only scans the modules' presentation assemblies.
@@ -40,6 +48,7 @@ Assembly[] modulePresentationAssemblies =
     PokeHub.Modules.Users.Presentation.AssemblyReference.Assembly,
     PokeHub.Modules.Pokedex.Presentation.AssemblyReference.Assembly,
     PokeHub.Modules.Trades.Presentation.AssemblyReference.Assembly,
+    PokeHub.Modules.Games.Presentation.AssemblyReference.Assembly,
 ];
 
 builder.Services.AddApplication(moduleApplicationAssemblies);
@@ -55,7 +64,7 @@ builder.Services.AddInfrastructure(
     databaseConnectionString,
     redisConnectionString);
 
-builder.Configuration.AddModuleConfiguration(["users", "pokedex", "trades"]);
+builder.Configuration.AddModuleConfiguration(["users", "pokedex", "trades", "games"]);
 
 Uri keyCloakHealthUrl = builder.Configuration.GetKeyCloakHealthUrl();
 
@@ -67,6 +76,7 @@ builder.Services.AddHealthChecks()
 builder.Services.AddUsersModule(builder.Configuration);
 builder.Services.AddPokedexModule(builder.Configuration);
 builder.Services.AddTradesModule(builder.Configuration);
+builder.Services.AddGamesModule(builder.Configuration);
 
 builder.Services.AddEndpoints(modulePresentationAssemblies);
 builder.Services.AddSwaggerDocumentation();

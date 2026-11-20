@@ -8,4 +8,8 @@ public enum OwnershipChange
     TradedAway = 3,
     ReceivedInTrade = 4,
     EvolvedByTrade = 5,
+
+    // Location changes: the trainer keeps the Pokémon, it just moves between hub and a save.
+    MovedToSave = 6,
+    MovedToHub = 7,
 }

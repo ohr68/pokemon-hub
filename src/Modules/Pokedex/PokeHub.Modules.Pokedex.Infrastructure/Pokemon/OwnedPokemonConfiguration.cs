@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using PokeHub.Modules.Pokedex.Domain.Pokemon;
+using PokeHub.Modules.Pokedex.Domain.Saves;
 using PokeHub.Modules.Pokedex.Domain.Species;
 using PokeHub.Modules.Pokedex.Domain.Trainers;
 
@@ -33,6 +34,16 @@ internal sealed class OwnedPokemonConfiguration : IEntityTypeConfiguration<Owned
         builder.Navigation(p => p.History).UsePropertyAccessMode(PropertyAccessMode.Field);
 
         builder.HasIndex(p => new { p.TrainerId, p.Status });
+
+        // Where the Pokémon is: a save, or the hub when empty.
+        builder.HasOne<Save>().WithMany().HasForeignKey(p => p.SaveId).OnDelete(DeleteBehavior.Restrict);
+
+        builder.Property(p => p.CatchKey).HasMaxLength(100);
+
+        // A game can't record the same catch twice.
+        builder.HasIndex(p => new { p.CaughtInGameId, p.CatchKey })
+            .IsUnique()
+            .HasFilter("catch_key IS NOT NULL");
 
         // PostgreSQL's xmin system column changes on every update. As a concurrency token it
         // makes a save fail when the Pokémon changed since it was read, so two trades accepted

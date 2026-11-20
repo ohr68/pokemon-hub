@@ -1,4 +1,5 @@
 using PokeHub.Common.Domain.Abstractions;
+using PokeHub.Modules.Pokedex.Domain.Saves;
 
 namespace PokeHub.Modules.Pokedex.Domain.Pokemon;
 
@@ -39,8 +40,29 @@ public sealed class OwnedPokemon : Entity
 
     public DateTime ObtainedOnUtc { get; private set; }
 
+    /// <summary>
+    /// Where the Pokémon is now: in a game's save, or in the PokeHub hub when empty.
+    /// </summary>
+    public Guid? SaveId { get; private set; }
+
+    /// <summary>
+    /// The game it was caught in, for Pokémon caught in a game.
+    /// </summary>
+    public Guid? CaughtInGameId { get; private set; }
+
+    /// <summary>
+    /// The game's own identifier for the catch. A game that repeats a request (after a
+    /// timeout, say) sends the same key and gets the same Pokémon back instead of a second one.
+    /// </summary>
+    public string? CatchKey { get; private set; }
+
+    public bool IsInHub => SaveId is null;
+
     public IReadOnlyCollection<OwnershipRecord> History => _history.AsReadOnly();
 
+    /// <summary>
+    /// A Pokémon a trainer gets in the hub (a starter, or one given by an admin).
+    /// </summary>
     public static Result<OwnedPokemon> Obtain(
         Guid trainerId,
         int speciesId,
@@ -48,6 +70,18 @@ public sealed class OwnedPokemon : Entity
         bool isShiny,
         PokemonOrigin origin,
         DateTime utcNow)
+    {
+        return Obtain(trainerId, speciesId, level, isShiny, origin, utcNow, saveId: null);
+    }
+
+    private static Result<OwnedPokemon> Obtain(
+        Guid trainerId,
+        int speciesId,
+        int level,
+        bool isShiny,
+        PokemonOrigin origin,
+        DateTime utcNow,
+        Guid? saveId)
     {
         if (level is < MinLevel or > MaxLevel)
         {
@@ -65,22 +99,63 @@ public sealed class OwnedPokemon : Entity
             Origin = origin,
             Status = PokemonStatus.Active,
             ObtainedOnUtc = utcNow,
+            SaveId = saveId,
         };
 
-        pokemon.Record(OwnershipChange.Obtained, trainerId, utcNow);
+        pokemon.Record(OwnershipChange.Obtained, trainerId, utcNow, saveId: saveId);
 
         pokemon.Raise(new PokemonObtainedDomainEvent(pokemon.Id, trainerId, speciesId, origin));
 
         return pokemon;
     }
 
-    public Result Release(Guid trainerId, DateTime utcNow)
+    /// <summary>
+    /// A Pokémon caught in a game. It starts in that game's save.
+    /// </summary>
+    public static Result<OwnedPokemon> Catch(
+        Save save,
+        int speciesId,
+        int level,
+        bool isShiny,
+        string catchKey,
+        DateTime utcNow)
+    {
+        Result<OwnedPokemon> caught = Obtain(
+            save.TrainerId,
+            speciesId,
+            level,
+            isShiny,
+            PokemonOrigin.Game,
+            utcNow,
+            save.Id);
+
+        if (caught.IsFailure)
+        {
+            return caught;
+        }
+
+        caught.Value.CaughtInGameId = save.GameId;
+        caught.Value.CatchKey = catchKey;
+
+        return caught;
+    }
+
+    /// <summary>
+    /// Releases the Pokémon from where it is: the hub (<paramref name="fromSaveId"/> empty) or
+    /// the given save, so a game can only release Pokémon in its own save.
+    /// </summary>
+    public Result Release(Guid trainerId, DateTime utcNow, Guid? fromSaveId = null)
     {
         Result ownership = EnsureActiveAndOwnedBy(trainerId);
 
         if (ownership.IsFailure)
         {
             return ownership;
+        }
+
+        if (SaveId != fromSaveId)
+        {
+            return Result.Failure(fromSaveId is null ? PokemonErrors.NotInHub : PokemonErrors.NotInThisSave);
         }
 
         Status = PokemonStatus.Released;
@@ -110,6 +185,12 @@ public sealed class OwnedPokemon : Entity
             return ownership;
         }
 
+        // Trades happen from the hub, like trading from Pokémon HOME.
+        if (!IsInHub)
+        {
+            return Result.Failure(PokemonErrors.NotInHub);
+        }
+
         int fromSpeciesId = SpeciesId;
 
         Record(OwnershipChange.TradedAway, currentTrainerId, utcNow, tradeId);
@@ -126,6 +207,47 @@ public sealed class OwnedPokemon : Entity
         }
 
         Raise(new PokemonTradedDomainEvent(Id, tradeId, currentTrainerId, newTrainerId, fromSpeciesId, SpeciesId));
+
+        return Result.Success();
+    }
+
+    /// <summary>
+    /// Moves the Pokémon into one of the trainer's saves, or back to the hub when
+    /// <paramref name="save"/> is empty. Moving between two games goes through the hub.
+    /// </summary>
+    public Result MoveTo(Guid trainerId, Save? save, DateTime utcNow)
+    {
+        Result ownership = EnsureActiveAndOwnedBy(trainerId);
+
+        if (ownership.IsFailure)
+        {
+            return ownership;
+        }
+
+        if (save is not null && save.TrainerId != trainerId)
+        {
+            return Result.Failure(SaveErrors.NotFound(save.Id));
+        }
+
+        if (save?.Id == SaveId)
+        {
+            return Result.Failure(PokemonErrors.AlreadyThere);
+        }
+
+        if (save is not null && !IsInHub)
+        {
+            return Result.Failure(PokemonErrors.NotInHub);
+        }
+
+        Guid? previousSaveId = SaveId;
+
+        SaveId = save?.Id;
+
+        Record(
+            save is null ? OwnershipChange.MovedToHub : OwnershipChange.MovedToSave,
+            trainerId,
+            utcNow,
+            saveId: save?.Id ?? previousSaveId);
 
         return Result.Success();
     }
@@ -156,8 +278,13 @@ public sealed class OwnedPokemon : Entity
             : Result.Failure(PokemonErrors.NotActive(Id));
     }
 
-    private void Record(OwnershipChange change, Guid trainerId, DateTime utcNow, Guid? tradeId = null)
+    private void Record(
+        OwnershipChange change,
+        Guid trainerId,
+        DateTime utcNow,
+        Guid? tradeId = null,
+        Guid? saveId = null)
     {
-        _history.Add(OwnershipRecord.Create(Id, trainerId, SpeciesId, change, utcNow, tradeId));
+        _history.Add(OwnershipRecord.Create(Id, trainerId, SpeciesId, change, utcNow, tradeId, saveId));
     }
 }
