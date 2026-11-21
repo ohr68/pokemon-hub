@@ -156,6 +156,11 @@ namespace PokeHub.Modules.Users.Infrastructure.Database.Migrations
                         {
                             PermissionCode = "shop:manage",
                             RoleName = "Administrator"
+                        },
+                        new
+                        {
+                            PermissionCode = "system:read",
+                            RoleName = "Administrator"
                         });
                 });
 
@@ -333,6 +338,10 @@ namespace PokeHub.Modules.Users.Infrastructure.Database.Migrations
                         new
                         {
                             Code = "shop:manage"
+                        },
+                        new
+                        {
+                            Code = "system:read"
                         });
                 });
 

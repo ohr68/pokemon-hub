@@ -53,9 +53,11 @@ Assembly[] moduleApplicationAssemblies =
     PokeHub.Modules.Economy.Application.AssemblyReference.Assembly,
 ];
 
-// FastEndpoints is registered once for the host and only scans the modules' presentation assemblies.
+// FastEndpoints is registered once for the host and scans the modules' presentation assemblies,
+// plus the host itself for the system status, which spans every module.
 Assembly[] modulePresentationAssemblies =
 [
+    typeof(Program).Assembly,
     PokeHub.Modules.Users.Presentation.AssemblyReference.Assembly,
     PokeHub.Modules.Pokedex.Presentation.AssemblyReference.Assembly,
     PokeHub.Modules.Trades.Presentation.AssemblyReference.Assembly,

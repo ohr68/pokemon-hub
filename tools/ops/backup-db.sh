@@ -18,4 +18,6 @@ mv "$tmp" "$final"
 
 ls -1t "$dir"/pokehub-*.dump | tail -n +"$((keep + 1))" | while read -r old; do rm -f "$old"; done
 
+(umask 022; date -u +%Y-%m-%dT%H:%M:%SZ > /status/database)
+
 echo "Database backup: $(basename "$final") ($(du -h "$final" | cut -f1))"

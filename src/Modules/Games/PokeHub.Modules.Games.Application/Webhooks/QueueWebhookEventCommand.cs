@@ -35,7 +35,8 @@ internal sealed class QueueWebhookEventCommandHandler(
 
         if (game.WebhookUrl is null || !game.IsActive)
         {
-            return (Guid?)null;
+            // Not (Guid?)null: a null value converts to a failed Result.
+            return Result.Success<Guid?>(null);
         }
 
         var id = Guid.CreateVersion7();

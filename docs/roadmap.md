@@ -8,7 +8,7 @@
 | 3. Trades | Done: trades between trainers, and moving Pokémon between saves through the hub |
 | 4. Games platform | Done: registration, game API, files, rate limits, webhooks, turning games off, admin pages |
 | 5. FireRed | Done: play in the browser, sync, mirror, save backups, transfers both ways |
-| 6. Operations: backups, reliable startup, problems view, local checks | In progress: backups and reliable startup done |
+| 6. Operations: backups, reliable startup, problems view, local checks | In progress: backups, reliable startup and problems view done |
 | 7. Trainer progression: XP and levels, trophies, badges, coins | Done |
 
 More ideas, not yet in a phase, are in the [backlog](#backlog).
@@ -151,8 +151,9 @@ Steps, in order:
   check, the API waits for healthy dependencies, and image versions are pinned. After a
   Docker restart the containers come up in any order, so the API also waits for the database
   before running migrations.
-- **6c. Problems view**: an admin page with service health, failed outbox messages, failed
-  webhook deliveries and the age of the last backup.
+- **6c. Problems view** (done): the Sistema tab in admin shows service health, the age of
+  the last backups, failed or stuck messages per module, recent failures, and webhooks that
+  are retrying or gave up. It only reads (`GET system/status`, permission `system:read`).
 - **6d. Local verify script**: one command that runs the backend build, architecture
   tests, frontend types, lint and vitest. There's no hosted CI.
 

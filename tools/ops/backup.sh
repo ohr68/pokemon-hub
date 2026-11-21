@@ -32,5 +32,7 @@ tar -tzf "$tmp" | grep -q 'keycloakdb.mv.db'
 mv "$tmp" "$final"
 
 ls -1t "$backups"/identity/keycloak-*.tar.gz | tail -n +"$((keep + 1))" | while read -r old; do rm -f "$old"; done
+docker compose run --rm --no-deps -T --entrypoint sh pokehub.backup \
+  -c 'umask 022; date -u +%Y-%m-%dT%H:%M:%SZ > /status/identity' > /dev/null 2>&1
 echo "Keycloak backup: $(basename "$final") ($(du -h "$final" | cut -f1))"
 echo "Saved in $backups"

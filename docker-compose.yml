@@ -10,6 +10,9 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
+    # Only when the last backups ran; the API can't read the backups themselves.
+    volumes:
+      - pokehub-backup-status:/backup-status:ro
     ports:
       - "5100:8080"
     depends_on:
@@ -69,6 +72,7 @@ services:
     volumes:
       - ${POKEHUB_BACKUP_DIR:-${HOME}/PokeHubBackups}:/backups
       - ./tools/ops:/ops:ro
+      - pokehub-backup-status:/status
     depends_on:
       pokehub.database:
         condition: service_healthy
@@ -143,3 +147,4 @@ networks:
 
 volumes:
   pokehub-database-data:
+  pokehub-backup-status:

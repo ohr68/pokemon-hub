@@ -22,7 +22,8 @@ changing the realm.
 tools/ops/backup.sh
 ```
 
-`--db-only` skips Keycloak and leaves it running.
+`--db-only` skips Keycloak and leaves it running. A full backup restarts Keycloak, which can
+sign you out of the app and the FireRed connection, so sign in again afterwards.
 
 ## Check a backup
 
