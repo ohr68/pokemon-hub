@@ -1,3 +1,17 @@
+# Operations
+
+## Verify
+
+Runs the backend build, architecture tests, frontend types, lint and tests, and prints one
+summary. It keeps going after a failure and exits non-zero if anything failed.
+
+```bash
+tools/ops/verify.sh
+```
+
+`--backend` or `--frontend` runs only that side. `POKEMON_WEB_DIR` points at the frontend
+when it isn't in `~/FrontendProjects/pokemon-web`.
+
 # Backups
 
 Backups go to `~/PokeHubBackups`, outside Docker and outside the repo, so

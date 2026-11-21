@@ -8,7 +8,7 @@
 | 3. Trades | Done: trades between trainers, and moving Pokémon between saves through the hub |
 | 4. Games platform | Done: registration, game API, files, rate limits, webhooks, turning games off, admin pages |
 | 5. FireRed | Done: play in the browser, sync, mirror, save backups, transfers both ways |
-| 6. Operations: backups, reliable startup, problems view, local checks | In progress: backups, reliable startup and problems view done |
+| 6. Operations | Done: backups, reliable startup, problems view, local checks |
 | 7. Trainer progression: XP and levels, trophies, badges, coins | Done |
 
 More ideas, not yet in a phase, are in the [backlog](#backlog).
@@ -154,8 +154,9 @@ Steps, in order:
 - **6c. Problems view** (done): the Sistema tab in admin shows service health, the age of
   the last backups, failed or stuck messages per module, recent failures, and webhooks that
   are retrying or gave up. It only reads (`GET system/status`, permission `system:read`).
-- **6d. Local verify script**: one command that runs the backend build, architecture
-  tests, frontend types, lint and vitest. There's no hosted CI.
+- **6d. Local verify script** (done): `tools/ops/verify.sh` runs the backend build,
+  architecture tests, frontend types, lint and vitest on both repos and prints one summary.
+  There's no hosted CI.
 
 Left out on purpose: public deployment, HTTPS and production hardening (the instance hosts
 a commercial ROM and must stay private), metrics dashboards and tracing, hosted CI, the full
