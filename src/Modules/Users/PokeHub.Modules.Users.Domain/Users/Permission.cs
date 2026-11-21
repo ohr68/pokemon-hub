@@ -17,6 +17,7 @@ public sealed class Permission
     public static readonly Permission Buy = new("economy:buy");
     public static readonly Permission ManageShop = new("shop:manage");
     public static readonly Permission ReadSystemStatus = new("system:read");
+    public static readonly Permission ManageRoles = new("users:roles");
 
     public Permission(string code)
     {

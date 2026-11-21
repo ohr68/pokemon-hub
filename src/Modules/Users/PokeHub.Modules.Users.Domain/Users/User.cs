@@ -36,6 +36,29 @@ public sealed class User : Entity
         return user;
     }
 
+    public bool HasRole(Role role) => _roles.Exists(r => r.Name == role.Name);
+
+    /// <param name="changedBy">The admin who did it; empty for the first administrator, set up from configuration.</param>
+    public void GrantRole(Role role, Guid? changedBy)
+    {
+        if (HasRole(role))
+        {
+            return;
+        }
+
+        _roles.Add(role);
+
+        Raise(new UserRoleChangedDomainEvent(Id, role.Name, true, changedBy));
+    }
+
+    public void RevokeRole(Role role, Guid changedBy)
+    {
+        if (_roles.RemoveAll(r => r.Name == role.Name) > 0)
+        {
+            Raise(new UserRoleChangedDomainEvent(Id, role.Name, false, changedBy));
+        }
+    }
+
     public void Update(string firstName, string lastName)
     {
         if (FirstName == firstName && LastName == lastName)

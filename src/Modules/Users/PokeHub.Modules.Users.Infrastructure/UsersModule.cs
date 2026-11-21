@@ -62,6 +62,8 @@ public static class UsersModule
 
             services.AddScoped<IUserRepository, UserRepository>();
 
+            services.AddHostedService<FirstAdministratorService>();
+
             services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<UsersDbContext>());
 
             services.Configure<OutboxOptions>(configuration.GetSection("Users:Outbox"));

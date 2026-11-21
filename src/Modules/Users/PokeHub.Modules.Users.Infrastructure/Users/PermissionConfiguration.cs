@@ -29,7 +29,8 @@ internal sealed class PermissionConfiguration : IEntityTypeConfiguration<Permiss
             Permission.ReadEconomy,
             Permission.Buy,
             Permission.ManageShop,
-            Permission.ReadSystemStatus);
+            Permission.ReadSystemStatus,
+            Permission.ManageRoles);
 
         builder
             .HasMany<Role>()
@@ -65,7 +66,8 @@ internal sealed class PermissionConfiguration : IEntityTypeConfiguration<Permiss
                     CreateRolePermission(Role.Administrator, Permission.ReadEconomy),
                     CreateRolePermission(Role.Administrator, Permission.Buy),
                     CreateRolePermission(Role.Administrator, Permission.ManageShop),
-                    CreateRolePermission(Role.Administrator, Permission.ReadSystemStatus)
+                    CreateRolePermission(Role.Administrator, Permission.ReadSystemStatus),
+                    CreateRolePermission(Role.Administrator, Permission.ManageRoles)
                 );
             });
     }

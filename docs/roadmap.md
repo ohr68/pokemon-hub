@@ -157,6 +157,10 @@ Steps, in order:
 - **6d. Local verify script** (done): `tools/ops/verify.sh` runs the backend build,
   architecture tests, frontend types, lint and vitest on both repos and prints one summary.
   There's no hosted CI.
+- **Role granting** (done, added after the phase): the Usuários tab in admin makes or
+  unmakes administrators (permission `users:roles`). Nobody can remove their own role, so
+  one always remains, and each change is recorded as a `UserRoleChanged` event. If no
+  administrator exists, `Users:FirstAdministratorEmail` sets up the first one at startup.
 
 Left out on purpose: public deployment, HTTPS and production hardening (the instance hosts
 a commercial ROM and must stay private), metrics dashboards and tracing, hosted CI, the full
