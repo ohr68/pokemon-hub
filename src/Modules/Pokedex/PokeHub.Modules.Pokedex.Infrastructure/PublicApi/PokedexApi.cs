@@ -12,6 +12,7 @@ using PokeHub.Modules.Pokedex.Application.Saves.GetOrCreateSave;
 using PokeHub.Modules.Pokedex.Application.Saves.DeliverPokemon;
 using PokeHub.Modules.Pokedex.Application.Saves.GetAwaitingDelivery;
 using PokeHub.Modules.Pokedex.Application.Saves.ReconcileSave;
+using PokeHub.Modules.Pokedex.Application.Saves.RedeliverPokemon;
 using PokeHub.Modules.Pokedex.Application.Saves.WithdrawPokemon;
 using PokeHub.Modules.Pokedex.Application.Pokemon.TradePokemon;
 using PokeHub.Modules.Pokedex.Application.Trainers.GetTrainer;
@@ -149,6 +150,14 @@ internal sealed class PokedexApi(ISender sender, ISpeciesRepository speciesRepos
             .Select(p => new LeftGameInfo(p.Id, p.SpeciesId, p.Nickname, p.Level, p.IsShiny))
             .ToList();
     }
+
+    public Task<Result> RedeliverAsync(
+        Guid trainerId,
+        Guid gameId,
+        IReadOnlyCollection<Guid> pokemonIds,
+        IReadOnlyCollection<string> presentCatchKeys,
+        CancellationToken cancellationToken = default) =>
+        sender.Send(new RedeliverPokemonCommand(trainerId, gameId, pokemonIds, presentCatchKeys), cancellationToken);
 
     public Task<Result> ReleaseFromSaveAsync(
         Guid trainerId,

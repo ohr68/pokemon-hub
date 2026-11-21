@@ -39,6 +39,17 @@ public interface IPokedexApi
     Task<Result<Guid>> CatchPokemonAsync(CatchRequest request, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Puts Pokémon that are no longer in the game's save back to waiting for delivery. Refused
+    /// for any Pokémon whose catch key is in <paramref name="presentCatchKeys"/>.
+    /// </summary>
+    Task<Result> RedeliverAsync(
+        Guid trainerId,
+        Guid gameId,
+        IReadOnlyCollection<Guid> pokemonIds,
+        IReadOnlyCollection<string> presentCatchKeys,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Mirrors the game's save: Pokémon inside the game (caught or delivered) that are in its save on PokeHub but no
     /// longer among <paramref name="presentCatchKeys"/> left the game and are removed. With
     /// <paramref name="dryRun"/>, only reports them.

@@ -374,6 +374,31 @@ public sealed class OwnedPokemon : Entity
     }
 
     /// <summary>
+    /// PokeHub has the Pokémon inside the game, but its save no longer does (an older save was
+    /// restored, for example). It goes back to waiting, so the game can deliver it again.
+    /// </summary>
+    public Result Redeliver(Guid trainerId, Save save)
+    {
+        Result ownership = EnsureActiveAndOwnedBy(trainerId);
+
+        if (ownership.IsFailure)
+        {
+            return ownership;
+        }
+
+        if (SaveId != save.Id || !IsInsideGame)
+        {
+            return Result.Failure(PokemonErrors.NotInThisSave);
+        }
+
+        AwaitingDelivery = true;
+
+        RaiseSaveChanged(save.Id, SaveChange.MovedIn);
+
+        return Result.Success();
+    }
+
+    /// <summary>
     /// The game took the Pokémon out of its own save and sent it to the hub, with what it
     /// stored about it: it may have grown, evolved or been renamed while in the game.
     /// </summary>
