@@ -135,13 +135,37 @@ namespace PokeHub.Modules.Progression.Infrastructure.Database.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("trainer_id");
 
+                    b.Property<int>("Catches")
+                        .HasColumnType("integer")
+                        .HasColumnName("catches");
+
+                    b.Property<int>("Evolutions")
+                        .HasColumnType("integer")
+                        .HasColumnName("evolutions");
+
                     b.Property<int>("Level")
                         .HasColumnType("integer")
                         .HasColumnName("level");
 
+                    b.Property<int>("ShinyCatches")
+                        .HasColumnType("integer")
+                        .HasColumnName("shiny_catches");
+
+                    b.Property<int>("SpeciesDiscovered")
+                        .HasColumnType("integer")
+                        .HasColumnName("species_discovered");
+
+                    b.Property<int>("StartersChosen")
+                        .HasColumnType("integer")
+                        .HasColumnName("starters_chosen");
+
                     b.Property<long>("TotalXp")
                         .HasColumnType("bigint")
                         .HasColumnName("total_xp");
+
+                    b.Property<int>("Trades")
+                        .HasColumnType("integer")
+                        .HasColumnName("trades");
 
                     b.Property<DateTime>("UpdatedOnUtc")
                         .HasColumnType("timestamp with time zone")
@@ -200,6 +224,36 @@ namespace PokeHub.Modules.Progression.Infrastructure.Database.Migrations
                         .HasDatabaseName("ix_xp_entries_trainer_id_source");
 
                     b.ToTable("xp_entries", "progression");
+                });
+
+            modelBuilder.Entity("PokeHub.Modules.Progression.Domain.Trainers.TrainerProgress", b =>
+                {
+                    b.OwnsMany("PokeHub.Modules.Progression.Domain.Trainers.TrainerTrophy", "Trophies", b1 =>
+                        {
+                            b1.Property<Guid>("TrainerId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("trainer_id");
+
+                            b1.Property<string>("TrophyCode")
+                                .HasMaxLength(50)
+                                .HasColumnType("character varying(50)")
+                                .HasColumnName("trophy_code");
+
+                            b1.Property<DateTime>("EarnedOnUtc")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("earned_on_utc");
+
+                            b1.HasKey("TrainerId", "TrophyCode")
+                                .HasName("pk_trainer_trophies");
+
+                            b1.ToTable("trainer_trophies", "progression");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TrainerId")
+                                .HasConstraintName("fk_trainer_trophies_trainer_progress_trainer_id");
+                        });
+
+                    b.Navigation("Trophies");
                 });
 
             modelBuilder.Entity("PokeHub.Modules.Progression.Domain.Trainers.XpEntry", b =>

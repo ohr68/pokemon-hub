@@ -18,7 +18,10 @@ public sealed record TrainerProgressResponse(
     long XpIntoLevel,
     long? XpForNextLevel,
     int MaxLevel,
+    TrainerStatsResponse Stats,
     IReadOnlyCollection<XpEntryResponse> RecentXp);
+
+public sealed record TrainerStatsResponse(int Catches, int ShinyCatches, int SpeciesDiscovered, int Trades, int Evolutions, int Trophies);
 
 /// <param name="Reason">chose_starter, caught_pokemon, caught_shiny, new_species, traded or evolved.</param>
 public sealed record XpEntryResponse(string Reason, int Amount, DateTime EarnedOnUtc);
@@ -34,7 +37,10 @@ internal sealed class GetTrainerProgressQueryHandler(IDbConnectionFactory dbConn
 
         const string sql =
             """
-            SELECT total_xp FROM progression.trainer_progress WHERE trainer_id = @TrainerId;
+            SELECT total_xp AS TotalXp, catches AS Catches, shiny_catches AS ShinyCatches,
+                   species_discovered AS SpeciesDiscovered, trades AS Trades, evolutions AS Evolutions,
+                   (SELECT count(*)::int FROM progression.trainer_trophies t WHERE t.trainer_id = @TrainerId) AS Trophies
+            FROM progression.trainer_progress WHERE trainer_id = @TrainerId;
 
             SELECT reason AS Reason, amount AS Amount, earned_on_utc AS EarnedOnUtc
             FROM progression.xp_entries
@@ -46,7 +52,8 @@ internal sealed class GetTrainerProgressQueryHandler(IDbConnectionFactory dbConn
         await using SqlMapper.GridReader results = await connection.QueryMultipleAsync(sql, new { request.TrainerId, RecentCount });
 
         // A trainer who never earned XP is at level 1 with none.
-        long totalXp = await results.ReadSingleOrDefaultAsync<long?>() ?? 0;
+        ProgressRow row = await results.ReadSingleOrDefaultAsync<ProgressRow>() ?? new ProgressRow(0, 0, 0, 0, 0, 0, 0);
+        long totalXp = row.TotalXp;
         IEnumerable<EntryRow> recent = await results.ReadAsync<EntryRow>();
 
         int level = XpRules.LevelFor(totalXp);
@@ -58,6 +65,7 @@ internal sealed class GetTrainerProgressQueryHandler(IDbConnectionFactory dbConn
             totalXp - XpRules.TotalXpForLevel(level),
             isMax ? null : XpRules.XpToNextLevel(level),
             XpRules.MaxLevel,
+            new TrainerStatsResponse(row.Catches, row.ShinyCatches, row.SpeciesDiscovered, row.Trades, row.Evolutions, row.Trophies),
             recent.Select(e => new XpEntryResponse(ToSnakeCase(e.Reason), e.Amount, e.EarnedOnUtc)).ToList());
     }
 
@@ -65,4 +73,6 @@ internal sealed class GetTrainerProgressQueryHandler(IDbConnectionFactory dbConn
         string.Concat(reason.Select((c, i) => i > 0 && char.IsUpper(c) ? $"_{char.ToLowerInvariant(c)}" : char.ToLowerInvariant(c).ToString()));
 
     private sealed record EntryRow(string Reason, int Amount, DateTime EarnedOnUtc);
+
+    private sealed record ProgressRow(long TotalXp, int Catches, int ShinyCatches, int SpeciesDiscovered, int Trades, int Evolutions, int Trophies);
 }

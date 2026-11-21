@@ -27,13 +27,17 @@ internal sealed class AwardXpCommandHandler(
 
         var awards = request.Awards.Where(a => !earned.Contains(a.Source)).ToList();
 
-        if (awards.Count == 0)
-        {
-            return Result.Success();
-        }
-
         DateTime utcNow = dateTimeProvider.UtcNow;
         TrainerProgress? progress = await repository.GetAsync(request.TrainerId, cancellationToken);
+
+        if (awards.Count == 0)
+        {
+            // Nothing new, but trophies may still be due (one added since, a replayed history).
+            progress?.EarnTrophies(utcNow);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
+
+            return Result.Success();
+        }
 
         if (progress is null)
         {
@@ -45,6 +49,8 @@ internal sealed class AwardXpCommandHandler(
         {
             progress.Earn(award.Reason, award.Source, award.EarnedOnUtc, utcNow);
         }
+
+        progress.EarnTrophies(awards.Max(a => a.EarnedOnUtc));
 
         repository.InsertEntries(progress.NewEntries);
 

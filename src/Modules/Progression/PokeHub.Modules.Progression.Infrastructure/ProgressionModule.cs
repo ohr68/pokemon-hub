@@ -59,6 +59,8 @@ public static class ProgressionModule
             services.ConfigureOptions<ConfigureProcessInboxJob>();
 
             services.AddScoped<ITrainerProgressRepository, TrainerProgressRepository>();
+
+            services.AddHostedService<TrophyCatchUpService>();
         }
 
         private void AddDomainEventHandlers()

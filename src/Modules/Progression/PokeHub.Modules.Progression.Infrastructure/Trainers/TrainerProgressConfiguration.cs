@@ -17,6 +17,17 @@ internal sealed class TrainerProgressConfiguration : IEntityTypeConfiguration<Tr
 
         builder.Ignore(p => p.NewEntries);
 
+        // Which trophies the trainer earned; what each one is lives in code (Trophies).
+        builder.OwnsMany(p => p.Trophies, trophies =>
+        {
+            trophies.ToTable("trainer_trophies");
+            trophies.WithOwner().HasForeignKey(t => t.TrainerId);
+            trophies.HasKey(t => new { t.TrainerId, t.TrophyCode });
+            trophies.Property(t => t.TrophyCode).HasMaxLength(50);
+        });
+
+        builder.Navigation(p => p.Trophies).UsePropertyAccessMode(PropertyAccessMode.Field);
+
         // Two awards for the same trainer at the same moment can't both win.
         builder.Property<uint>("Version").IsRowVersion();
     }

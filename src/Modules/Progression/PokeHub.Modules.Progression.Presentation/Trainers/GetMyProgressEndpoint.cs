@@ -30,3 +30,27 @@ internal sealed class GetMyProgressEndpoint(ISender sender) : EndpointWithoutReq
         await SendResultAsync(result, progress => Results.Ok(progress));
     }
 }
+
+internal sealed class GetMyTrophiesEndpoint(ISender sender) : EndpointWithoutRequestBase
+{
+    public override void Configure()
+    {
+        Get("me/trophies");
+        Policies(ProgressionPermissions.ReadProgression);
+        Group<ProgressionEndpointGroup>();
+
+        Description(builder => builder.Produces<IReadOnlyCollection<TrophyResponse>>(StatusCodes.Status200OK, "application/json"));
+        Summary(s =>
+        {
+            s.Summary = "Lists every trophy, earned or not";
+            s.Description = "Each with its tier, the trainer's progress toward its target, and when it was earned.";
+        });
+    }
+
+    public override async Task HandleAsync(CancellationToken ct)
+    {
+        Result<IReadOnlyCollection<TrophyResponse>> result = await sender.Send(new GetTrainerTrophiesQuery(User.GetUserId()), ct);
+
+        await SendResultAsync(result, trophies => Results.Ok(trophies));
+    }
+}

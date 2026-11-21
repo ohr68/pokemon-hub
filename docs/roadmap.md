@@ -9,7 +9,7 @@
 | 4. Games platform | Done: registration, game API, files, rate limits, webhooks, turning games off, admin pages |
 | 5. FireRed | Done: play in the browser, sync, mirror, save backups, transfers both ways |
 | 6. Operations | Planned |
-| 7. Trainer progression: XP and levels, trophies, badges, coins | In progress: XP and levels done |
+| 7. Trainer progression: XP and levels, trophies, badges, coins | In progress: XP, levels and trophies done |
 
 More ideas, not yet in a phase, are in the [backlog](#backlog).
 
@@ -147,8 +147,14 @@ Trainers grow by playing, across every game connected to PokeHub:
   level and latest XP in Meus Pokémons and the account menu (`api/progression/me`). Past
   activity was backfilled by replaying the Pokédex's ownership history as the same events
   (`api/pokedex/history/replay`, admins only; safe to repeat).
-- **Trophies**: achievements for milestones, such as a completed regional Pokédex, a first
-  shiny or a hundred trades.
+- **Trophies** (done): 18 trophies in bronze, silver and gold, defined in code
+  (`Trophies.cs`): first steps, catches, species discovered, shinies, trades, evolutions and
+  trainer level. Progression keeps a counter for each with every XP award and gives trophies
+  as targets are reached, publishing `TrophyEarned` for coins to build on. At startup it
+  also gives trainers any trophy they already qualify for, so new trophies reach them.
+  Trainers see them, with progress toward the ones still locked, on their own page
+  (`/trainer`, from the account menu), with their level and stats
+  (`api/progression/me/trophies`).
 - **Badges per game**: each game's gym badges synced to PokeHub (for FireRed, read from the
   save), shown on the trainer's profile.
 - **Coins**: earned for catching shiny or rare Pokémon, winning badges and other

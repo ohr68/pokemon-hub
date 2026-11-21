@@ -11,6 +11,11 @@ internal sealed class TrainerProgressRepository(ProgressionDbContext context) : 
         return context.TrainerProgress.SingleOrDefaultAsync(p => p.TrainerId == trainerId, cancellationToken);
     }
 
+    public async Task<IReadOnlyList<TrainerProgress>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        return await context.TrainerProgress.ToListAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlySet<string>> GetEarnedSourcesAsync(
         Guid trainerId,
         IReadOnlyCollection<string> sources,

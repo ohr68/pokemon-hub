@@ -17,3 +17,16 @@ internal sealed class TrainerLeveledUpDomainEventHandler(IEventBus eventBus) : D
                 domainEvent.ToLevel),
             cancellationToken);
 }
+
+internal sealed class TrophyEarnedDomainEventHandler(IEventBus eventBus) : DomainEventHandler<TrophyEarnedDomainEvent>
+{
+    public override Task Handle(TrophyEarnedDomainEvent domainEvent, CancellationToken cancellationToken = default) =>
+        eventBus.PublishAsync(
+            new TrophyEarnedIntegrationEvent(
+                domainEvent.Id,
+                domainEvent.OccurredOnUtc,
+                domainEvent.TrainerId,
+                domainEvent.TrophyCode,
+                domainEvent.Tier.ToString().ToLowerInvariant()),
+            cancellationToken);
+}
