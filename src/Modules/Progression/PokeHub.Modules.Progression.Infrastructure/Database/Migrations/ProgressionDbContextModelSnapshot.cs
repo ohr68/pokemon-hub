@@ -135,6 +135,10 @@ namespace PokeHub.Modules.Progression.Infrastructure.Database.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("trainer_id");
 
+                    b.Property<int>("Badges")
+                        .HasColumnType("integer")
+                        .HasColumnName("badges");
+
                     b.Property<int>("Catches")
                         .HasColumnType("integer")
                         .HasColumnName("catches");
@@ -228,6 +232,71 @@ namespace PokeHub.Modules.Progression.Infrastructure.Database.Migrations
 
             modelBuilder.Entity("PokeHub.Modules.Progression.Domain.Trainers.TrainerProgress", b =>
                 {
+                    b.OwnsMany("PokeHub.Modules.Progression.Domain.Trainers.TrainerBadge", "EarnedBadges", b1 =>
+                        {
+                            b1.Property<Guid>("TrainerId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("trainer_id");
+
+                            b1.Property<Guid>("GameId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("game_id");
+
+                            b1.Property<string>("Code")
+                                .HasMaxLength(50)
+                                .HasColumnType("character varying(50)")
+                                .HasColumnName("code");
+
+                            b1.Property<DateTime>("EarnedOnUtc")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("earned_on_utc");
+
+                            b1.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("name");
+
+                            b1.HasKey("TrainerId", "GameId", "Code")
+                                .HasName("pk_trainer_badges");
+
+                            b1.ToTable("trainer_badges", "progression");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TrainerId")
+                                .HasConstraintName("fk_trainer_badges_trainer_progress_trainer_id");
+                        });
+
+                    b.OwnsMany("PokeHub.Modules.Progression.Domain.Trainers.TrainerGame", "Games", b1 =>
+                        {
+                            b1.Property<Guid>("TrainerId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("trainer_id");
+
+                            b1.Property<Guid>("GameId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("game_id");
+
+                            b1.Property<string>("GameName")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("game_name");
+
+                            b1.Property<int>("TotalBadges")
+                                .HasColumnType("integer")
+                                .HasColumnName("total_badges");
+
+                            b1.HasKey("TrainerId", "GameId")
+                                .HasName("pk_trainer_games");
+
+                            b1.ToTable("trainer_games", "progression");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TrainerId")
+                                .HasConstraintName("fk_trainer_games_trainer_progress_trainer_id");
+                        });
+
                     b.OwnsMany("PokeHub.Modules.Progression.Domain.Trainers.TrainerTrophy", "Trophies", b1 =>
                         {
                             b1.Property<Guid>("TrainerId")
@@ -252,6 +321,10 @@ namespace PokeHub.Modules.Progression.Infrastructure.Database.Migrations
                                 .HasForeignKey("TrainerId")
                                 .HasConstraintName("fk_trainer_trophies_trainer_progress_trainer_id");
                         });
+
+                    b.Navigation("EarnedBadges");
+
+                    b.Navigation("Games");
 
                     b.Navigation("Trophies");
                 });

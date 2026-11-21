@@ -9,7 +9,7 @@
 | 4. Games platform | Done: registration, game API, files, rate limits, webhooks, turning games off, admin pages |
 | 5. FireRed | Done: play in the browser, sync, mirror, save backups, transfers both ways |
 | 6. Operations | Planned |
-| 7. Trainer progression: XP and levels, trophies, badges, coins | In progress: XP, levels and trophies done |
+| 7. Trainer progression: XP and levels, trophies, badges, coins | In progress: XP, levels, trophies and badges done |
 
 More ideas, not yet in a phase, are in the [backlog](#backlog).
 
@@ -155,8 +155,13 @@ Trainers grow by playing, across every game connected to PokeHub:
   Trainers see them, with progress toward the ones still locked, on their own page
   (`/trainer`, from the account menu), with their level and stats
   (`api/progression/me/trophies`).
-- **Badges per game**: each game's gym badges synced to PokeHub (for FireRed, read from the
-  save), shown on the trainer's profile.
+- **Badges per game** (done): games report the badges a player has earned
+  (`PUT api/game/save/badges`, every badge so far plus the game's total); the Games module
+  publishes `GameBadgesReported`, and Progression records each new one per game, awards 100
+  XP and counts it for three trophies (1, 8 and 16 badges). FireRed's sync reads the 8 Kanto
+  badges from the save (flags 0x820 to 0x827, checked on a real save) and reports them. The
+  trainer page shows a badge case per game (`api/progression/me/badges`). Badges are never
+  removed, even if a save is restored to before one.
 - **Coins**: earned for catching shiny or rare Pokémon, winning badges and other
   achievements, and spent in the hub on items or Pokémon to send into the games.
 

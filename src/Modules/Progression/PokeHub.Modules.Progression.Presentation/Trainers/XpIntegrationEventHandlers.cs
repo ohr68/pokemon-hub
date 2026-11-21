@@ -2,6 +2,7 @@ using MediatR;
 using PokeHub.Common.Application.EventBus;
 using PokeHub.Common.Application.Exceptions;
 using PokeHub.Common.Domain.Abstractions;
+using PokeHub.Modules.Games.IntegrationEvents;
 using PokeHub.Modules.Pokedex.IntegrationEvents;
 using PokeHub.Modules.Progression.Application.Trainers;
 using PokeHub.Modules.Progression.Domain.Trainers;
@@ -76,4 +77,25 @@ internal sealed class PokemonEvolvedIntegrationEventHandler(ISender sender)
             e.TrainerId,
             [new XpAward(XpReason.Evolved, $"evolved:{e.PokemonId}:{e.ToSpeciesId}", e.OccurredOnUtc)],
             cancellationToken);
+}
+
+internal sealed class GameBadgesReportedIntegrationEventHandler(ISender sender)
+    : IntegrationEventHandler<GameBadgesReportedIntegrationEvent>
+{
+    public override async Task Handle(GameBadgesReportedIntegrationEvent e, CancellationToken cancellationToken = default)
+    {
+        Result result = await sender.Send(
+            new RecordBadgesCommand(
+                e.TrainerId,
+                e.GameId,
+                e.GameName,
+                e.TotalBadges,
+                e.Badges.Select(b => new BadgeInfo(b.Code, b.Name)).ToList()),
+            cancellationToken);
+
+        if (result.IsFailure)
+        {
+            throw new PokeHubException(nameof(RecordBadgesCommand), result.Error);
+        }
+    }
 }

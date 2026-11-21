@@ -54,3 +54,27 @@ internal sealed class GetMyTrophiesEndpoint(ISender sender) : EndpointWithoutReq
         await SendResultAsync(result, trophies => Results.Ok(trophies));
     }
 }
+
+internal sealed class GetMyBadgesEndpoint(ISender sender) : EndpointWithoutRequestBase
+{
+    public override void Configure()
+    {
+        Get("me/badges");
+        Policies(ProgressionPermissions.ReadProgression);
+        Group<ProgressionEndpointGroup>();
+
+        Description(builder => builder.Produces<IReadOnlyCollection<GameBadgesResponse>>(StatusCodes.Status200OK, "application/json"));
+        Summary(s =>
+        {
+            s.Summary = "Lists the trainer's badges per game";
+            s.Description = "Each game that reported badges, how many it has in all, and the ones earned.";
+        });
+    }
+
+    public override async Task HandleAsync(CancellationToken ct)
+    {
+        Result<IReadOnlyCollection<GameBadgesResponse>> result = await sender.Send(new GetTrainerBadgesQuery(User.GetUserId()), ct);
+
+        await SendResultAsync(result, games => Results.Ok(games));
+    }
+}

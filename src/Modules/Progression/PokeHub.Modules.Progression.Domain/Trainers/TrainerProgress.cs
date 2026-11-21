@@ -12,6 +12,10 @@ public sealed class TrainerProgress : Entity
 
     private readonly List<TrainerTrophy> _trophies = [];
 
+    private readonly List<TrainerGame> _games = [];
+
+    private readonly List<TrainerBadge> _earnedBadges = [];
+
     private TrainerProgress()
     {
     }
@@ -35,9 +39,16 @@ public sealed class TrainerProgress : Entity
 
     public int Evolutions { get; private set; }
 
+    public int Badges { get; private set; }
+
     public DateTime UpdatedOnUtc { get; private set; }
 
     public IReadOnlyCollection<TrainerTrophy> Trophies => _trophies.AsReadOnly();
+
+    // The games that reported badges, and the badges earned in them.
+    public IReadOnlyCollection<TrainerGame> Games => _games.AsReadOnly();
+
+    public IReadOnlyCollection<TrainerBadge> EarnedBadges => _earnedBadges.AsReadOnly();
 
     // Awards made since loading, for the repository to save.
     public IReadOnlyCollection<XpEntry> NewEntries => _newEntries.AsReadOnly();
@@ -78,6 +89,35 @@ public sealed class TrainerProgress : Entity
     }
 
     /// <summary>
+    /// Records what a game reported: every badge earned in it so far. New ones earn XP;
+    /// badges are never removed (a save restored to before one keeps it).
+    /// </summary>
+    public void RecordBadges(Guid gameId, string gameName, int totalBadges, IEnumerable<(string Code, string Name)> badges, DateTime utcNow)
+    {
+        TrainerGame? game = _games.Find(g => g.GameId == gameId);
+
+        if (game is null)
+        {
+            _games.Add(TrainerGame.Create(TrainerId, gameId, gameName, totalBadges));
+        }
+        else
+        {
+            game.Update(gameName, totalBadges);
+        }
+
+        foreach ((string code, string name) in badges)
+        {
+            if (_earnedBadges.Exists(b => b.GameId == gameId && b.Code == code))
+            {
+                continue;
+            }
+
+            _earnedBadges.Add(TrainerBadge.Create(TrainerId, gameId, code, name, utcNow));
+            Earn(XpReason.EarnedBadge, $"badge:{gameId}:{code}", utcNow, utcNow);
+        }
+    }
+
+    /// <summary>
     /// Awards every trophy whose target the trainer reached and doesn't have yet. Runs after
     /// each award, and on its own to catch up (a trophy added later, a replayed history).
     /// </summary>
@@ -104,6 +144,7 @@ public sealed class TrainerProgress : Entity
         TrainerStat.Trades => Trades,
         TrainerStat.Evolutions => Evolutions,
         TrainerStat.Level => Level,
+        TrainerStat.Badges => Badges,
         _ => 0,
     };
 
@@ -117,6 +158,7 @@ public sealed class TrainerProgress : Entity
             case XpReason.NewSpecies: SpeciesDiscovered++; break;
             case XpReason.Traded: Trades++; break;
             case XpReason.Evolved: Evolutions++; break;
+            case XpReason.EarnedBadge: Badges++; break;
         }
     }
 }

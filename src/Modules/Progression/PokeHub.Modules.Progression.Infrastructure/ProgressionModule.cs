@@ -12,6 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using MassTransit;
+using PokeHub.Modules.Games.IntegrationEvents;
 using PokeHub.Modules.Pokedex.IntegrationEvents;
 using PokeHub.Modules.Progression.Domain.Trainers;
 using PokeHub.Modules.Progression.Infrastructure.Trainers;
@@ -26,6 +27,9 @@ public static class ProgressionModule
         registrationConfigurator.AddConsumer<IntegrationEventConsumer<PokemonObtainedIntegrationEvent>>();
         registrationConfigurator.AddConsumer<IntegrationEventConsumer<PokemonTradedIntegrationEvent>>();
         registrationConfigurator.AddConsumer<IntegrationEventConsumer<PokemonEvolvedIntegrationEvent>>();
+
+        // Games report the badges players earn in them.
+        registrationConfigurator.AddConsumer<IntegrationEventConsumer<GameBadgesReportedIntegrationEvent>>();
     }
 
     extension(IServiceCollection services)

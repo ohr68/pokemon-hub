@@ -8,4 +8,5 @@ public enum XpReason
     NewSpecies = 4,
     Traded = 5,
     Evolved = 6,
+    EarnedBadge = 7,
 }

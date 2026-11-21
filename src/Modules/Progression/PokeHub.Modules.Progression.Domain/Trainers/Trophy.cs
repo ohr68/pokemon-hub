@@ -32,6 +32,10 @@ public static class Trophies
         new("first-evolution", "Evolução", "Evolua um Pokémon.", TrophyTier.Bronze, TrainerStat.Evolutions, 1),
         new("evolver-10", "Treinador dedicado", "Evolua 10 Pokémon.", TrophyTier.Silver, TrainerStat.Evolutions, 10),
 
+        new("first-badge", "Primeira insígnia", "Conquiste uma insígnia de ginásio em um jogo.", TrophyTier.Bronze, TrainerStat.Badges, 1),
+        new("badges-8", "Oito insígnias", "Conquiste 8 insígnias.", TrophyTier.Silver, TrainerStat.Badges, 8),
+        new("badges-16", "Colecionador de insígnias", "Conquiste 16 insígnias, somando os jogos.", TrophyTier.Gold, TrainerStat.Badges, 16),
+
         new("level-5", "Nível 5", "Chegue ao nível 5 de treinador.", TrophyTier.Bronze, TrainerStat.Level, 5),
         new("level-10", "Nível 10", "Chegue ao nível 10 de treinador.", TrophyTier.Silver, TrainerStat.Level, 10),
         new("level-25", "Nível 25", "Chegue ao nível 25 de treinador.", TrophyTier.Gold, TrainerStat.Level, 25),

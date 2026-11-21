@@ -10,4 +10,5 @@ public enum TrainerStat
     Trades = 5,
     Evolutions = 6,
     Level = 7,
+    Badges = 8,
 }

@@ -28,6 +28,32 @@ internal sealed class TrainerProgressConfiguration : IEntityTypeConfiguration<Tr
 
         builder.Navigation(p => p.Trophies).UsePropertyAccessMode(PropertyAccessMode.Field);
 
+        builder.OwnsMany(p => p.Games, games =>
+        {
+            games.ToTable("trainer_games");
+            games.WithOwner().HasForeignKey(g => g.TrainerId);
+            // The game lives in the Games module, so no foreign key to it.
+            games.HasKey(g => new { g.TrainerId, g.GameId });
+            // Set by us: without this EF treats a Guid in an owned key as generated, takes a
+            // new game for an existing one and updates instead of inserting.
+            games.Property(g => g.GameId).ValueGeneratedNever();
+            games.Property(g => g.GameName).HasMaxLength(100);
+        });
+
+        builder.Navigation(p => p.Games).UsePropertyAccessMode(PropertyAccessMode.Field);
+
+        builder.OwnsMany(p => p.EarnedBadges, badges =>
+        {
+            badges.ToTable("trainer_badges");
+            badges.WithOwner().HasForeignKey(b => b.TrainerId);
+            badges.HasKey(b => new { b.TrainerId, b.GameId, b.Code });
+            badges.Property(b => b.GameId).ValueGeneratedNever();
+            badges.Property(b => b.Code).HasMaxLength(50);
+            badges.Property(b => b.Name).HasMaxLength(100);
+        });
+
+        builder.Navigation(p => p.EarnedBadges).UsePropertyAccessMode(PropertyAccessMode.Field);
+
         // Two awards for the same trainer at the same moment can't both win.
         builder.Property<uint>("Version").IsRowVersion();
     }

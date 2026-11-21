@@ -31,7 +31,7 @@ internal sealed class GetTrainerTrophiesQueryHandler(IDbConnectionFactory dbConn
         const string sql =
             """
             SELECT starters_chosen AS StartersChosen, catches AS Catches, shiny_catches AS ShinyCatches,
-                   species_discovered AS SpeciesDiscovered, trades AS Trades, evolutions AS Evolutions, level AS Level
+                   species_discovered AS SpeciesDiscovered, trades AS Trades, evolutions AS Evolutions, level AS Level, badges AS Badges
             FROM progression.trainer_progress WHERE trainer_id = @TrainerId;
 
             SELECT trophy_code AS TrophyCode, earned_on_utc AS EarnedOnUtc
@@ -40,7 +40,7 @@ internal sealed class GetTrainerTrophiesQueryHandler(IDbConnectionFactory dbConn
 
         await using SqlMapper.GridReader results = await connection.QueryMultipleAsync(sql, new { request.TrainerId });
 
-        StatsRow stats = await results.ReadSingleOrDefaultAsync<StatsRow>() ?? new StatsRow(0, 0, 0, 0, 0, 0, 1);
+        StatsRow stats = await results.ReadSingleOrDefaultAsync<StatsRow>() ?? new StatsRow(0, 0, 0, 0, 0, 0, 1, 0);
         var earned = (await results.ReadAsync<EarnedRow>()).ToDictionary(e => e.TrophyCode, e => e.EarnedOnUtc);
 
         return Trophies.All
@@ -55,7 +55,7 @@ internal sealed class GetTrainerTrophiesQueryHandler(IDbConnectionFactory dbConn
             .ToList();
     }
 
-    private sealed record StatsRow(int StartersChosen, int Catches, int ShinyCatches, int SpeciesDiscovered, int Trades, int Evolutions, int Level)
+    private sealed record StatsRow(int StartersChosen, int Catches, int ShinyCatches, int SpeciesDiscovered, int Trades, int Evolutions, int Level, int Badges)
     {
         public int Value(TrainerStat stat) => stat switch
         {
@@ -66,6 +66,7 @@ internal sealed class GetTrainerTrophiesQueryHandler(IDbConnectionFactory dbConn
             TrainerStat.Trades => Trades,
             TrainerStat.Evolutions => Evolutions,
             TrainerStat.Level => Level,
+            TrainerStat.Badges => Badges,
             _ => 0,
         };
     }

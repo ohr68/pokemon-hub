@@ -18,6 +18,8 @@ public static class XpRules
         XpReason.NewSpecies => 25,
         XpReason.Traded => 20,
         XpReason.Evolved => 15,
+        // A gym badge in any game.
+        XpReason.EarnedBadge => 100,
         _ => 0,
     };
 
