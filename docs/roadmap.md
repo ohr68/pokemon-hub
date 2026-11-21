@@ -8,7 +8,7 @@
 | 3. Trades | Done: trades between trainers, and moving Pokémon between saves through the hub |
 | 4. Games platform | Done: registration, game API, files, rate limits, webhooks, turning games off, admin pages |
 | 5. FireRed | Done: play in the browser, sync, mirror, save backups, transfers both ways |
-| 6. Operations | Planned |
+| 6. Operations: backups, reliable startup, problems view, local checks | Planned |
 | 7. Trainer progression: XP and levels, trophies, badges, coins | Done |
 
 More ideas, not yet in a phase, are in the [backlog](#backlog).
@@ -133,6 +133,30 @@ Pokémon back unchanged when it saves.
 **Open:** the summary screen of a delivered Pokémon (original trainer, met location) is
 still to check in the game, and Deoxys has no FireRed learnset yet (PokéAPI lists it under
 another form).
+
+## 6. Operations
+
+PokeHub stays private, so this phase is about not losing data and knowing when something
+breaks, not about going to production. Health checks (`/health`), Serilog with Seq and a
+global exception handler already exist.
+
+Steps, in order:
+
+- **6a. Backups and restore**: saves, Pokémon, coins and the ROM all live in one Docker
+  volume, so a `docker compose down -v` would remove the originals and their backups
+  together. Add a one-command and scheduled `pg_dump` to a folder outside Docker, keeping
+  the last N copies, and back up the Keycloak realm and users too. The restore is tested on
+  a scratch database.
+- **6b. Reliable startup**: restart policies, container health checks, the API waiting for
+  healthy dependencies, and pinned image versions (Seq runs on `latest` today).
+- **6c. Problems view**: an admin page with service health, failed outbox messages, failed
+  webhook deliveries and the age of the last backup.
+- **6d. Local verify script**: one command that runs the backend build, architecture
+  tests, frontend types, lint and vitest. There's no hosted CI.
+
+Left out on purpose: public deployment, HTTPS and production hardening (the instance hosts
+a commercial ROM and must stay private), metrics dashboards and tracing, hosted CI, the full
+module test suite, and the items in [tech-debt.md](tech-debt.md).
 
 ## 7. Trainer progression
 
