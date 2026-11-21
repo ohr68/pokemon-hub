@@ -8,7 +8,7 @@
 | 3. Trades | Done: trades between trainers, and moving Pokémon between saves through the hub |
 | 4. Games platform | Done: registration, game API, files, rate limits, webhooks, turning games off, admin pages |
 | 5. FireRed | Done: play in the browser, sync, mirror, save backups, transfers both ways |
-| 6. Operations: backups, reliable startup, problems view, local checks | In progress: backups done |
+| 6. Operations: backups, reliable startup, problems view, local checks | In progress: backups and reliable startup done |
 | 7. Trainer progression: XP and levels, trophies, badges, coins | Done |
 
 More ideas, not yet in a phase, are in the [backlog](#backlog).
@@ -147,8 +147,10 @@ Steps, in order:
   dumps the database daily and `tools/ops/backup.sh` also copies Keycloak, which has to stop
   for a few seconds. Restores load on the side and keep what they replace. See
   [tools/ops/README.md](../tools/ops/README.md).
-- **6b. Reliable startup**: restart policies, container health checks, the API waiting for
-  healthy dependencies, and pinned image versions (Seq runs on `latest` today).
+- **6b. Reliable startup** (done): every service restarts on its own and has a health
+  check, the API waits for healthy dependencies, and image versions are pinned. After a
+  Docker restart the containers come up in any order, so the API also waits for the database
+  before running migrations.
 - **6c. Problems view**: an admin page with service health, failed outbox messages, failed
   webhook deliveries and the age of the last backup.
 - **6d. Local verify script**: one command that runs the backend build, architecture
