@@ -278,6 +278,11 @@ namespace PokeHub.Modules.Games.Infrastructure.Database.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("game_id");
 
+                    b.Property<string>("Label")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("label");
+
                     b.Property<string>("Sha256")
                         .IsRequired()
                         .HasMaxLength(64)

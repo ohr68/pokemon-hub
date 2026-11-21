@@ -39,7 +39,7 @@ internal sealed class UploadSaveFileEndpoint(ISender sender) : EndpointBase<Uplo
         await req.File.CopyToAsync(content, ct);
 
         Result<UploadedSaveFileResponse> result = await sender.Send(
-            new UploadSaveFileCommand(User.GetClientId(), User.GetUserId(), content.ToArray()),
+            new UploadSaveFileCommand(User.GetClientId(), User.GetUserId(), content.ToArray(), req.Label),
             ct);
 
         await SendResultAsync(result, uploaded => Results.Ok(uploaded));

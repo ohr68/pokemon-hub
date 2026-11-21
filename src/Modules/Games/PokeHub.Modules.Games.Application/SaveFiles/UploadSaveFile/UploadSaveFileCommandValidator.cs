@@ -11,5 +11,7 @@ internal sealed class UploadSaveFileCommandValidator : AbstractValidator<UploadS
             .NotEmpty()
             .Must(content => content.Length <= SaveFile.MaxSizeBytes)
             .WithMessage($"A save file can be at most {SaveFile.MaxSizeBytes / 1024} KB.");
+
+        RuleFor(c => c.Label).MaximumLength(100);
     }
 }

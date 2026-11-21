@@ -4,7 +4,8 @@ namespace PokeHub.Modules.Games.Application.SaveFiles.UploadSaveFile;
 
 /// <param name="ClientId">The client the player signed in with, from the token.</param>
 /// <param name="Content">The save file exactly as the game wrote it.</param>
-public sealed record UploadSaveFileCommand(string? ClientId, Guid TrainerId, byte[] Content)
+/// <param name="Label">Where it came from when it isn't a sync, such as an imported file.</param>
+public sealed record UploadSaveFileCommand(string? ClientId, Guid TrainerId, byte[] Content, string? Label = null)
     : ICommand<UploadedSaveFileResponse>;
 
 /// <param name="IsNew">False when the save matched the latest backup, which was kept instead.</param>

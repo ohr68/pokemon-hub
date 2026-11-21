@@ -32,7 +32,7 @@ internal sealed class UploadSaveFileCommandHandler(
             return new UploadedSaveFileResponse(latest.Id, latest.UploadedOnUtc, IsNew: false);
         }
 
-        var saveFile = SaveFile.Upload(request.TrainerId, game.Value.Id, request.Content, dateTimeProvider.UtcNow);
+        var saveFile = SaveFile.Upload(request.TrainerId, game.Value.Id, request.Content, dateTimeProvider.UtcNow, request.Label);
 
         saveFileRepository.Insert(saveFile);
 

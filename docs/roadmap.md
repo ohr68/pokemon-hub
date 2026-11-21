@@ -181,7 +181,12 @@ Trainers grow by playing, across every game connected to PokeHub:
 - **Custom SVG type icons**: check whether drawing our own icon for each type (instead of
   the closest Lucide icon) is worth it. The icons are components in one map, so they can be
   swapped; the open question is where the artwork comes from.
-- **Saves between consoles and emulators**: move a save from a real console or another
-  emulator into PokeHub and back. To study: how to do it without building native apps (for
-  example from the browser, with the files the player exports from their device or flash
-  cart).
+- **Saves between consoles and emulators** (done for files): every way in or out of a
+  GBA device ends in the same raw save file (.sav; .srm in RetroArch): emulators (mGBA,
+  VisualBoyAdvance, myBoy, Pizza Boy, Delta) read and write it, flash carts keep it on
+  their SD card, and USB cartridge readers (GBxCart RW, GB Operator, with FlashGBX) dump and
+  write it. So the Jogar page imports one (checked to be FireRed/LeafGreen by the game code
+  the save records, trimmed to 128 KB when an emulator added bytes, previewed, stored as a
+  labeled backup and optionally loaded into the game) and exports the current save or any
+  backup, with a short guide per device. Still to study: talking to a cartridge reader
+  straight from the browser (Web Serial), which would skip the desktop tool.

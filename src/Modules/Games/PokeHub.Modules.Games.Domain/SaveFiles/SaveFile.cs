@@ -35,12 +35,16 @@ public sealed class SaveFile : Entity
 
     public DateTime UploadedOnUtc { get; private set; }
 
+    // Where it came from when it wasn't a sync, such as "Importado: firered.sav".
+    public string? Label { get; private set; }
+
     public static string HashOf(byte[] content) => Convert.ToHexStringLower(SHA256.HashData(content));
 
-    public static SaveFile Upload(Guid trainerId, Guid gameId, byte[] content, DateTime utcNow)
+    public static SaveFile Upload(Guid trainerId, Guid gameId, byte[] content, DateTime utcNow, string? label = null)
     {
         return new SaveFile
         {
+            Label = string.IsNullOrWhiteSpace(label) ? null : label.Trim(),
             Id = Guid.CreateVersion7(),
             TrainerId = trainerId,
             GameId = gameId,

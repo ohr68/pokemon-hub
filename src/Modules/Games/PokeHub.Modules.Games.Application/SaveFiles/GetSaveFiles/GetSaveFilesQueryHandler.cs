@@ -31,7 +31,8 @@ internal sealed class GetSaveFilesQueryHandler(IGameRepository gameRepository, I
                 id AS {nameof(SaveFileResponse.Id)},
                 size_bytes AS {nameof(SaveFileResponse.SizeBytes)},
                 sha256 AS {nameof(SaveFileResponse.Sha256)},
-                uploaded_on_utc AS {nameof(SaveFileResponse.UploadedOnUtc)}
+                uploaded_on_utc AS {nameof(SaveFileResponse.UploadedOnUtc)},
+                label AS {nameof(SaveFileResponse.Label)}
              FROM games.save_files
              WHERE trainer_id = @TrainerId AND game_id = @GameId
              ORDER BY uploaded_on_utc DESC

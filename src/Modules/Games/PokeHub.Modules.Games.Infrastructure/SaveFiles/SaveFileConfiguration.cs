@@ -17,6 +17,8 @@ internal sealed class SaveFileConfiguration : IEntityTypeConfiguration<SaveFile>
 
         builder.Property(s => s.Sha256).HasMaxLength(64);
 
+        builder.Property(s => s.Label).HasMaxLength(100);
+
         // PostgreSQL bytea; values this size are stored compressed, out of line (TOAST).
         builder.Property(s => s.Content);
 
