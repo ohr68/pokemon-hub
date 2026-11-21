@@ -32,6 +32,25 @@ services:
     networks:
       - pokehub_network
 
+  # Dumps the database on a schedule into a folder outside Docker (see tools/ops/README.md).
+  pokehub.backup:
+    image: postgres:17
+    container_name: PokeHub.Backup
+    restart: unless-stopped
+    entrypoint: ["sh"]
+    command: ["/ops/backup-loop.sh"]
+    environment:
+      - PGPASSWORD=postgres
+      - BACKUP_INTERVAL_HOURS=${BACKUP_INTERVAL_HOURS:-24}
+      - BACKUP_KEEP=${BACKUP_KEEP:-14}
+    volumes:
+      - ${POKEHUB_BACKUP_DIR:-${HOME}/PokeHubBackups}:/backups
+      - ./tools/ops:/ops:ro
+    depends_on:
+      - pokehub.database
+    networks:
+      - pokehub_network
+
   pokehub.seq:
     image: datalust/seq:latest
     container_name: PokeHub.Seq

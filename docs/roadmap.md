@@ -8,7 +8,7 @@
 | 3. Trades | Done: trades between trainers, and moving Pokémon between saves through the hub |
 | 4. Games platform | Done: registration, game API, files, rate limits, webhooks, turning games off, admin pages |
 | 5. FireRed | Done: play in the browser, sync, mirror, save backups, transfers both ways |
-| 6. Operations: backups, reliable startup, problems view, local checks | Planned |
+| 6. Operations: backups, reliable startup, problems view, local checks | In progress: backups done |
 | 7. Trainer progression: XP and levels, trophies, badges, coins | Done |
 
 More ideas, not yet in a phase, are in the [backlog](#backlog).
@@ -142,11 +142,11 @@ global exception handler already exist.
 
 Steps, in order:
 
-- **6a. Backups and restore**: saves, Pokémon, coins and the ROM all live in one Docker
-  volume, so a `docker compose down -v` would remove the originals and their backups
-  together. Add a one-command and scheduled `pg_dump` to a folder outside Docker, keeping
-  the last N copies, and back up the Keycloak realm and users too. The restore is tested on
-  a scratch database.
+- **6a. Backups and restore** (done): saves, Pokémon, coins and the ROM all live in one
+  Docker volume, so backups now go to a folder outside Docker. A `pokehub.backup` service
+  dumps the database daily and `tools/ops/backup.sh` also copies Keycloak, which has to stop
+  for a few seconds. Restores load on the side and keep what they replace. See
+  [tools/ops/README.md](../tools/ops/README.md).
 - **6b. Reliable startup**: restart policies, container health checks, the API waiting for
   healthy dependencies, and pinned image versions (Seq runs on `latest` today).
 - **6c. Problems view**: an admin page with service health, failed outbox messages, failed
