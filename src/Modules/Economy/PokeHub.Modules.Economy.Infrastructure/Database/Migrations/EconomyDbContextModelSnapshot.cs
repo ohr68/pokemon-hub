@@ -129,6 +129,118 @@ namespace PokeHub.Modules.Economy.Infrastructure.Database.Migrations
                     b.ToTable("outbox_message_consumers", "economy");
                 });
 
+            modelBuilder.Entity("PokeHub.Modules.Economy.Domain.Shop.ItemOffer", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedOnUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on_utc");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<int>("ItemId")
+                        .HasColumnType("integer")
+                        .HasColumnName("item_id");
+
+                    b.Property<string>("ItemName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("item_name");
+
+                    b.Property<string>("Pocket")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("pocket");
+
+                    b.Property<int>("Price")
+                        .HasColumnType("integer")
+                        .HasColumnName("price");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer")
+                        .HasColumnName("quantity");
+
+                    b.Property<int?>("Stock")
+                        .HasColumnType("integer")
+                        .HasColumnName("stock");
+
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("Id")
+                        .HasName("pk_item_offers");
+
+                    b.ToTable("item_offers", "economy");
+                });
+
+            modelBuilder.Entity("PokeHub.Modules.Economy.Domain.Shop.ItemPurchase", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime?>("DeliveredOnUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("delivered_on_utc");
+
+                    b.Property<int>("ItemId")
+                        .HasColumnType("integer")
+                        .HasColumnName("item_id");
+
+                    b.Property<string>("ItemName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("item_name");
+
+                    b.Property<Guid>("OfferId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("offer_id");
+
+                    b.Property<string>("Pocket")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("pocket");
+
+                    b.Property<int>("Price")
+                        .HasColumnType("integer")
+                        .HasColumnName("price");
+
+                    b.Property<DateTime>("PurchasedOnUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("purchased_on_utc");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer")
+                        .HasColumnName("quantity");
+
+                    b.Property<Guid>("TrainerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("trainer_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_item_purchases");
+
+                    b.HasIndex("OfferId")
+                        .HasDatabaseName("ix_item_purchases_offer_id");
+
+                    b.HasIndex("TrainerId", "DeliveredOnUtc")
+                        .HasDatabaseName("ix_item_purchases_trainer_id_delivered_on_utc");
+
+                    b.ToTable("item_purchases", "economy");
+                });
+
             modelBuilder.Entity("PokeHub.Modules.Economy.Domain.Shop.Purchase", b =>
                 {
                     b.Property<Guid>("Id")
@@ -314,6 +426,16 @@ namespace PokeHub.Modules.Economy.Infrastructure.Database.Migrations
                         .HasName("pk_wallets");
 
                     b.ToTable("wallets", "economy");
+                });
+
+            modelBuilder.Entity("PokeHub.Modules.Economy.Domain.Shop.ItemPurchase", b =>
+                {
+                    b.HasOne("PokeHub.Modules.Economy.Domain.Shop.ItemOffer", null)
+                        .WithMany()
+                        .HasForeignKey("OfferId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_item_purchases_item_offers_offer_id");
                 });
 
             modelBuilder.Entity("PokeHub.Modules.Economy.Domain.Shop.Purchase", b =>

@@ -19,6 +19,10 @@ public sealed class EconomyDbContext(DbContextOptions<EconomyDbContext> options)
 
     internal DbSet<Purchase> Purchases { get; set; }
 
+    internal DbSet<ItemOffer> ItemOffers { get; set; }
+
+    internal DbSet<ItemPurchase> ItemPurchases { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema(Schemas.Economy);
@@ -31,5 +35,7 @@ public sealed class EconomyDbContext(DbContextOptions<EconomyDbContext> options)
         modelBuilder.ApplyConfiguration(new CoinEntryConfiguration());
         modelBuilder.ApplyConfiguration(new ShopOfferConfiguration());
         modelBuilder.ApplyConfiguration(new PurchaseConfiguration());
+        modelBuilder.ApplyConfiguration(new ItemOfferConfiguration());
+        modelBuilder.ApplyConfiguration(new ItemPurchaseConfiguration());
     }
 }

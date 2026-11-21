@@ -199,8 +199,10 @@ Trainers grow by playing, across every game connected to PokeHub:
   buyer's hub (the purchase id becomes the Pokémon's, so it can't be given twice); if
   that fails, coins and stock go back. Bought Pokémon earn no XP or coins. Past
   achievements were backfilled with the history replays (`api/pokedex/history/replay`,
-  `api/progression/replay`). Selling items for the games comes later: it means writing
-  the game's bag in the save.
+  `api/progression/replay`). Items for the bag are on sale too: an admin picks from a
+  safe catalog (balls, healing, vitamins, Rare Candy, evolution stones; no key items or
+  TMs), and a purchase waits until the FireRed page writes it into the save, with a backup
+  before and after.
 
 ## Backlog
 
