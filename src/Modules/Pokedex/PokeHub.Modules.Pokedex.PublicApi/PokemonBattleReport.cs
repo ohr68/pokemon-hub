@@ -1,0 +1,24 @@
+namespace PokeHub.Modules.Pokedex.PublicApi;
+
+/// <summary>What a game knows about one of its Pokémon, by catch key.</summary>
+public sealed record PokemonBattleReport(string CatchKey, PokemonBattleData Data);
+
+/// <param name="Nature">0 to 24, in the games' order (Hardy to Quirky).</param>
+/// <param name="AbilitySlot">Which of the species' abilities: 0 or 1.</param>
+/// <param name="HeldItemId">The game's item id; 0 for none.</param>
+/// <param name="Ivs">HP, Attack, Defense, Speed, Sp. Atk, Sp. Def.</param>
+/// <param name="Evs">In the same order as the IVs.</param>
+/// <param name="Stats">Only for Pokémon in the party: games don't store them for the PC.</param>
+public sealed record PokemonBattleData(
+    int Nature,
+    int AbilitySlot,
+    int HeldItemId,
+    int Friendship,
+    IReadOnlyList<PokemonBattleMove> Moves,
+    IReadOnlyList<int> Ivs,
+    IReadOnlyList<int> Evs,
+    PokemonBattleStats? Stats);
+
+public sealed record PokemonBattleMove(int Id, int Pp, int PpUps);
+
+public sealed record PokemonBattleStats(int CurrentHp, int MaxHp, int Attack, int Defense, int Speed, int SpecialAttack, int SpecialDefense);

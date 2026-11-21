@@ -313,6 +313,47 @@ namespace PokeHub.Modules.Games.Infrastructure.Database.Migrations
                     b.ToTable("save_files", "games");
                 });
 
+            modelBuilder.Entity("PokeHub.Modules.Games.Domain.Stats.PlayerGameStats", b =>
+                {
+                    b.Property<Guid>("TrainerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("trainer_id");
+
+                    b.Property<Guid>("GameId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("game_id");
+
+                    b.Property<string>("Counters")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("counters");
+
+                    b.Property<long>("Money")
+                        .HasColumnType("bigint")
+                        .HasColumnName("money");
+
+                    b.Property<long>("PlayTimeSeconds")
+                        .HasColumnType("bigint")
+                        .HasColumnName("play_time_seconds");
+
+                    b.Property<int>("PokedexOwned")
+                        .HasColumnType("integer")
+                        .HasColumnName("pokedex_owned");
+
+                    b.Property<int>("PokedexSeen")
+                        .HasColumnType("integer")
+                        .HasColumnName("pokedex_seen");
+
+                    b.Property<DateTime>("UpdatedOnUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_on_utc");
+
+                    b.HasKey("TrainerId", "GameId")
+                        .HasName("pk_player_game_stats");
+
+                    b.ToTable("player_game_stats", "games");
+                });
+
             modelBuilder.Entity("PokeHub.Modules.Games.Domain.Webhooks.WebhookDelivery", b =>
                 {
                     b.Property<Guid>("Id")

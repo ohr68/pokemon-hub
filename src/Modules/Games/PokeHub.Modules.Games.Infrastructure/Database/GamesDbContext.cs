@@ -5,11 +5,13 @@ using PokeHub.Modules.Games.Application.Abstractions.Data;
 using PokeHub.Modules.Games.Domain.Games;
 using PokeHub.Modules.Games.Domain.GameFiles;
 using PokeHub.Modules.Games.Domain.SaveFiles;
+using PokeHub.Modules.Games.Domain.Stats;
 using PokeHub.Modules.Games.Domain.Webhooks;
 using PokeHub.Modules.Games.Infrastructure.GameFiles;
 using PokeHub.Modules.Games.Infrastructure.Webhooks;
 using PokeHub.Modules.Games.Infrastructure.Games;
 using PokeHub.Modules.Games.Infrastructure.SaveFiles;
+using PokeHub.Modules.Games.Infrastructure.Stats;
 
 namespace PokeHub.Modules.Games.Infrastructure.Database;
 
@@ -23,6 +25,8 @@ public sealed class GamesDbContext(DbContextOptions<GamesDbContext> options) : D
 
     internal DbSet<WebhookDelivery> WebhookDeliveries { get; set; }
 
+    internal DbSet<PlayerGameStats> PlayerGameStats { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema(Schemas.Games);
@@ -35,5 +39,6 @@ public sealed class GamesDbContext(DbContextOptions<GamesDbContext> options) : D
         modelBuilder.ApplyConfiguration(new SaveFileConfiguration());
         modelBuilder.ApplyConfiguration(new GameFileConfiguration());
         modelBuilder.ApplyConfiguration(new WebhookDeliveryConfiguration());
+        modelBuilder.ApplyConfiguration(new PlayerGameStatsConfiguration());
     }
 }

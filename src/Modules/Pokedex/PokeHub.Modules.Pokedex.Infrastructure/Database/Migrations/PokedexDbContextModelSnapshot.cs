@@ -139,6 +139,14 @@ namespace PokeHub.Modules.Pokedex.Infrastructure.Database.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("awaiting_delivery");
 
+                    b.Property<string>("BattleData")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("battle_data");
+
+                    b.Property<DateTime?>("BattleDataUpdatedOnUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("battle_data_updated_on_utc");
+
                     b.Property<string>("CatchKey")
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)")

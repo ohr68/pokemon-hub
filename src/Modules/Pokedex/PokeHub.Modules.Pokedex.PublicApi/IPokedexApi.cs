@@ -39,6 +39,16 @@ public interface IPokedexApi
     Task<Result<Guid>> CatchPokemonAsync(CatchRequest request, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Keeps what the game reports about the Pokémon inside it. Catch keys it doesn't know are
+    /// skipped, since the save may hold Pokémon not synced yet.
+    /// </summary>
+    Task<Result> UpdateBattleDataAsync(
+        Guid trainerId,
+        Guid gameId,
+        IReadOnlyCollection<PokemonBattleReport> reports,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Puts Pokémon that are no longer in the game's save back to waiting for delivery. Refused
     /// for any Pokémon whose catch key is in <paramref name="presentCatchKeys"/>.
     /// </summary>

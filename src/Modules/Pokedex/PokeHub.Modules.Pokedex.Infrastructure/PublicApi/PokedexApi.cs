@@ -13,6 +13,7 @@ using PokeHub.Modules.Pokedex.Application.Saves.DeliverPokemon;
 using PokeHub.Modules.Pokedex.Application.Saves.GetAwaitingDelivery;
 using PokeHub.Modules.Pokedex.Application.Saves.ReconcileSave;
 using PokeHub.Modules.Pokedex.Application.Saves.RedeliverPokemon;
+using PokeHub.Modules.Pokedex.Application.Saves.UpdateBattleData;
 using PokeHub.Modules.Pokedex.Application.Saves.WithdrawPokemon;
 using PokeHub.Modules.Pokedex.Application.Pokemon.TradePokemon;
 using PokeHub.Modules.Pokedex.Application.Trainers.GetTrainer;
@@ -150,6 +151,37 @@ internal sealed class PokedexApi(ISender sender, ISpeciesRepository speciesRepos
             .Select(p => new LeftGameInfo(p.Id, p.SpeciesId, p.Nickname, p.Level, p.IsShiny))
             .ToList();
     }
+
+    public Task<Result> UpdateBattleDataAsync(
+        Guid trainerId,
+        Guid gameId,
+        IReadOnlyCollection<PokemonBattleReport> reports,
+        CancellationToken cancellationToken = default) =>
+        sender.Send(
+            new UpdateBattleDataCommand(
+                trainerId,
+                gameId,
+                [.. reports.Select(r => new BattleReport(r.CatchKey, ToBattleData(r.Data)))]),
+            cancellationToken);
+
+    private static BattleData ToBattleData(PokemonBattleData data) => new(
+        data.Nature,
+        data.AbilitySlot,
+        data.HeldItemId,
+        data.Friendship,
+        [.. data.Moves.Select(m => new BattleMove(m.Id, m.Pp, m.PpUps))],
+        data.Ivs,
+        data.Evs,
+        data.Stats is null
+            ? null
+            : new BattleStats(
+                data.Stats.CurrentHp,
+                data.Stats.MaxHp,
+                data.Stats.Attack,
+                data.Stats.Defense,
+                data.Stats.Speed,
+                data.Stats.SpecialAttack,
+                data.Stats.SpecialDefense));
 
     public Task<Result> RedeliverAsync(
         Guid trainerId,

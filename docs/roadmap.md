@@ -213,12 +213,13 @@ Trainers grow by playing, across every game connected to PokeHub:
 - **Automatic sync** (done for FireRed): while the game is open, it syncs at the interval
   each trainer chooses, only when the in-game save changed. The interval is kept per account
   in the browser, so it doesn't follow the trainer to another device.
-- **Battle data per Pokémon**: show what each Pokémon carries in the game, such as moves,
-  IVs, EVs, friendship and, for the party, its current stats. A Gen 3 save keeps no battle
-  history per Pokémon, so anything like growth over time has to come from comparing syncs.
-- **Stats sync per game**: bring each game's own numbers to the trainer's page, such as play
-  time, money, Pokédex seen and caught, and the counters the save keeps. Stored per game, so
-  other games can report theirs.
+- **Battle data per Pokémon** (done for FireRed): each sync stores what the save holds about
+  a Pokémon (nature, moves and PP, IVs, EVs, friendship, held item and, for the party, current
+  stats), shown on its card in Meus Pokémons. It keeps the latest report only: a Gen 3 save has
+  no battle history per Pokémon, so growth over time would need keeping past syncs.
+- **Stats sync per game** (done for FireRed): each sync stores the game's play time, money,
+  Pokédex and counters (steps, battles, captures...), shown per game on the trainer's page.
+  Counters are kept by name, so other games can report their own.
 - **Custom SVG type icons**: check whether drawing our own icon for each type (instead of
   the closest Lucide icon) is worth it. The icons are components in one map, so they can be
   swapped; the open question is where the artwork comes from.

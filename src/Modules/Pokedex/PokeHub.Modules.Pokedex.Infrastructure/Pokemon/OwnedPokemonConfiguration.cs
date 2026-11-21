@@ -19,6 +19,8 @@ internal sealed class OwnedPokemonConfiguration : IEntityTypeConfiguration<Owned
 
         builder.Property(p => p.Nickname).HasMaxLength(12);
 
+        builder.Property(p => p.BattleData).HasColumnType("jsonb");
+
         builder.Property(p => p.Origin).HasConversion<string>().HasMaxLength(20);
 
         builder.Property(p => p.Status).HasConversion<string>().HasMaxLength(20);
