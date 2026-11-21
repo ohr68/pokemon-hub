@@ -204,8 +204,15 @@ Trainers grow by playing, across every game connected to PokeHub:
 
 ## Backlog
 
-- **Automatic sync**: sync a game's Pokémon on their own, at an interval each trainer
-  chooses.
+- **Automatic sync** (done for FireRed): while the game is open, it syncs at the interval
+  each trainer chooses, only when the in-game save changed. The interval is kept per account
+  in the browser, so it doesn't follow the trainer to another device.
+- **Battle data per Pokémon**: show what each Pokémon carries in the game, such as moves,
+  IVs, EVs, friendship and, for the party, its current stats. A Gen 3 save keeps no battle
+  history per Pokémon, so anything like growth over time has to come from comparing syncs.
+- **Stats sync per game**: bring each game's own numbers to the trainer's page, such as play
+  time, money, Pokédex seen and caught, and the counters the save keeps. Stored per game, so
+  other games can report theirs.
 - **Custom SVG type icons**: check whether drawing our own icon for each type (instead of
   the closest Lucide icon) is worth it. The icons are components in one map, so they can be
   swapped; the open question is where the artwork comes from.
