@@ -188,5 +188,9 @@ Trainers grow by playing, across every game connected to PokeHub:
   write it. So the Jogar page imports one (checked to be FireRed/LeafGreen by the game code
   the save records, trimmed to 128 KB when an emulator added bytes, previewed, stored as a
   labeled backup and optionally loaded into the game) and exports the current save or any
-  backup, with a short guide per device. Still to study: talking to a cartridge reader
-  straight from the browser (Web Serial), which would skip the desktop tool.
+  backup, with a short guide per device. 3DS Virtual Console: while the game runs, its
+  save sits in a NAND partition behind a 512-byte header with a CMAC signed with the
+  console's keys, which a browser can't produce; GodMode9 dumps and injects it
+  (`agbsave.bin`), and the import strips that header when present. Still to study: talking
+  to a cartridge reader straight from the browser (Web Serial), which would skip the
+  desktop tool.
