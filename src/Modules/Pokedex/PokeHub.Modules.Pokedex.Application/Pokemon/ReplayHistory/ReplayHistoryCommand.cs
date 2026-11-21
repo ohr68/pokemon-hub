@@ -30,12 +30,14 @@ internal sealed class ReplayHistoryCommandHandler(IDbConnectionFactory dbConnect
             """
             SELECT h.id AS Id, h.occurred_on_utc AS OccurredOnUtc, h.pokemon_id AS PokemonId, h.trainer_id AS TrainerId,
                    h.species_id AS SpeciesId, lower(p.origin) AS Origin, p.is_shiny AS IsShiny,
+                   (s.is_legendary OR s.is_mythical) AS IsRare,
                    NOT EXISTS (
                        SELECT 1 FROM pokedex.ownership_history e
                        WHERE e.trainer_id = h.trainer_id AND e.species_id = h.species_id
                          AND e.occurred_on_utc < h.occurred_on_utc) AS IsNewSpecies
             FROM pokedex.ownership_history h
             JOIN pokedex.pokemon p ON p.id = h.pokemon_id
+            JOIN pokedex.species s ON s.id = h.species_id
             WHERE h.change = 'Obtained'
             ORDER BY h.occurred_on_utc;
 
@@ -65,7 +67,7 @@ internal sealed class ReplayHistoryCommandHandler(IDbConnectionFactory dbConnect
         foreach (ObtainedRow o in obtained)
         {
             await eventBus.PublishAsync(
-                new PokemonObtainedIntegrationEvent(o.Id, o.OccurredOnUtc, o.PokemonId, o.TrainerId, o.SpeciesId, o.Origin, o.IsShiny, o.IsNewSpecies),
+                new PokemonObtainedIntegrationEvent(o.Id, o.OccurredOnUtc, o.PokemonId, o.TrainerId, o.SpeciesId, o.Origin, o.IsShiny, o.IsNewSpecies, o.IsRare),
                 cancellationToken);
         }
 
@@ -86,7 +88,7 @@ internal sealed class ReplayHistoryCommandHandler(IDbConnectionFactory dbConnect
         return new ReplayHistoryResponse(obtained.Count, traded.Count, evolved.Count);
     }
 
-    private sealed record ObtainedRow(Guid Id, DateTime OccurredOnUtc, Guid PokemonId, Guid TrainerId, int SpeciesId, string Origin, bool IsShiny, bool IsNewSpecies);
+    private sealed record ObtainedRow(Guid Id, DateTime OccurredOnUtc, Guid PokemonId, Guid TrainerId, int SpeciesId, string Origin, bool IsShiny, bool IsRare, bool IsNewSpecies);
 
     private sealed record TradedRow(Guid Id, DateTime OccurredOnUtc, Guid PokemonId, Guid TradeId, Guid FromTrainerId, Guid ToTrainerId);
 

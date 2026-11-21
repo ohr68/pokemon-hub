@@ -30,3 +30,16 @@ internal sealed class TrophyEarnedDomainEventHandler(IEventBus eventBus) : Domai
                 domainEvent.Tier.ToString().ToLowerInvariant()),
             cancellationToken);
 }
+
+internal sealed class BadgeEarnedDomainEventHandler(IEventBus eventBus) : DomainEventHandler<BadgeEarnedDomainEvent>
+{
+    public override Task Handle(BadgeEarnedDomainEvent domainEvent, CancellationToken cancellationToken = default) =>
+        eventBus.PublishAsync(
+            new BadgeEarnedIntegrationEvent(
+                domainEvent.Id,
+                domainEvent.OccurredOnUtc,
+                domainEvent.TrainerId,
+                domainEvent.GameId,
+                domainEvent.BadgeCode),
+            cancellationToken);
+}

@@ -17,12 +17,15 @@ internal sealed class PokemonObtainedDomainEventHandler(IDbConnectionFactory dbC
     {
         await using DbConnection connection = await dbConnectionFactory.OpenConnectionAsync();
 
-        // New to the trainer: no other Pokémon of theirs was ever this species.
-        bool hadSpecies = await connection.ExecuteScalarAsync<bool>(
+        // New to the trainer: no other Pokémon of theirs was ever this species. Rare: the
+        // species is legendary or mythical.
+        (bool hadSpecies, bool isRare) = await connection.QuerySingleAsync<(bool, bool)>(
             """
-            SELECT EXISTS (
-                SELECT 1 FROM pokedex.ownership_history
-                WHERE trainer_id = @TrainerId AND species_id = @SpeciesId AND pokemon_id <> @PokemonId)
+            SELECT
+                EXISTS (
+                    SELECT 1 FROM pokedex.ownership_history
+                    WHERE trainer_id = @TrainerId AND species_id = @SpeciesId AND pokemon_id <> @PokemonId),
+                (SELECT is_legendary OR is_mythical FROM pokedex.species WHERE id = @SpeciesId)
             """,
             new { domainEvent.TrainerId, domainEvent.SpeciesId, domainEvent.PokemonId });
 
@@ -35,7 +38,8 @@ internal sealed class PokemonObtainedDomainEventHandler(IDbConnectionFactory dbC
                 domainEvent.SpeciesId,
                 domainEvent.Origin.ToString().ToLowerInvariant(),
                 domainEvent.IsShiny,
-                !hadSpecies),
+                !hadSpecies,
+                isRare),
             cancellationToken);
     }
 }

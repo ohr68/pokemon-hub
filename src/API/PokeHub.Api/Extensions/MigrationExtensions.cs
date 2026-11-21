@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PokeHub.Modules.Games.Infrastructure.Database;
 using PokeHub.Modules.Progression.Infrastructure.Database;
+using PokeHub.Modules.Economy.Infrastructure.Database;
 using PokeHub.Modules.Pokedex.Infrastructure.Database;
 using PokeHub.Modules.Trades.Infrastructure.Database;
 using PokeHub.Modules.Users.Infrastructure.Database;
@@ -18,6 +19,7 @@ internal static class MigrationExtensions
         ApplyMigration<TradesDbContext>(scope);
         ApplyMigration<GamesDbContext>(scope);
         ApplyMigration<ProgressionDbContext>(scope);
+        ApplyMigration<EconomyDbContext>(scope);
     }
 
     private static void ApplyMigration<TDbContext>(IServiceScope scope)

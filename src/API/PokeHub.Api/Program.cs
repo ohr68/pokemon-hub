@@ -12,6 +12,7 @@ using PokeHub.Modules.Games.Infrastructure;
 using PokeHub.Modules.Games.PublicApi;
 using PokeHub.Modules.Pokedex.Infrastructure;
 using PokeHub.Modules.Progression.Infrastructure;
+using PokeHub.Modules.Economy.Infrastructure;
 using PokeHub.Modules.Trades.Infrastructure;
 using PokeHub.Modules.Users.Infrastructure;
 using Serilog;
@@ -49,6 +50,7 @@ Assembly[] moduleApplicationAssemblies =
     PokeHub.Modules.Trades.Application.AssemblyReference.Assembly,
     PokeHub.Modules.Games.Application.AssemblyReference.Assembly,
     PokeHub.Modules.Progression.Application.AssemblyReference.Assembly,
+    PokeHub.Modules.Economy.Application.AssemblyReference.Assembly,
 ];
 
 // FastEndpoints is registered once for the host and only scans the modules' presentation assemblies.
@@ -59,6 +61,7 @@ Assembly[] modulePresentationAssemblies =
     PokeHub.Modules.Trades.Presentation.AssemblyReference.Assembly,
     PokeHub.Modules.Games.Presentation.AssemblyReference.Assembly,
     PokeHub.Modules.Progression.Presentation.AssemblyReference.Assembly,
+    PokeHub.Modules.Economy.Presentation.AssemblyReference.Assembly,
 ];
 
 builder.Services.AddApplication(moduleApplicationAssemblies);
@@ -72,11 +75,12 @@ builder.Services.AddInfrastructure(
         PokedexModule.ConfigureConsumers,
         GamesModule.ConfigureConsumers,
         ProgressionModule.ConfigureConsumers,
+        EconomyModule.ConfigureConsumers,
     ],
     databaseConnectionString,
     redisConnectionString);
 
-builder.Configuration.AddModuleConfiguration(["users", "pokedex", "trades", "games", "progression"]);
+builder.Configuration.AddModuleConfiguration(["users", "pokedex", "trades", "games", "progression", "economy"]);
 
 Uri keyCloakHealthUrl = builder.Configuration.GetKeyCloakHealthUrl();
 
@@ -90,6 +94,7 @@ builder.Services.AddPokedexModule(builder.Configuration);
 builder.Services.AddTradesModule(builder.Configuration);
 builder.Services.AddGamesModule(builder.Configuration);
 builder.Services.AddProgressionModule(builder.Configuration);
+builder.Services.AddEconomyModule(builder.Configuration);
 
 builder.Services.AddEndpoints(modulePresentationAssemblies);
 builder.Services.AddSwaggerDocumentation();

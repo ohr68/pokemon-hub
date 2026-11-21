@@ -12,6 +12,10 @@ public sealed class Permission
     public static readonly Permission UpdateTrades = new("trades:update");
     public static readonly Permission ManageGames = new("games:manage");
     public static readonly Permission ReadProgression = new("progression:read");
+    public static readonly Permission ManageProgression = new("progression:manage");
+    public static readonly Permission ReadEconomy = new("economy:read");
+    public static readonly Permission Buy = new("economy:buy");
+    public static readonly Permission ManageShop = new("shop:manage");
 
     public Permission(string code)
     {

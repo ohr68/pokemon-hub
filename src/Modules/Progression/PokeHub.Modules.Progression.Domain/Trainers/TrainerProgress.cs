@@ -114,6 +114,7 @@ public sealed class TrainerProgress : Entity
 
             _earnedBadges.Add(TrainerBadge.Create(TrainerId, gameId, code, name, utcNow));
             Earn(XpReason.EarnedBadge, $"badge:{gameId}:{code}", utcNow, utcNow);
+            Raise(new BadgeEarnedDomainEvent(TrainerId, gameId, code));
         }
     }
 

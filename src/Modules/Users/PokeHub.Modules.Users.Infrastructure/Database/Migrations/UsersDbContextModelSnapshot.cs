@@ -79,6 +79,16 @@ namespace PokeHub.Modules.Users.Infrastructure.Database.Migrations
                         },
                         new
                         {
+                            PermissionCode = "economy:read",
+                            RoleName = "Member"
+                        },
+                        new
+                        {
+                            PermissionCode = "economy:buy",
+                            RoleName = "Member"
+                        },
+                        new
+                        {
                             PermissionCode = "users:read",
                             RoleName = "Administrator"
                         },
@@ -125,6 +135,26 @@ namespace PokeHub.Modules.Users.Infrastructure.Database.Migrations
                         new
                         {
                             PermissionCode = "progression:read",
+                            RoleName = "Administrator"
+                        },
+                        new
+                        {
+                            PermissionCode = "progression:manage",
+                            RoleName = "Administrator"
+                        },
+                        new
+                        {
+                            PermissionCode = "economy:read",
+                            RoleName = "Administrator"
+                        },
+                        new
+                        {
+                            PermissionCode = "economy:buy",
+                            RoleName = "Administrator"
+                        },
+                        new
+                        {
+                            PermissionCode = "shop:manage",
                             RoleName = "Administrator"
                         });
                 });
@@ -287,6 +317,22 @@ namespace PokeHub.Modules.Users.Infrastructure.Database.Migrations
                         new
                         {
                             Code = "progression:read"
+                        },
+                        new
+                        {
+                            Code = "progression:manage"
+                        },
+                        new
+                        {
+                            Code = "economy:read"
+                        },
+                        new
+                        {
+                            Code = "economy:buy"
+                        },
+                        new
+                        {
+                            Code = "shop:manage"
                         });
                 });
 

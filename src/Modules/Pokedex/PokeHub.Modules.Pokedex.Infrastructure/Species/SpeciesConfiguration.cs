@@ -27,6 +27,8 @@ internal sealed class SpeciesConfiguration : IEntityTypeConfiguration<PokemonSpe
 
         builder.HasIndex(s => s.Gen3Index);
 
+        builder.Ignore(s => s.IsRare);
+
         // One row per move, replaced as a whole when a sync changes the learnset.
         builder.OwnsMany(s => s.Gen3LevelUpMoves, moves =>
         {

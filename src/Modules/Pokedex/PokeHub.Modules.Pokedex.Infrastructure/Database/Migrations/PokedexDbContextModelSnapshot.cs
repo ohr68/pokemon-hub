@@ -378,6 +378,14 @@ namespace PokeHub.Modules.Pokedex.Infrastructure.Database.Migrations
                         .HasColumnType("character varying(30)")
                         .HasColumnName("growth_rate");
 
+                    b.Property<bool>("IsLegendary")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_legendary");
+
+                    b.Property<bool>("IsMythical")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_mythical");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)

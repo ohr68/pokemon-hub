@@ -9,7 +9,7 @@ public abstract class BaseTest
     protected const string ModulesNamespace = "PokeHub.Modules";
 
     // Add new modules here; every module is checked against all the others.
-    protected static readonly string[] Modules = ["Users", "Pokedex", "Trades", "Games", "Progression"];
+    protected static readonly string[] Modules = ["Users", "Pokedex", "Trades", "Games", "Progression", "Economy"];
 
     private static readonly string[] ModuleLayers = ["Domain", "Application", "Infrastructure", "Presentation"];
 

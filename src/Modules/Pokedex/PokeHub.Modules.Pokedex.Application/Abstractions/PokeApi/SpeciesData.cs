@@ -13,7 +13,9 @@ public sealed record SpeciesData(
     int? TradeEvolutionSpeciesId,
     string? GrowthRate,
     int? Gen3Index,
-    IReadOnlyList<LevelUpMoveData> Gen3LevelUpMoves);
+    IReadOnlyList<LevelUpMoveData> Gen3LevelUpMoves,
+    bool IsLegendary,
+    bool IsMythical);
 
 public sealed record LevelUpMoveData(int Level, int MoveId);
 

@@ -78,3 +78,27 @@ internal sealed class GetMyBadgesEndpoint(ISender sender) : EndpointWithoutReque
         await SendResultAsync(result, games => Results.Ok(games));
     }
 }
+
+internal sealed class ReplayAchievementsEndpoint(ISender sender) : EndpointWithoutRequestBase
+{
+    public override void Configure()
+    {
+        Post("replay");
+        Policies(ProgressionPermissions.ManageProgression);
+        Group<ProgressionEndpointGroup>();
+
+        Description(builder => builder.Produces<ReplayAchievementsResponse>(StatusCodes.Status200OK, "application/json"));
+        Summary(s =>
+        {
+            s.Summary = "Replays trainers' trophies, badges and levels as integration events";
+            s.Description = "For a module added later (Economy's coins) to catch up. Admins only; safe to repeat.";
+        });
+    }
+
+    public override async Task HandleAsync(CancellationToken ct)
+    {
+        Result<ReplayAchievementsResponse> result = await sender.Send(new ReplayAchievementsCommand(), ct);
+
+        await SendResultAsync(result, replayed => Results.Ok(replayed));
+    }
+}

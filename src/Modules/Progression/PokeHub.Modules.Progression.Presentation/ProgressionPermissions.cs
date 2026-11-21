@@ -4,4 +4,5 @@ namespace PokeHub.Modules.Progression.Presentation;
 internal static class ProgressionPermissions
 {
     internal const string ReadProgression = "progression:read";
+    internal const string ManageProgression = "progression:manage";
 }

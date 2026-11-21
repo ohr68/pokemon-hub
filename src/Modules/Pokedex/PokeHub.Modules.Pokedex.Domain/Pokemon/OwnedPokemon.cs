@@ -96,6 +96,15 @@ public sealed class OwnedPokemon : Entity
         return Obtain(trainerId, speciesId, level, isShiny, origin, utcNow, saveId: null);
     }
 
+    /// <summary>
+    /// A Pokémon bought in the shop, in the hub. Its id is the purchase's, so buying is safe
+    /// to repeat: the same purchase can only ever create one Pokémon.
+    /// </summary>
+    public static Result<OwnedPokemon> Buy(Guid purchaseId, Guid trainerId, int speciesId, int level, bool isShiny, DateTime utcNow)
+    {
+        return Obtain(trainerId, speciesId, level, isShiny, PokemonOrigin.Shop, utcNow, saveId: null, id: purchaseId);
+    }
+
     private static Result<OwnedPokemon> Obtain(
         Guid trainerId,
         int speciesId,
@@ -103,7 +112,8 @@ public sealed class OwnedPokemon : Entity
         bool isShiny,
         PokemonOrigin origin,
         DateTime utcNow,
-        Guid? saveId)
+        Guid? saveId,
+        Guid? id = null)
     {
         if (level is < MinLevel or > MaxLevel)
         {
@@ -112,7 +122,7 @@ public sealed class OwnedPokemon : Entity
 
         var pokemon = new OwnedPokemon
         {
-            Id = Guid.CreateVersion7(),
+            Id = id ?? Guid.CreateVersion7(),
             SpeciesId = speciesId,
             TrainerId = trainerId,
             OriginalTrainerId = trainerId,

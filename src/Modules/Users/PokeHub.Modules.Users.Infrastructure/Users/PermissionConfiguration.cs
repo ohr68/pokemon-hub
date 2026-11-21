@@ -24,7 +24,11 @@ internal sealed class PermissionConfiguration : IEntityTypeConfiguration<Permiss
             Permission.ReadTrades,
             Permission.UpdateTrades,
             Permission.ManageGames,
-            Permission.ReadProgression);
+            Permission.ReadProgression,
+            Permission.ManageProgression,
+            Permission.ReadEconomy,
+            Permission.Buy,
+            Permission.ManageShop);
 
         builder
             .HasMany<Role>()
@@ -42,6 +46,8 @@ internal sealed class PermissionConfiguration : IEntityTypeConfiguration<Permiss
                     CreateRolePermission(Role.Member, Permission.ReadTrades),
                     CreateRolePermission(Role.Member, Permission.UpdateTrades),
                     CreateRolePermission(Role.Member, Permission.ReadProgression),
+                    CreateRolePermission(Role.Member, Permission.ReadEconomy),
+                    CreateRolePermission(Role.Member, Permission.Buy),
 
                     // Admin permissions
                     CreateRolePermission(Role.Administrator, Permission.GetUser),
@@ -53,7 +59,11 @@ internal sealed class PermissionConfiguration : IEntityTypeConfiguration<Permiss
                     CreateRolePermission(Role.Administrator, Permission.ReadTrades),
                     CreateRolePermission(Role.Administrator, Permission.UpdateTrades),
                     CreateRolePermission(Role.Administrator, Permission.ManageGames),
-                    CreateRolePermission(Role.Administrator, Permission.ReadProgression)
+                    CreateRolePermission(Role.Administrator, Permission.ReadProgression),
+                    CreateRolePermission(Role.Administrator, Permission.ManageProgression),
+                    CreateRolePermission(Role.Administrator, Permission.ReadEconomy),
+                    CreateRolePermission(Role.Administrator, Permission.Buy),
+                    CreateRolePermission(Role.Administrator, Permission.ManageShop)
                 );
             });
     }

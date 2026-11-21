@@ -11,7 +11,8 @@ namespace PokeHub.Modules.Pokedex.Infrastructure.PokeApi;
 /// each generation lists its species, and each type lists the Pokémon that have it and in
 /// which slot. A species' types are those of its default form, whose id equals the species id.
 /// Trade evolutions add about 50 more requests, and the Generation III data (game numbers and
-/// FireRed/LeafGreen learnsets) one per species up to #386 plus one per move they learn.
+/// FireRed/LeafGreen learnsets) one per species up to #386 plus one per move they learn, and
+/// legendary/mythical flags one per species.
 /// </summary>
 internal sealed partial class PokeApiClient(HttpClient httpClient, ILogger<PokeApiClient> logger) : IPokeApiClient
 {
@@ -36,6 +37,7 @@ internal sealed partial class PokeApiClient(HttpClient httpClient, ILogger<PokeA
             Dictionary<int, int> tradeEvolutions = await GetTradeEvolutionsAsync(species, cancellationToken);
             GrowthRateResponse[] growthRates = await GetGrowthRatesAsync(cancellationToken);
             Gen3Data gen3 = await GetGen3DataAsync(species, cancellationToken);
+            Dictionary<int, SpeciesRarityResponse> rarity = await GetRarityAsync(species, cancellationToken);
             IReadOnlyCollection<MoveData> moves = await GetMovesAsync(
                 gen3.LevelUpMoves.Values.SelectMany(learnset => learnset.Select(m => m.MoveId)).ToHashSet(),
                 cancellationToken);
@@ -63,7 +65,9 @@ internal sealed partial class PokeApiClient(HttpClient httpClient, ILogger<PokeA
                     tradeEvolutions.TryGetValue(id, out int evolvesInto) ? evolvesInto : null,
                     growthRateBySpecies.GetValueOrDefault(id),
                     gen3.Indices.TryGetValue(id, out int gen3Index) ? gen3Index : null,
-                    gen3.LevelUpMoves.GetValueOrDefault(id) ?? []));
+                    gen3.LevelUpMoves.GetValueOrDefault(id) ?? [],
+                    rarity.GetValueOrDefault(id)?.IsLegendary ?? false,
+                    rarity.GetValueOrDefault(id)?.IsMythical ?? false));
             }
 
             return new SpeciesCatalog(
@@ -222,6 +226,19 @@ internal sealed partial class PokeApiClient(HttpClient httpClient, ILogger<PokeA
         }
 
         return new Gen3Data(indices, levelUpMoves);
+    }
+
+    /// <summary>Which species are legendary or mythical: one request per species.</summary>
+    private async Task<Dictionary<int, SpeciesRarityResponse>> GetRarityAsync(
+        Dictionary<int, (string Name, int Generation)> species,
+        CancellationToken cancellationToken)
+    {
+        SpeciesRarityResponse[] rarity = await ThrottledAsync(
+            species.Keys,
+            id => GetAsync<SpeciesRarityResponse>($"pokemon-species/{id}", cancellationToken),
+            cancellationToken);
+
+        return rarity.ToDictionary(r => r.Id);
     }
 
     private async Task<IReadOnlyCollection<MoveData>> GetMovesAsync(

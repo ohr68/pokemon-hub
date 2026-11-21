@@ -8,4 +8,7 @@ public enum PokemonOrigin
 
     // Caught in a game connected to PokeHub.
     Game = 3,
+
+    // Bought with coins in the hub's shop.
+    Shop = 4,
 }

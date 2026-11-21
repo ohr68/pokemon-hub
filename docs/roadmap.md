@@ -9,7 +9,7 @@
 | 4. Games platform | Done: registration, game API, files, rate limits, webhooks, turning games off, admin pages |
 | 5. FireRed | Done: play in the browser, sync, mirror, save backups, transfers both ways |
 | 6. Operations | Planned |
-| 7. Trainer progression: XP and levels, trophies, badges, coins | In progress: XP, levels, trophies and badges done |
+| 7. Trainer progression: XP and levels, trophies, badges, coins | Done |
 
 More ideas, not yet in a phase, are in the [backlog](#backlog).
 
@@ -162,8 +162,17 @@ Trainers grow by playing, across every game connected to PokeHub:
   badges from the save (flags 0x820 to 0x827, checked on a real save) and reports them. The
   trainer page shows a badge case per game (`api/progression/me/badges`). Badges are never
   removed, even if a save is restored to before one.
-- **Coins**: earned for catching shiny or rare Pokémon, winning badges and other
-  achievements, and spent in the hub on items or Pokémon to send into the games.
+- **Coins** (done): an Economy module keeps each trainer's wallet and coin ledger (each
+  source pays once). Coins come from catching a shiny (50) or a rare Pokémon (100:
+  legendary or mythical, flags the catalog sync now fetches), badges (30), trophies (20,
+  50, 100 by tier) and each new level (10 × the level). They're spent in the shop
+  (`/shop`): admins put Pokémon up for sale (species, level, shiny, price, optional stock)
+  at `/admin/shop`, and a purchase pays first, then has the Pokédex give the Pokémon to the
+  buyer's hub (the purchase id becomes the Pokémon's, so it can't be given twice); if
+  that fails, coins and stock go back. Bought Pokémon earn no XP or coins. Past
+  achievements were backfilled with the history replays (`api/pokedex/history/replay`,
+  `api/progression/replay`). Selling items for the games comes later: it means writing
+  the game's bag in the save.
 
 ## Backlog
 

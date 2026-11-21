@@ -51,6 +51,8 @@ internal sealed class SyncSpeciesCommandHandler(
                         data.GrowthRate,
                         data.Gen3Index,
                         ToLevelUpMoves(data.Gen3LevelUpMoves),
+                        data.IsLegendary,
+                        data.IsMythical,
                         utcNow))
                 {
                     updated++;
@@ -69,6 +71,8 @@ internal sealed class SyncSpeciesCommandHandler(
                 data.GrowthRate,
                 data.Gen3Index,
                 ToLevelUpMoves(data.Gen3LevelUpMoves),
+                data.IsLegendary,
+                data.IsMythical,
                 utcNow));
 
             added++;

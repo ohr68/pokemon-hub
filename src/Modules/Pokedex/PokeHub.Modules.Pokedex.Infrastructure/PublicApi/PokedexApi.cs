@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PokeHub.Common.Application.Exceptions;
 using PokeHub.Common.Domain.Abstractions;
+using PokeHub.Modules.Pokedex.Application.Pokemon.BuyPokemon;
 using PokeHub.Modules.Pokedex.Application.Pokemon.CatchPokemon;
 using PokeHub.Modules.Pokedex.Application.Pokemon.GetPokemon;
 using PokeHub.Modules.Pokedex.Application.Pokemon.GetTrainerPokemon;
@@ -15,11 +16,12 @@ using PokeHub.Modules.Pokedex.Application.Saves.WithdrawPokemon;
 using PokeHub.Modules.Pokedex.Application.Pokemon.TradePokemon;
 using PokeHub.Modules.Pokedex.Application.Trainers.GetTrainer;
 using PokeHub.Modules.Pokedex.Domain.Pokemon;
+using PokeHub.Modules.Pokedex.Domain.Species;
 using PokeHub.Modules.Pokedex.PublicApi;
 
 namespace PokeHub.Modules.Pokedex.Infrastructure.PublicApi;
 
-internal sealed class PokedexApi(ISender sender) : IPokedexApi
+internal sealed class PokedexApi(ISender sender, ISpeciesRepository speciesRepository) : IPokedexApi
 {
     public async Task<PokemonInfo?> GetPokemonAsync(Guid pokemonId, CancellationToken cancellationToken = default)
     {
@@ -229,5 +231,23 @@ internal sealed class PokedexApi(ISender sender) : IPokedexApi
         {
             return Result.Failure<IReadOnlyCollection<Guid>>(PokemonErrors.ChangedMeanwhile);
         }
+    }
+
+    public Task<Result<Guid>> GiveBoughtPokemonAsync(
+        Guid purchaseId,
+        Guid trainerId,
+        int speciesId,
+        int level,
+        bool isShiny,
+        CancellationToken cancellationToken = default)
+    {
+        return sender.Send(new GiveBoughtPokemonCommand(purchaseId, trainerId, speciesId, level, isShiny), cancellationToken);
+    }
+
+    public async Task<SpeciesInfo?> GetSpeciesAsync(int speciesId, CancellationToken cancellationToken = default)
+    {
+        PokemonSpecies? species = await speciesRepository.GetAsync(speciesId, cancellationToken);
+
+        return species is null ? null : new SpeciesInfo(species.Id, species.Name, species.IsRare);
     }
 }

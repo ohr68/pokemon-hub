@@ -46,6 +46,13 @@ public sealed class PokemonSpecies : Entity
     /// </summary>
     public IReadOnlyCollection<LevelUpMove> Gen3LevelUpMoves => _gen3LevelUpMoves.AsReadOnly();
 
+    // Legendary and mythical species count as rare (catching one earns coins).
+    public bool IsLegendary { get; private set; }
+
+    public bool IsMythical { get; private set; }
+
+    public bool IsRare => IsLegendary || IsMythical;
+
     public DateTime SyncedOnUtc { get; private set; }
 
     public static PokemonSpecies Create(
@@ -58,6 +65,8 @@ public sealed class PokemonSpecies : Entity
         string? growthRate,
         int? gen3Index,
         IReadOnlyCollection<LevelUpMove> gen3LevelUpMoves,
+        bool isLegendary,
+        bool isMythical,
         DateTime utcNow)
     {
         var species = new PokemonSpecies
@@ -70,6 +79,8 @@ public sealed class PokemonSpecies : Entity
             TradeEvolutionSpeciesId = tradeEvolutionSpeciesId,
             GrowthRate = growthRate,
             Gen3Index = gen3Index,
+            IsLegendary = isLegendary,
+            IsMythical = isMythical,
             SyncedOnUtc = utcNow,
         };
 
@@ -90,6 +101,8 @@ public sealed class PokemonSpecies : Entity
         string? growthRate,
         int? gen3Index,
         IReadOnlyCollection<LevelUpMove> gen3LevelUpMoves,
+        bool isLegendary,
+        bool isMythical,
         DateTime utcNow)
     {
         if (Name == name &&
@@ -99,6 +112,8 @@ public sealed class PokemonSpecies : Entity
             TradeEvolutionSpeciesId == tradeEvolutionSpeciesId &&
             GrowthRate == growthRate &&
             Gen3Index == gen3Index &&
+            IsLegendary == isLegendary &&
+            IsMythical == isMythical &&
             _gen3LevelUpMoves.SequenceEqual(gen3LevelUpMoves))
         {
             return false;
@@ -111,6 +126,8 @@ public sealed class PokemonSpecies : Entity
         TradeEvolutionSpeciesId = tradeEvolutionSpeciesId;
         GrowthRate = growthRate;
         Gen3Index = gen3Index;
+        IsLegendary = isLegendary;
+        IsMythical = isMythical;
         SyncedOnUtc = utcNow;
 
         if (!_gen3LevelUpMoves.SequenceEqual(gen3LevelUpMoves))

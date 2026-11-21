@@ -85,4 +85,19 @@ public interface IPokedexApi
         Guid gameId,
         IReadOnlyCollection<WithdrawnPokemon> withdrawals,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gives a trainer a Pokémon bought in the shop, in the hub. Safe to repeat for the same
+    /// purchase: the Pokémon gets the purchase's id.
+    /// </summary>
+    Task<Result<Guid>> GiveBoughtPokemonAsync(
+        Guid purchaseId,
+        Guid trainerId,
+        int speciesId,
+        int level,
+        bool isShiny,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>A species in the catalog, or null when there is none with that number.</summary>
+    Task<SpeciesInfo?> GetSpeciesAsync(int speciesId, CancellationToken cancellationToken = default);
 }

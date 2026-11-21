@@ -42,6 +42,9 @@
         <Content Update="modules.progression.Development.json">
             <DependentUpon>modules.progression.json</DependentUpon>
         </Content>
+        <Content Update="modules.economy.Development.json">
+            <DependentUpon>modules.economy.json</DependentUpon>
+        </Content>
     </ItemGroup>
 
     <ItemGroup>
@@ -50,6 +53,7 @@
         <ProjectReference Include="..\..\Modules\Trades\PokeHub.Modules.Trades.Infrastructure\PokeHub.Modules.Trades.Infrastructure.csproj"/>
         <ProjectReference Include="..\..\Modules\Games\PokeHub.Modules.Games.Infrastructure\PokeHub.Modules.Games.Infrastructure.csproj"/>
         <ProjectReference Include="..\..\Modules\Progression\PokeHub.Modules.Progression.Infrastructure\PokeHub.Modules.Progression.Infrastructure.csproj"/>
+        <ProjectReference Include="..\..\Modules\Economy\PokeHub.Modules.Economy.Infrastructure\PokeHub.Modules.Economy.Infrastructure.csproj"/>
     </ItemGroup>
 
 </Project>

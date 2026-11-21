@@ -82,3 +82,8 @@ internal sealed record MoveResponse(
 internal sealed record GameIndex(
     [property: JsonPropertyName("game_index")] int Index,
     [property: JsonPropertyName("version")] NamedResource Version);
+
+internal sealed record SpeciesRarityResponse(
+    [property: JsonPropertyName("id")] int Id,
+    [property: JsonPropertyName("is_legendary")] bool IsLegendary,
+    [property: JsonPropertyName("is_mythical")] bool IsMythical);

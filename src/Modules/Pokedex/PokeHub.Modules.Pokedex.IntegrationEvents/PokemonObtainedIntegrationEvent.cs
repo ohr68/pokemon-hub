@@ -3,8 +3,9 @@ using PokeHub.Common.Application.EventBus;
 namespace PokeHub.Modules.Pokedex.IntegrationEvents;
 
 /// <summary>A trainer got a new Pokémon: their starter, a catch in a game, or a grant.</summary>
-/// <param name="origin">starter, game or grant.</param>
+/// <param name="origin">starter, game, grant or shop.</param>
 /// <param name="isNewSpecies">The trainer never had this species before.</param>
+/// <param name="isRare">The species is legendary or mythical.</param>
 public sealed class PokemonObtainedIntegrationEvent(
     Guid id,
     DateTime occurredOnUtc,
@@ -13,7 +14,8 @@ public sealed class PokemonObtainedIntegrationEvent(
     int speciesId,
     string origin,
     bool isShiny,
-    bool isNewSpecies) : IntegrationEvent(id, occurredOnUtc)
+    bool isNewSpecies,
+    bool isRare) : IntegrationEvent(id, occurredOnUtc)
 {
     public Guid PokemonId { get; init; } = pokemonId;
 
@@ -26,4 +28,6 @@ public sealed class PokemonObtainedIntegrationEvent(
     public bool IsShiny { get; init; } = isShiny;
 
     public bool IsNewSpecies { get; init; } = isNewSpecies;
+
+    public bool IsRare { get; init; } = isRare;
 }
