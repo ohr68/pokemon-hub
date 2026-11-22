@@ -7,6 +7,24 @@ using PokeHub.Modules.Pokedex.Domain.Trainers;
 
 namespace PokeHub.Modules.Pokedex.Infrastructure.Pokemon;
 
+internal sealed class PokemonGameStatusConfiguration : IEntityTypeConfiguration<PokemonGameStatus>
+{
+    public void Configure(EntityTypeBuilder<PokemonGameStatus> builder)
+    {
+        builder.ToTable("pokemon_game_status");
+
+        builder.HasKey(s => new { s.PokemonId, s.GameId });
+
+        builder.Property(s => s.PokemonId).ValueGeneratedNever();
+
+        builder.Property(s => s.GameId).ValueGeneratedNever();
+
+        builder.Property(s => s.BattleData).HasColumnType("jsonb");
+
+        builder.HasOne<OwnedPokemon>().WithMany().HasForeignKey(s => s.PokemonId).OnDelete(DeleteBehavior.Cascade);
+    }
+}
+
 internal sealed class OwnedPokemonConfiguration : IEntityTypeConfiguration<OwnedPokemon>
 {
     public void Configure(EntityTypeBuilder<OwnedPokemon> builder)
@@ -18,8 +36,6 @@ internal sealed class OwnedPokemonConfiguration : IEntityTypeConfiguration<Owned
         builder.Property(p => p.Id).ValueGeneratedNever();
 
         builder.Property(p => p.Nickname).HasMaxLength(12);
-
-        builder.Property(p => p.BattleData).HasColumnType("jsonb");
 
         builder.Property(p => p.Origin).HasConversion<string>().HasMaxLength(20);
 

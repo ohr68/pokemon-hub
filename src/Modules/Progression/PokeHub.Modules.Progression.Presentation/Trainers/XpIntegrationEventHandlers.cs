@@ -37,12 +37,25 @@ internal sealed class PokemonObtainedIntegrationEventHandler(ISender sender)
                 }
 
                 break;
-            // Pokémon an admin grants earn nothing, so XP can't be handed out.
-            default:
-                return;
         }
 
-        await AwardAsync(sender, e.TrainerId, awards, cancellationToken);
+        // Granted and bought Pokémon earn no XP, but every species counts as discovered.
+        if (awards.Count > 0)
+        {
+            await AwardAsync(sender, e.TrainerId, awards, cancellationToken);
+        }
+
+        await RefreshSpeciesAsync(sender, e.TrainerId, cancellationToken);
+    }
+
+    internal static async Task RefreshSpeciesAsync(ISender sender, Guid trainerId, CancellationToken cancellationToken)
+    {
+        Result result = await sender.Send(new RefreshSpeciesDiscoveredCommand(trainerId), cancellationToken);
+
+        if (result.IsFailure)
+        {
+            throw new PokeHubException(nameof(RefreshSpeciesDiscoveredCommand), result.Error);
+        }
     }
 
     internal static async Task AwardAsync(ISender sender, Guid trainerId, IReadOnlyCollection<XpAward> awards, CancellationToken cancellationToken)
@@ -60,23 +73,31 @@ internal sealed class PokemonTradedIntegrationEventHandler(ISender sender)
     : IntegrationEventHandler<PokemonTradedIntegrationEvent>
 {
     // A trade publishes one event per Pokémon; each trainer earns once, for the one they receive.
-    public override Task Handle(PokemonTradedIntegrationEvent e, CancellationToken cancellationToken = default) =>
-        PokemonObtainedIntegrationEventHandler.AwardAsync(
+    public override async Task Handle(PokemonTradedIntegrationEvent e, CancellationToken cancellationToken = default)
+    {
+        await PokemonObtainedIntegrationEventHandler.AwardAsync(
             sender,
             e.ToTrainerId,
             [new XpAward(XpReason.Traded, $"trade:{e.TradeId}", e.OccurredOnUtc)],
             cancellationToken);
+
+        await PokemonObtainedIntegrationEventHandler.RefreshSpeciesAsync(sender, e.ToTrainerId, cancellationToken);
+    }
 }
 
 internal sealed class PokemonEvolvedIntegrationEventHandler(ISender sender)
     : IntegrationEventHandler<PokemonEvolvedIntegrationEvent>
 {
-    public override Task Handle(PokemonEvolvedIntegrationEvent e, CancellationToken cancellationToken = default) =>
-        PokemonObtainedIntegrationEventHandler.AwardAsync(
+    public override async Task Handle(PokemonEvolvedIntegrationEvent e, CancellationToken cancellationToken = default)
+    {
+        await PokemonObtainedIntegrationEventHandler.AwardAsync(
             sender,
             e.TrainerId,
             [new XpAward(XpReason.Evolved, $"evolved:{e.PokemonId}:{e.ToSpeciesId}", e.OccurredOnUtc)],
             cancellationToken);
+
+        await PokemonObtainedIntegrationEventHandler.RefreshSpeciesAsync(sender, e.TrainerId, cancellationToken);
+    }
 }
 
 internal sealed class GameBadgesReportedIntegrationEventHandler(ISender sender)

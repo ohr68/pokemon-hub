@@ -11,6 +11,21 @@ internal sealed class OwnedPokemonRepository(PokedexDbContext context) : IOwnedP
         return await context.Pokemon.SingleOrDefaultAsync(p => p.Id == pokemonId, cancellationToken);
     }
 
+    public async Task<IReadOnlyList<PokemonGameStatus>> GetGameStatusesAsync(
+        Guid gameId,
+        IReadOnlyCollection<Guid> pokemonIds,
+        CancellationToken cancellationToken = default)
+    {
+        return await context.Set<PokemonGameStatus>()
+            .Where(s => s.GameId == gameId && pokemonIds.Contains(s.PokemonId))
+            .ToListAsync(cancellationToken);
+    }
+
+    public void Insert(PokemonGameStatus status)
+    {
+        context.Set<PokemonGameStatus>().Add(status);
+    }
+
     public Task<bool> IsTradeCompletedAsync(Guid tradeId, CancellationToken cancellationToken = default)
     {
         return context.Set<OwnershipRecord>().AnyAsync(r => r.TradeId == tradeId, cancellationToken);

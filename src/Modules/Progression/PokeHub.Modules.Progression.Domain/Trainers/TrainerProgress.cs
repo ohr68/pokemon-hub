@@ -119,6 +119,21 @@ public sealed class TrainerProgress : Entity
     }
 
     /// <summary>
+    /// Every species the trainer ever had, however they got it. It comes from the Pokédex's
+    /// history rather than from XP, because not every way of getting a Pokémon earns XP.
+    /// </summary>
+    public void SetSpeciesDiscovered(int count, DateTime utcNow)
+    {
+        if (count == SpeciesDiscovered)
+        {
+            return;
+        }
+
+        SpeciesDiscovered = count;
+        UpdatedOnUtc = utcNow;
+    }
+
+    /// <summary>
     /// Awards every trophy whose target the trainer reached and doesn't have yet. Runs after
     /// each award, and on its own to catch up (a trophy added later, a replayed history).
     /// </summary>
@@ -156,7 +171,6 @@ public sealed class TrainerProgress : Entity
             case XpReason.ChoseStarter: StartersChosen++; break;
             case XpReason.CaughtPokemon: Catches++; break;
             case XpReason.CaughtShiny: ShinyCatches++; break;
-            case XpReason.NewSpecies: SpeciesDiscovered++; break;
             case XpReason.Traded: Trades++; break;
             case XpReason.Evolved: Evolutions++; break;
             case XpReason.EarnedBadge: Badges++; break;

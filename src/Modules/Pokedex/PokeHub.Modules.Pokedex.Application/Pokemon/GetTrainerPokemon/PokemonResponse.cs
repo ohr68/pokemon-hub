@@ -15,5 +15,4 @@ public sealed record PokemonResponse(
     Guid? SaveId,
     string? GameName,
     bool IsAwaitingDelivery,
-    bool IsInsideGame,
-    string? BattleData);
+    bool IsInsideGame);

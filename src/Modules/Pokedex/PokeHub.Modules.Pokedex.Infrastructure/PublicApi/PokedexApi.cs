@@ -11,6 +11,7 @@ using PokeHub.Modules.Pokedex.Application.Saves;
 using PokeHub.Modules.Pokedex.Application.Saves.GetOrCreateSave;
 using PokeHub.Modules.Pokedex.Application.Saves.DeliverPokemon;
 using PokeHub.Modules.Pokedex.Application.Saves.GetAwaitingDelivery;
+using PokeHub.Modules.Pokedex.Application.Pokemon.GetSpeciesEverOwned;
 using PokeHub.Modules.Pokedex.Application.Saves.ReconcileSave;
 using PokeHub.Modules.Pokedex.Application.Saves.RedeliverPokemon;
 using PokeHub.Modules.Pokedex.Application.Saves.UpdateBattleData;
@@ -152,6 +153,13 @@ internal sealed class PokedexApi(ISender sender, ISpeciesRepository speciesRepos
             .ToList();
     }
 
+    public async Task<IReadOnlyDictionary<Guid, int>> GetSpeciesEverOwnedAsync(Guid? trainerId = null, CancellationToken cancellationToken = default)
+    {
+        Result<IReadOnlyDictionary<Guid, int>> result = await sender.Send(new GetSpeciesEverOwnedQuery(trainerId), cancellationToken);
+
+        return result.IsSuccess ? result.Value : new Dictionary<Guid, int>();
+    }
+
     public Task<Result> UpdateBattleDataAsync(
         Guid trainerId,
         Guid gameId,
@@ -161,7 +169,7 @@ internal sealed class PokedexApi(ISender sender, ISpeciesRepository speciesRepos
             new UpdateBattleDataCommand(
                 trainerId,
                 gameId,
-                [.. reports.Select(r => new BattleReport(r.CatchKey, ToBattleData(r.Data)))]),
+                [.. reports.Select(r => new BattleReport(r.CatchKey, r.Level, ToBattleData(r.Data)))]),
             cancellationToken);
 
     private static BattleData ToBattleData(PokemonBattleData data) => new(

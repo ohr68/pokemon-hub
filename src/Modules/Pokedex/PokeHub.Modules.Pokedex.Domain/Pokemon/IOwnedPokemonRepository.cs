@@ -16,5 +16,12 @@ public interface IOwnedPokemonRepository
 
     Task<IReadOnlyList<OwnedPokemon>> GetAwaitingDeliveryAsync(Guid saveId, CancellationToken cancellationToken = default);
 
+    Task<IReadOnlyList<PokemonGameStatus>> GetGameStatusesAsync(
+        Guid gameId,
+        IReadOnlyCollection<Guid> pokemonIds,
+        CancellationToken cancellationToken = default);
+
+    void Insert(PokemonGameStatus status);
+
     void Insert(OwnedPokemon pokemon);
 }

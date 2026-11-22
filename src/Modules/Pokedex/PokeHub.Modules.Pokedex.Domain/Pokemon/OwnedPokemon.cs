@@ -73,11 +73,6 @@ public sealed class OwnedPokemon : Entity
 
     public byte[]? GameData { get; private set; }
 
-    /// <summary>What the game last reported about it in battle (moves, IVs, EVs...), as JSON.</summary>
-    public string? BattleData { get; private set; }
-
-    public DateTime? BattleDataUpdatedOnUtc { get; private set; }
-
     /// <summary>
     /// In a save and in the game's own save too: only the game can take it out.
     /// </summary>
@@ -376,18 +371,6 @@ public sealed class OwnedPokemon : Entity
         RaiseSaveChanged(save.Id, SaveChange.Delivered);
 
         return Result.Success();
-    }
-
-    /// <summary>Keeps what the game reports now; it replaces the last report.</summary>
-    public void UpdateBattleData(string battleData, DateTime utcNow)
-    {
-        if (BattleData == battleData)
-        {
-            return;
-        }
-
-        BattleData = battleData;
-        BattleDataUpdatedOnUtc = utcNow;
     }
 
     /// <summary>

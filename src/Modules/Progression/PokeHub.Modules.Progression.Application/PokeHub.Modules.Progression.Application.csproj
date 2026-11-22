@@ -2,6 +2,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\..\Common\PokeHub.Common.Application\PokeHub.Common.Application.csproj"/>
+        <ProjectReference Include="..\..\Pokedex\PokeHub.Modules.Pokedex.PublicApi\PokeHub.Modules.Pokedex.PublicApi.csproj"/>
         <ProjectReference Include="..\PokeHub.Modules.Progression.Domain\PokeHub.Modules.Progression.Domain.csproj"/>
         <ProjectReference Include="..\PokeHub.Modules.Progression.IntegrationEvents\PokeHub.Modules.Progression.IntegrationEvents.csproj"/>
     </ItemGroup>

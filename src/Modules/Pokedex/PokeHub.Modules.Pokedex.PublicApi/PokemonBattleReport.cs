@@ -1,7 +1,8 @@
 namespace PokeHub.Modules.Pokedex.PublicApi;
 
 /// <summary>What a game knows about one of its Pokémon, by catch key.</summary>
-public sealed record PokemonBattleReport(string CatchKey, PokemonBattleData Data);
+/// <param name="Level">Its level in that game now.</param>
+public sealed record PokemonBattleReport(string CatchKey, int Level, PokemonBattleData Data);
 
 /// <param name="Nature">0 to 24, in the games' order (Hardy to Quirky).</param>
 /// <param name="AbilitySlot">Which of the species' abilities: 0 or 1.</param>

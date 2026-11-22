@@ -201,7 +201,8 @@ Trainers grow by playing, across every game connected to PokeHub:
   (`/shop`): admins put Pokémon up for sale (species, level, shiny, price, optional stock)
   at `/admin/shop`, and a purchase pays first, then has the Pokédex give the Pokémon to the
   buyer's hub (the purchase id becomes the Pokémon's, so it can't be given twice); if
-  that fails, coins and stock go back. Bought Pokémon earn no XP or coins. Past
+  that fails, coins and stock go back. Bought Pokémon earn no XP or coins directly, but count as discovered species, which come
+  from the Pokédex's history (however the trainer got them) and can earn species trophies. Past
   achievements were backfilled with the history replays (`api/pokedex/history/replay`,
   `api/progression/replay`). Items for the bag are on sale too: an admin picks from a
   safe catalog (balls, healing, vitamins, Rare Candy, evolution stones; no key items or
@@ -214,9 +215,11 @@ Trainers grow by playing, across every game connected to PokeHub:
   each trainer chooses, only when the in-game save changed. The interval is kept per account
   in the browser, so it doesn't follow the trainer to another device.
 - **Battle data per Pokémon** (done for FireRed): each sync stores what the save holds about
-  a Pokémon (nature, moves and PP, IVs, EVs, friendship, held item and, for the party, current
-  stats), shown on its card in Meus Pokémons. It keeps the latest report only: a Gen 3 save has
-  no battle history per Pokémon, so growth over time would need keeping past syncs.
+  a Pokémon (level, nature, moves and PP, IVs, EVs, friendship, held item and, for the party,
+  current stats), per game. Each owned Pokémon has its own page (`/my-pokemon/:id`) with its
+  evolution chain and its status in every game it has been in. It keeps the latest report per
+  game: a Gen 3 save has no battle history per Pokémon, so growth over time would need keeping
+  past syncs.
 - **Stats sync per game** (done for FireRed): each sync stores the game's play time, money,
   Pokédex and counters (steps, battles, captures...), shown per game on the trainer's page.
   Counters are kept by name, so other games can report their own.

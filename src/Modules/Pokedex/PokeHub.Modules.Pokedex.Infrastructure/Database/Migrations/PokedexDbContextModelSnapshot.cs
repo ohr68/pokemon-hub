@@ -139,14 +139,6 @@ namespace PokeHub.Modules.Pokedex.Infrastructure.Database.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("awaiting_delivery");
 
-                    b.Property<string>("BattleData")
-                        .HasColumnType("jsonb")
-                        .HasColumnName("battle_data");
-
-                    b.Property<DateTime?>("BattleDataUpdatedOnUtc")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("battle_data_updated_on_utc");
-
                     b.Property<string>("CatchKey")
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)")
@@ -291,6 +283,35 @@ namespace PokeHub.Modules.Pokedex.Infrastructure.Database.Migrations
                         .HasDatabaseName("ix_ownership_history_trainer_id_change_species_id");
 
                     b.ToTable("ownership_history", "pokedex");
+                });
+
+            modelBuilder.Entity("PokeHub.Modules.Pokedex.Domain.Pokemon.PokemonGameStatus", b =>
+                {
+                    b.Property<Guid>("PokemonId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("pokemon_id");
+
+                    b.Property<Guid>("GameId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("game_id");
+
+                    b.Property<string>("BattleData")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("battle_data");
+
+                    b.Property<int>("Level")
+                        .HasColumnType("integer")
+                        .HasColumnName("level");
+
+                    b.Property<DateTime>("UpdatedOnUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_on_utc");
+
+                    b.HasKey("PokemonId", "GameId")
+                        .HasName("pk_pokemon_game_status");
+
+                    b.ToTable("pokemon_game_status", "pokedex");
                 });
 
             modelBuilder.Entity("PokeHub.Modules.Pokedex.Domain.Saves.Save", b =>
@@ -518,6 +539,16 @@ namespace PokeHub.Modules.Pokedex.Infrastructure.Database.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_ownership_history_trainers_trainer_id");
+                });
+
+            modelBuilder.Entity("PokeHub.Modules.Pokedex.Domain.Pokemon.PokemonGameStatus", b =>
+                {
+                    b.HasOne("PokeHub.Modules.Pokedex.Domain.Pokemon.OwnedPokemon", null)
+                        .WithMany()
+                        .HasForeignKey("PokemonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_pokemon_game_status_pokemon_pokemon_id");
                 });
 
             modelBuilder.Entity("PokeHub.Modules.Pokedex.Domain.Saves.Save", b =>

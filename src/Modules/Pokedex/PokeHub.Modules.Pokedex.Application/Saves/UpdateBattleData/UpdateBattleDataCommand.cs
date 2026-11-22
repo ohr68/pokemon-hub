@@ -14,7 +14,7 @@ public sealed record UpdateBattleDataCommand(
     Guid GameId,
     IReadOnlyCollection<BattleReport> Reports) : ICommand;
 
-public sealed record BattleReport(string CatchKey, BattleData Data);
+public sealed record BattleReport(string CatchKey, int Level, BattleData Data);
 
 public sealed record BattleData(
     int Nature,
@@ -42,6 +42,7 @@ internal sealed class UpdateBattleDataCommandValidator : AbstractValidator<Updat
         RuleForEach(c => c.Reports).ChildRules(report =>
         {
             report.RuleFor(r => r.CatchKey).NotEmpty().MaximumLength(100);
+            report.RuleFor(r => r.Level).InclusiveBetween(1, 100);
             report.RuleFor(r => r.Data).NotNull();
             report.RuleFor(r => r.Data.Nature).InclusiveBetween(0, 24);
             report.RuleFor(r => r.Data.AbilitySlot).InclusiveBetween(0, 1);
@@ -81,13 +82,30 @@ internal sealed class UpdateBattleDataCommandHandler(
         var inGame = (await pokemonRepository.GetInsideGameAsync(save.Id, request.GameId, cancellationToken))
             .ToDictionary(p => p.CatchKey!, StringComparer.Ordinal);
 
+        Guid[] ids = [.. inGame.Values.Select(p => p.Id)];
+        var statuses = (await pokemonRepository.GetGameStatusesAsync(request.GameId, ids, cancellationToken))
+            .ToDictionary(s => s.PokemonId);
+
         DateTime utcNow = dateTimeProvider.UtcNow;
 
         foreach (BattleReport report in request.Reports)
         {
-            if (inGame.TryGetValue(report.CatchKey, out OwnedPokemon? pokemon))
+            if (!inGame.TryGetValue(report.CatchKey, out OwnedPokemon? pokemon))
             {
-                pokemon.UpdateBattleData(JsonSerializer.Serialize(report.Data, JsonOptions), utcNow);
+                continue;
+            }
+
+            string battleData = JsonSerializer.Serialize(report.Data, JsonOptions);
+
+            if (statuses.TryGetValue(pokemon.Id, out PokemonGameStatus? status))
+            {
+                status.Update(report.Level, battleData, utcNow);
+            }
+            else
+            {
+                status = PokemonGameStatus.Create(pokemon.Id, request.GameId, report.Level, battleData, utcNow);
+                statuses[pokemon.Id] = status;
+                pokemonRepository.Insert(status);
             }
         }
 
