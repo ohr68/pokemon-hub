@@ -458,6 +458,10 @@ namespace PokeHub.Modules.Pokedex.Infrastructure.Database.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<Guid?>("AvatarPokemonId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("avatar_pokemon_id");
+
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(9)

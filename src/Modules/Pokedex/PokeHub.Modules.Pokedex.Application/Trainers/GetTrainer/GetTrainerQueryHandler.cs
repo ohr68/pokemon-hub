@@ -17,12 +17,17 @@ internal sealed class GetTrainerQueryHandler(IDbConnectionFactory dbConnectionFa
         const string sql =
             $"""
              SELECT
-                id AS {nameof(TrainerResponse.Id)},
-                name AS {nameof(TrainerResponse.Name)},
-                code AS {nameof(TrainerResponse.Code)},
-                starter_species_id AS {nameof(TrainerResponse.StarterSpeciesId)}
-             FROM pokedex.trainers
-             WHERE id = @TrainerId
+                t.id AS {nameof(TrainerResponse.Id)},
+                t.name AS {nameof(TrainerResponse.Name)},
+                t.code AS {nameof(TrainerResponse.Code)},
+                t.starter_species_id AS {nameof(TrainerResponse.StarterSpeciesId)},
+                p.id AS {nameof(TrainerResponse.AvatarPokemonId)},
+                p.species_id AS {nameof(TrainerResponse.AvatarSpeciesId)},
+                p.is_shiny AS {nameof(TrainerResponse.AvatarIsShiny)}
+             FROM pokedex.trainers t
+             LEFT JOIN pokedex.pokemon p
+                ON p.id = t.avatar_pokemon_id AND p.trainer_id = t.id AND p.status = 'Active'
+             WHERE t.id = @TrainerId
              """;
 
         TrainerResponse? trainer = await connection.QuerySingleOrDefaultAsync<TrainerResponse>(sql, request);

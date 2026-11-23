@@ -35,6 +35,12 @@ public sealed class Trainer : Entity
 
     public int? StarterSpeciesId { get; private set; }
 
+    /// <summary>
+    /// The Pokémon shown as the trainer's picture. A reference, so the picture follows it when it
+    /// evolves; it stops showing once the trainer no longer owns it.
+    /// </summary>
+    public Guid? AvatarPokemonId { get; private set; }
+
     public static Trainer Create(Guid id, string name)
     {
         return new Trainer
@@ -60,6 +66,11 @@ public sealed class Trainer : Entity
         StarterSpeciesId = speciesId;
 
         return Result.Success();
+    }
+
+    public void SetAvatar(Guid? pokemonId)
+    {
+        AvatarPokemonId = pokemonId;
     }
 
     public void Rename(string name)
