@@ -40,27 +40,3 @@ internal sealed class GetGameDexesQueryHandler(IDbConnectionFactory dbConnection
 
     private sealed record CountRow(string Slug, int Count);
 }
-
-/// <summary>The species in a game's own Pokédex, in the game's order.</summary>
-public sealed record GetGameDexSpeciesQuery(string Slug) : IQuery<IReadOnlyCollection<int>>;
-
-internal sealed class GetGameDexSpeciesQueryHandler(IDbConnectionFactory dbConnectionFactory)
-    : IQueryHandler<GetGameDexSpeciesQuery, IReadOnlyCollection<int>>
-{
-    public async Task<Result<IReadOnlyCollection<int>>> Handle(
-        GetGameDexSpeciesQuery request,
-        CancellationToken cancellationToken)
-    {
-        await using DbConnection connection = await dbConnectionFactory.OpenConnectionAsync();
-
-        const string sql =
-            """
-            SELECT species_id
-            FROM pokedex.game_dex_entries
-            WHERE game_slug = @Slug
-            ORDER BY position
-            """;
-
-        return (await connection.QueryAsync<int>(sql, request)).ToList();
-    }
-}
