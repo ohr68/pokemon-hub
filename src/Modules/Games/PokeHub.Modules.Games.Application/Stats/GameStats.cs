@@ -4,12 +4,14 @@ using Dapper;
 using FluentValidation;
 using PokeHub.Common.Application.Clock;
 using PokeHub.Common.Application.Data;
+using PokeHub.Common.Application.EventBus;
 using PokeHub.Common.Application.Messaging;
 using PokeHub.Common.Domain.Abstractions;
 using PokeHub.Modules.Games.Application.Abstractions.Data;
 using PokeHub.Modules.Games.Application.Play;
 using PokeHub.Modules.Games.Domain.Games;
 using PokeHub.Modules.Games.Domain.Stats;
+using PokeHub.Modules.Games.IntegrationEvents;
 using PokeHub.Modules.Pokedex.PublicApi;
 
 namespace PokeHub.Modules.Games.Application.Stats;
@@ -62,6 +64,7 @@ internal sealed class ReportGameStatsCommandValidator : AbstractValidator<Report
 internal sealed class ReportGameStatsCommandHandler(
     IGameRepository gameRepository,
     IPlayerGameStatsRepository statsRepository,
+    IEventBus eventBus,
     IDateTimeProvider dateTimeProvider,
     IUnitOfWork unitOfWork)
     : ICommandHandler<ReportGameStatsCommand>
@@ -83,6 +86,8 @@ internal sealed class ReportGameStatsCommandHandler(
             statsRepository.Insert(stats);
         }
 
+        bool countersChanged = !SameCounters(stats.Counters, request.Counters);
+
         stats.Report(
             request.PlayTimeSeconds,
             request.Money,
@@ -93,7 +98,26 @@ internal sealed class ReportGameStatsCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
+        if (countersChanged)
+        {
+            await eventBus.PublishAsync(
+                new GameStatsReportedIntegrationEvent(
+                    Guid.CreateVersion7(),
+                    dateTimeProvider.UtcNow,
+                    request.TrainerId,
+                    game.Value.Id),
+                cancellationToken);
+        }
+
         return Result.Success();
+    }
+
+    private static bool SameCounters(string stored, IReadOnlyDictionary<string, long> reported)
+    {
+        Dictionary<string, long> previous = JsonSerializer.Deserialize<Dictionary<string, long>>(stored) ?? [];
+
+        return previous.Count == reported.Count
+            && reported.All(pair => previous.TryGetValue(pair.Key, out long value) && value == pair.Value);
     }
 }
 

@@ -76,6 +76,8 @@ public static class GamesModule
 
             services.AddScoped<IPlayerGameStatsRepository, PlayerGameStatsRepository>();
 
+            services.AddScoped<IPlayerGameCounters, PlayerGameCountersReader>();
+
             services.AddScoped<IGameFileRepository, GameFileRepository>();
 
             services.AddScoped<IWebhookDeliveryRepository, WebhookDeliveryRepository>();

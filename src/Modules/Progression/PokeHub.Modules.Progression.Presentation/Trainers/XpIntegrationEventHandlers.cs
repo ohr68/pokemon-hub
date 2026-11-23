@@ -100,6 +100,14 @@ internal sealed class PokemonEvolvedIntegrationEventHandler(ISender sender)
     }
 }
 
+internal sealed class GameStatsReportedIntegrationEventHandler(ISender sender)
+    : IntegrationEventHandler<GameStatsReportedIntegrationEvent>
+{
+    // New counters can complete a goal built on them, such as entering the Hall of Fame.
+    public override Task Handle(GameStatsReportedIntegrationEvent e, CancellationToken cancellationToken = default) =>
+        PokemonObtainedIntegrationEventHandler.RefreshSpeciesAsync(sender, e.TrainerId, cancellationToken);
+}
+
 internal sealed class GameBadgesReportedIntegrationEventHandler(ISender sender)
     : IntegrationEventHandler<GameBadgesReportedIntegrationEvent>
 {

@@ -4,6 +4,7 @@ using PokeHub.Common.Application.Clock;
 using PokeHub.Common.Application.Data;
 using PokeHub.Common.Application.Messaging;
 using PokeHub.Common.Domain.Abstractions;
+using PokeHub.Modules.Games.PublicApi;
 using PokeHub.Modules.Pokedex.PublicApi;
 using PokeHub.Modules.Progression.Application.Abstractions.Data;
 using PokeHub.Modules.Progression.Domain.Trainers;
@@ -18,6 +19,7 @@ public sealed record RecordBadgesCommand(Guid TrainerId, Guid GameId, string Gam
 internal sealed class RecordBadgesCommandHandler(
     ITrainerProgressRepository repository,
     IPokedexApi pokedexApi,
+    IPlayerGameCounters gameCounters,
     IDateTimeProvider dateTimeProvider,
     IUnitOfWork unitOfWork)
     : ICommandHandler<RecordBadgesCommand>
@@ -38,7 +40,11 @@ internal sealed class RecordBadgesCommandHandler(
 
         IReadOnlyCollection<GameFact> facts = await pokedexApi.GetGameFactsAsync(request.TrainerId, cancellationToken);
         IReadOnlyCollection<GameDexProgress> dexes = await pokedexApi.GetGameDexProgressAsync(request.TrainerId, cancellationToken);
-        progress.EarnAchievements(TrainerAchievements.For(progress, facts, dexes), utcNow);
+        AchievementProgress achievements = TrainerAchievements.For(progress, facts, dexes);
+        progress.EarnAchievements(achievements, utcNow);
+
+        SpecificSources sources = await TrainerAchievements.LoadSourcesAsync(pokedexApi, gameCounters, request.TrainerId, cancellationToken);
+        progress.EarnSpecific(TrainerAchievements.Specific(request.TrainerId, facts, achievements, sources), utcNow);
 
         repository.InsertEntries(progress.NewEntries);
 

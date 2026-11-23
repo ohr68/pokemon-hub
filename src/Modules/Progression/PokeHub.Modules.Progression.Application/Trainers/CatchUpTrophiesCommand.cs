@@ -2,6 +2,7 @@ using PokeHub.Common.Application.Clock;
 using PokeHub.Common.Application.Messaging;
 using PokeHub.Common.Domain.Abstractions;
 using PokeHub.Modules.Progression.Application.Abstractions.Data;
+using PokeHub.Modules.Games.PublicApi;
 using PokeHub.Modules.Pokedex.PublicApi;
 using PokeHub.Modules.Progression.Domain.Trainers;
 
@@ -16,6 +17,7 @@ public sealed record CatchUpTrophiesCommand : ICommand<int>;
 internal sealed class CatchUpTrophiesCommandHandler(
     ITrainerProgressRepository repository,
     IPokedexApi pokedexApi,
+    IPlayerGameCounters gameCounters,
     IDateTimeProvider dateTimeProvider,
     IUnitOfWork unitOfWork)
     : ICommandHandler<CatchUpTrophiesCommand, int>
@@ -27,6 +29,7 @@ internal sealed class CatchUpTrophiesCommandHandler(
         IReadOnlyDictionary<Guid, int> species = await pokedexApi.GetSpeciesEverOwnedAsync(cancellationToken: cancellationToken);
         ILookup<Guid, GameFact> facts = (await pokedexApi.GetGameFactsAsync(cancellationToken: cancellationToken)).ToLookup(f => f.TrainerId);
         ILookup<Guid, GameDexProgress> dexes = (await pokedexApi.GetGameDexProgressAsync(cancellationToken: cancellationToken)).ToLookup(d => d.TrainerId);
+        SpecificSources sources = await TrainerAchievements.LoadSourcesAsync(pokedexApi, gameCounters, null, cancellationToken);
 
         foreach (TrainerProgress progress in await repository.GetAllAsync(cancellationToken))
         {
@@ -37,7 +40,9 @@ internal sealed class CatchUpTrophiesCommandHandler(
 
             int before = progress.Trophies.Count;
             progress.EarnTrophies(utcNow);
-            progress.EarnAchievements(TrainerAchievements.For(progress, facts[progress.TrainerId], dexes[progress.TrainerId]), utcNow);
+            AchievementProgress achievements = TrainerAchievements.For(progress, facts[progress.TrainerId], dexes[progress.TrainerId]);
+            progress.EarnAchievements(achievements, utcNow);
+            progress.EarnSpecific(TrainerAchievements.Specific(progress.TrainerId, facts[progress.TrainerId], achievements, sources), utcNow);
             awarded += progress.Trophies.Count - before;
         }
 

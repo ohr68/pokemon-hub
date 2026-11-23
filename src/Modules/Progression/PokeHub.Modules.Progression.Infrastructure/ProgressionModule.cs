@@ -30,6 +30,7 @@ public static class ProgressionModule
 
         // Games report the badges players earn in them.
         registrationConfigurator.AddConsumer<IntegrationEventConsumer<GameBadgesReportedIntegrationEvent>>();
+        registrationConfigurator.AddConsumer<IntegrationEventConsumer<GameStatsReportedIntegrationEvent>>();
     }
 
     extension(IServiceCollection services)

@@ -3,6 +3,7 @@ using Dapper;
 using PokeHub.Common.Application.Data;
 using PokeHub.Common.Application.Messaging;
 using PokeHub.Common.Domain.Abstractions;
+using PokeHub.Modules.Games.PublicApi;
 using PokeHub.Modules.Pokedex.PublicApi;
 using PokeHub.Modules.Progression.Domain.Trainers;
 
@@ -33,8 +34,49 @@ public sealed record CrossGameAchievementsResponse(
     int DexesCompleted,
     int BadgeSetsCompleted);
 
+/// <summary>What hand-made trophies read from other modules, per trainer.</summary>
+internal sealed record SpecificSources(
+    ILookup<Guid, PokemonJourneyStep> Journeys,
+    ILookup<Guid, PlayerGameCounters> Counters,
+    IReadOnlyDictionary<string, Guid> GameIds);
+
 internal static class TrainerAchievements
 {
+    private const string HallOfFameCounter = "hallOfFame";
+
+    public static async Task<SpecificSources> LoadSourcesAsync(
+        IPokedexApi pokedexApi,
+        IPlayerGameCounters gameCounters,
+        Guid? trainerId,
+        CancellationToken cancellationToken)
+    {
+        IReadOnlyCollection<PokemonJourneyStep> journeys = await pokedexApi.GetPokemonJourneysAsync(trainerId, cancellationToken);
+        IReadOnlyCollection<PlayerGameCounters> counters = await gameCounters.GetCountersAsync(trainerId, cancellationToken);
+        IReadOnlyDictionary<string, Guid> gameIds = await gameCounters.GetGameIdsAsync(
+            SpecificTrophies.All.Where(t => t.GameSlug is not null).Select(t => t.GameSlug!).Distinct().ToList(),
+            cancellationToken);
+
+        return new SpecificSources(journeys.ToLookup(j => j.TrainerId), counters.ToLookup(c => c.TrainerId), gameIds);
+    }
+
+    public static SpecificProgress Specific(
+        Guid trainerId,
+        IEnumerable<GameFact> facts,
+        AchievementProgress achievements,
+        SpecificSources sources) =>
+        new(
+            facts.Select(f => new AchievementFact(f.GameId, f.IsEvolution, f.PokemonId, f.SpeciesId, f.IsShiny)).ToList(),
+            sources.Journeys[trainerId]
+                .Select(j => new JourneyMove(
+                    j.PokemonId,
+                    Enum.TryParse(j.Change, out JourneyKind kind) ? kind : JourneyKind.Other,
+                    j.GameId,
+                    j.OccurredOnUtc))
+                .ToList(),
+            sources.GameIds,
+            sources.Counters[trainerId].ToDictionary(c => c.GameId, c => c.Counters.GetValueOrDefault(HallOfFameCounter)),
+            achievements.Games.Where(g => g.DexTotal > 0).Select(g => g.GameId).ToHashSet());
+
     public static AchievementProgress For(TrainerProgress progress, IEnumerable<GameFact> facts, IEnumerable<GameDexProgress> dexes) =>
         From(
             facts,

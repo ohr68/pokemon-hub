@@ -166,6 +166,17 @@ internal sealed class PokedexApi(ISender sender, ISpeciesRepository speciesRepos
                 .ToList();
     }
 
+    public async Task<IReadOnlyCollection<PokemonJourneyStep>> GetPokemonJourneysAsync(Guid? trainerId = null, CancellationToken cancellationToken = default)
+    {
+        Result<IReadOnlyCollection<PokemonJourneyStepResponse>> result = await sender.Send(new GetPokemonJourneysQuery(trainerId), cancellationToken);
+
+        return result.IsFailure
+            ? []
+            : result.Value
+                .Select(s => new PokemonJourneyStep(s.TrainerId, s.PokemonId, s.Change, s.GameId, s.OccurredOnUtc))
+                .ToList();
+    }
+
     public async Task<IReadOnlyCollection<GameDexProgress>> GetGameDexProgressAsync(Guid? trainerId = null, CancellationToken cancellationToken = default)
     {
         Result<IReadOnlyCollection<GameDexProgressResponse>> result = await sender.Send(new GetGameDexProgressQuery(trainerId), cancellationToken);

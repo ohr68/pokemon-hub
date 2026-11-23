@@ -178,6 +178,18 @@ public sealed class TrainerProgress : Entity
         }
     }
 
+    /// <summary>Awards every hand-made trophy the trainer reached and doesn't have yet.</summary>
+    public void EarnSpecific(SpecificProgress specific, DateTime earnedOnUtc) =>
+        EarnSpecific(specific, SpecificTrophies.All, earnedOnUtc);
+
+    public void EarnSpecific(SpecificProgress specific, IReadOnlyCollection<SpecificTrophy> trophies, DateTime earnedOnUtc)
+    {
+        foreach (SpecificTrophy trophy in trophies.Where(t => specific.Value(t) >= t.Target))
+        {
+            Award(trophy.Code, trophy.Tier, earnedOnUtc);
+        }
+    }
+
     public int Value(TrainerStat stat) => stat switch
     {
         TrainerStat.StartersChosen => StartersChosen,

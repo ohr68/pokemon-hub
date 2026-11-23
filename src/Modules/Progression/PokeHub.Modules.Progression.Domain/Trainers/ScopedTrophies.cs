@@ -92,6 +92,7 @@ public static class TrophyCatalog
 
         return Trophies.All.FirstOrDefault(t => t.Code == code)?.Tier
             ?? GameTrophies.All.FirstOrDefault(t => t.Code == code)?.Tier
-            ?? CrossGameTrophies.All.FirstOrDefault(t => t.Code == code)?.Tier;
+            ?? CrossGameTrophies.All.FirstOrDefault(t => t.Code == code)?.Tier
+            ?? SpecificTrophies.All.FirstOrDefault(t => t.Code == code)?.Tier;
     }
 }

@@ -57,6 +57,11 @@ public interface IPokedexApi
     Task<IReadOnlyCollection<GameDexProgress>> GetGameDexProgressAsync(Guid? trainerId = null, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Everything in the history of trainers' Pokémon, oldest first. With a trainer id, only theirs.
+    /// </summary>
+    Task<IReadOnlyCollection<PokemonJourneyStep>> GetPokemonJourneysAsync(Guid? trainerId = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Keeps what the game reports about the Pokémon inside it. Catch keys it doesn't know are
     /// skipped, since the save may hold Pokémon not synced yet.
     /// </summary>

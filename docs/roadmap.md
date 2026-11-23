@@ -10,7 +10,7 @@
 | 5. FireRed | Done: play in the browser, sync, mirror, save backups, transfers both ways |
 | 6. Operations | Done: backups, reliable startup, problems view, local checks |
 | 7. Trainer progression: XP and levels, trophies, badges, coins | Done |
-| 8. Connected achievements: general, per-game, cross-game and specific | In progress (8a to 8d done) |
+| 8. Connected achievements: general, per-game, cross-game and specific | In progress (8a to 8e done) |
 
 More ideas, not yet in a phase, are in the [backlog](#backlog).
 
@@ -235,7 +235,9 @@ a larger journey. Today's trophies are global counters that don't know which gam
 - **8d. Cross-game set (done):** 11 trophies for playing several games, catching or evolving
   the same species across 2, 3 and 5 games, and completing 2 Pokédexes or badge sets. They pay
   double their tier. Only games with a known Pokédex count, so a sandbox game can't earn them.
-- **8e. Specific achievements:** hand-made goals for FireRed and for the hub overall.
+- **8e. Specific achievements (done):** 7 hand-made goals. FireRed: beat the Elite Four, catch
+  the legendary birds and Mewtwo, evolve the Eevee family. Hub: bring a Pokémon back from the
+  hub, receive a trade evolution, take one Pokémon to 3 games.
 - **8f. Trophy screen:** General and per-game tabs, progress bars, and notifications that name
   the game.
 

@@ -5,6 +5,7 @@ using PokeHub.Common.Application.Messaging;
 using PokeHub.Common.Domain.Abstractions;
 using PokeHub.Modules.Progression.Domain.Trainers;
 
+using PokeHub.Modules.Games.PublicApi;
 using PokeHub.Modules.Pokedex.PublicApi;
 
 namespace PokeHub.Modules.Progression.Application.Trainers;
@@ -16,6 +17,7 @@ public sealed record GetTrainerTrophiesQuery(Guid TrainerId) : IQuery<IReadOnlyC
 /// <param name="Progress">The trainer's count toward <paramref name="Target"/>, capped at it.</param>
 /// <param name="GameId">The game a per-game trophy belongs to; empty for the others.</param>
 /// <param name="IsCrossGame">It rewards what the trainer did across their games.</param>
+/// <param name="IsSpecific">A hand-made goal, for one game or for the hub.</param>
 public sealed record TrophyResponse(
     string Code,
     string Name,
@@ -26,15 +28,20 @@ public sealed record TrophyResponse(
     DateTime? EarnedOnUtc,
     Guid? GameId = null,
     string? GameName = null,
-    bool IsCrossGame = false);
+    bool IsCrossGame = false,
+    bool IsSpecific = false);
 
-internal sealed class GetTrainerTrophiesQueryHandler(IDbConnectionFactory dbConnectionFactory, IPokedexApi pokedexApi)
+internal sealed class GetTrainerTrophiesQueryHandler(
+    IDbConnectionFactory dbConnectionFactory,
+    IPokedexApi pokedexApi,
+    IPlayerGameCounters gameCounters)
     : IQueryHandler<GetTrainerTrophiesQuery, IReadOnlyCollection<TrophyResponse>>
 {
     public async Task<Result<IReadOnlyCollection<TrophyResponse>>> Handle(GetTrainerTrophiesQuery request, CancellationToken cancellationToken)
     {
         IReadOnlyCollection<GameFact> facts = await pokedexApi.GetGameFactsAsync(request.TrainerId, cancellationToken);
         IReadOnlyCollection<GameDexProgress> dexes = await pokedexApi.GetGameDexProgressAsync(request.TrainerId, cancellationToken);
+        SpecificSources sources = await TrainerAchievements.LoadSourcesAsync(pokedexApi, gameCounters, request.TrainerId, cancellationToken);
 
         await using DbConnection connection = await dbConnectionFactory.OpenConnectionAsync();
 
@@ -74,6 +81,8 @@ internal sealed class GetTrainerTrophiesQueryHandler(IDbConnectionFactory dbConn
             gameNames[dex.GameId] = dex.GameName;
         }
 
+        SpecificProgress specific = TrainerAchievements.Specific(request.TrainerId, facts, achievements, sources);
+
         var perGame = achievements.Games
             .SelectMany(game => GameTrophies.All
                 .Where(game.Offers)
@@ -99,6 +108,9 @@ internal sealed class GetTrainerTrophiesQueryHandler(IDbConnectionFactory dbConn
                 t.Target,
                 earned.TryGetValue(t.Code, out DateTime earnedOn) ? earnedOn : null,
                 IsCrossGame: true)))
+            .Concat(SpecificTrophies.All
+                .Where(t => t.GameSlug is null || sources.GameIds.ContainsKey(t.GameSlug))
+                .Select(t => ForSpecific(t, specific, sources.GameIds, gameNames, earned)))
             .ToList();
     }
 
@@ -117,6 +129,29 @@ internal sealed class GetTrainerTrophiesQueryHandler(IDbConnectionFactory dbConn
             earned.TryGetValue(code, out DateTime on) ? on : null,
             game.GameId,
             gameName);
+    }
+
+    private static TrophyResponse ForSpecific(
+        SpecificTrophy trophy,
+        SpecificProgress specific,
+        IReadOnlyDictionary<string, Guid> gameIds,
+        Dictionary<Guid, string> gameNames,
+        Dictionary<string, DateTime> earned)
+    {
+        Guid? gameId = trophy.GameSlug is not null ? gameIds[trophy.GameSlug] : null;
+        string? gameName = gameId is { } id && gameNames.TryGetValue(id, out string? name) ? ShortName(name) : null;
+
+        return new TrophyResponse(
+            trophy.Code,
+            trophy.Name,
+            trophy.Description,
+            trophy.Tier.ToString().ToLowerInvariant(),
+            Math.Min(specific.Value(trophy), trophy.Target),
+            trophy.Target,
+            earned.TryGetValue(trophy.Code, out DateTime on) ? on : null,
+            gameId,
+            gameName,
+            IsSpecific: true);
     }
 
     private static string ShortName(string gameName) =>
