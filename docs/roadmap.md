@@ -246,9 +246,9 @@ Trainers grow by playing, across every game connected to PokeHub:
 - **Stats sync per game** (done for FireRed): each sync stores the game's play time, money,
   Pokédex and counters (steps, battles, captures...), shown per game on the trainer's page.
   Counters are kept by name, so other games can report their own.
-- **Custom SVG type icons**: check whether drawing our own icon for each type (instead of
-  the closest Lucide icon) is worth it. The icons are components in one map, so they can be
-  swapped; the open question is where the artwork comes from.
+- **Custom SVG type icons** (done): all 18 types have original icons drawn on Lucide's grid
+  (24px, 2px rounded strokes) and built with its `createLucideIcon`, so badges and card
+  patterns use them like any other Lucide icon.
 - **Saves between consoles and emulators** (done for files): every way in or out of a
   GBA device ends in the same raw save file (.sav; .srm in RetroArch): emulators (mGBA,
   VisualBoyAdvance, myBoy, Pizza Boy, Delta) read and write it, flash carts keep it on
