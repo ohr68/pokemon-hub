@@ -211,6 +211,23 @@ Trainers grow by playing, across every game connected to PokeHub:
 
 ## Backlog
 
+- **Fluid save sync** (scoped, not started; the problem is in
+  [tech-debt.md](tech-debt.md#save-sync-isnt-fluid)), in four steps:
+  1. **Safe transfers:** PokeHub records a transfer before the game's save changes, so a failed
+     restore or a closed tab can leave a withdrawn Pokémon in both places, or a delivered one
+     marked as in the game when it isn't. Make an interrupted transfer recoverable, back up the
+     save after every transfer, and stop automatic sync from starting as a transfer begins.
+  2. **Instant sync:** notice each in-game save and sync it a few seconds later, on by default
+     with an off switch, replacing the interval picker. First measure how often the save can
+     be checked, since each read may also write to browser storage.
+  3. **One save panel:** a single status (up to date, syncing, failed, no save yet) with the
+     last sync time, and tabs for transfers, items, import/export and backups.
+  4. **Fewer disruptive restarts:** pending Pokémon and items go in when the game starts, while
+     there's no progress to lose. Mid-game they wait until the player applies them, with a
+     warning that says how long ago the last save was.
+
+  Left out for now: writing into the running game's memory to avoid restarts (risky, needs its
+  own spike), automating the 3DS routine, and detecting old save states.
 - **Automatic sync** (done for FireRed): while the game is open, it syncs at the interval
   each trainer chooses, only when the in-game save changed. The interval is kept per account
   in the browser, so it doesn't follow the trainer to another device.
