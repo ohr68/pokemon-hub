@@ -229,6 +229,9 @@ Trainers grow by playing, across every game connected to PokeHub:
      restart, when the game starts and there's no progress to lose. Mid-game they wait until
      the player applies them, with a warning that says how long ago the last save was.
 
+  A game also runs in only one tab at a time (Web Locks): all tabs share one save in IndexedDB,
+  so a second running copy would overwrite it. A waiting tab takes over when the first closes.
+
   Left out for now: writing into the running game's memory to avoid restarts (risky, needs its
   own spike), automating the 3DS routine, and detecting old save states.
 - **Automatic sync** (done for FireRed): while the game is open, it syncs after each in-game
