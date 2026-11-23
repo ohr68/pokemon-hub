@@ -10,7 +10,7 @@
 | 5. FireRed | Done: play in the browser, sync, mirror, save backups, transfers both ways |
 | 6. Operations | Done: backups, reliable startup, problems view, local checks |
 | 7. Trainer progression: XP and levels, trophies, badges, coins | Done |
-| 8. Connected achievements: general, per-game, cross-game and specific | In progress (8a to 8e done) |
+| 8. Connected achievements: general, per-game, cross-game and specific | Done |
 
 More ideas, not yet in a phase, are in the [backlog](#backlog).
 
@@ -213,7 +213,7 @@ Trainers grow by playing, across every game connected to PokeHub:
 ## 8. Connected achievements
 
 Achievements that follow a trainer across every game, so progress in one game counts toward
-a larger journey. Today's trophies are global counters that don't know which game earned them.
+a larger journey. Trophies are general, per game, cross-game or hand-made for one game or the hub.
 
 | Category | Examples |
 |---|---|
@@ -238,8 +238,8 @@ a larger journey. Today's trophies are global counters that don't know which gam
 - **8e. Specific achievements (done):** 7 hand-made goals. FireRed: beat the Elite Four, catch
   the legendary birds and Mewtwo, evolve the Eevee family. Hub: bring a Pokémon back from the
   hub, receive a trade evolution, take one Pokémon to 3 games.
-- **8f. Trophy screen:** General and per-game tabs, progress bars, and notifications that name
-  the game.
+- **8f. Trophy screen (done):** General, cross-game and per-game tabs, progress bars, and
+  notifications that name the game.
 
 Rules:
 

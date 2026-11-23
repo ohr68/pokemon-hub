@@ -34,7 +34,8 @@ public sealed record TrophyResponse(
 internal sealed class GetTrainerTrophiesQueryHandler(
     IDbConnectionFactory dbConnectionFactory,
     IPokedexApi pokedexApi,
-    IPlayerGameCounters gameCounters)
+    IPlayerGameCounters gameCounters,
+    IGameSpeciesLimits games)
     : IQueryHandler<GetTrainerTrophiesQuery, IReadOnlyCollection<TrophyResponse>>
 {
     public async Task<Result<IReadOnlyCollection<TrophyResponse>>> Handle(GetTrainerTrophiesQuery request, CancellationToken cancellationToken)
@@ -81,6 +82,14 @@ internal sealed class GetTrainerTrophiesQueryHandler(
             gameNames[dex.GameId] = dex.GameName;
         }
 
+        // A game-specific trophy is shown before the trainer ever plays that game.
+        IReadOnlyDictionary<Guid, GameIdentity> identities = await games.GetIdentitiesAsync(sources.GameIds.Values.ToList(), cancellationToken);
+
+        foreach ((Guid gameId, GameIdentity identity) in identities)
+        {
+            gameNames.TryAdd(gameId, identity.Name);
+        }
+
         SpecificProgress specific = TrainerAchievements.Specific(request.TrainerId, facts, achievements, sources);
 
         var perGame = achievements.Games
@@ -122,7 +131,7 @@ internal sealed class GetTrainerTrophiesQueryHandler(
         return new TrophyResponse(
             code,
             trophy.Name,
-            $"{gameName}: {trophy.Description}",
+            trophy.Description,
             trophy.Tier.ToString().ToLowerInvariant(),
             Math.Min(current, target),
             target,
