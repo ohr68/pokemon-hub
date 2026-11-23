@@ -9,6 +9,11 @@ internal sealed class GetSpeciesRequest
 
     public int? Generation { get; init; }
 
+    // A game's Pokédex (?game=firered-leafgreen), or its National one (&national=true).
+    public string? Game { get; init; }
+
+    public bool National { get; init; }
+
     public int Page { get; init; } = 1;
 
     public int PageSize { get; init; } = 50;

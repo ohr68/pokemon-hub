@@ -18,6 +18,12 @@ internal sealed class SyncSpeciesCommandHandler(
     {
         if (request.OnlyIfEmpty && await speciesRepository.AnyAsync(cancellationToken))
         {
+            // Game lists arrived after the catalog: an existing catalog still needs them once.
+            if (!await speciesRepository.AnyGameDexEntriesAsync(cancellationToken))
+            {
+                await SyncGameDexesAsync(cancellationToken);
+            }
+
             return new SpeciesSyncResponse(0, 0, 0, Skipped: true);
         }
 
@@ -80,7 +86,32 @@ internal sealed class SyncSpeciesCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
+        await SyncGameDexesAsync(cancellationToken);
+
         return new SpeciesSyncResponse(added, updated, catalog.Value.Species.Count);
+    }
+
+    // Extra to the catalog: if PokéAPI fails here, the current lists stay and the catalog still counts.
+    private async Task SyncGameDexesAsync(CancellationToken cancellationToken)
+    {
+        Result<IReadOnlyCollection<GameDexData>> dexes = await pokeApiClient.GetGameDexesAsync(cancellationToken);
+
+        if (dexes.IsFailure)
+        {
+            return;
+        }
+
+        var known = (await speciesRepository.GetIdsAsync(cancellationToken)).ToHashSet();
+
+        var entries = dexes.Value
+            .SelectMany(dex => dex.SpeciesIds
+                .Where(known.Contains)
+                .Select((speciesId, position) => GameDexEntry.Create(dex.GameSlug, speciesId, position)))
+            .ToList();
+
+        await speciesRepository.ReplaceGameDexEntriesAsync(entries, cancellationToken);
+
+        await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
     private async Task SyncGrowthRatesAsync(IReadOnlyCollection<GrowthRateData> growthRates, CancellationToken cancellationToken)

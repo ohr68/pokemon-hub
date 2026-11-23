@@ -15,6 +15,17 @@ internal sealed record NamedResource(
 internal sealed record ResourceList(
     [property: JsonPropertyName("results")] IReadOnlyList<NamedResource> Results);
 
+internal sealed record VersionGroupResponse(
+    [property: JsonPropertyName("pokedexes")] IReadOnlyList<NamedResource> Pokedexes);
+
+internal sealed record PokedexResponse(
+    [property: JsonPropertyName("name")] string Name,
+    [property: JsonPropertyName("pokemon_entries")] IReadOnlyList<PokedexEntryResponse> PokemonEntries);
+
+internal sealed record PokedexEntryResponse(
+    [property: JsonPropertyName("entry_number")] int EntryNumber,
+    [property: JsonPropertyName("pokemon_species")] NamedResource PokemonSpecies);
+
 internal sealed record GenerationResponse(
     [property: JsonPropertyName("id")] int Id,
     [property: JsonPropertyName("pokemon_species")] IReadOnlyList<NamedResource> PokemonSpecies);

@@ -50,4 +50,23 @@ internal sealed class SpeciesRepository(PokedexDbContext context) : ISpeciesRepo
     {
         context.Set<Move>().Add(move);
     }
+
+    public Task<bool> AnyGameDexEntriesAsync(CancellationToken cancellationToken = default)
+    {
+        return context.Set<GameDexEntry>().AnyAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyCollection<int>> GetIdsAsync(CancellationToken cancellationToken = default)
+    {
+        return await context.Species.Select(s => s.Id).ToListAsync(cancellationToken);
+    }
+
+    public async Task ReplaceGameDexEntriesAsync(
+        IReadOnlyCollection<GameDexEntry> entries,
+        CancellationToken cancellationToken = default)
+    {
+        await context.Set<GameDexEntry>().ExecuteDeleteAsync(cancellationToken);
+
+        context.Set<GameDexEntry>().AddRange(entries);
+    }
 }

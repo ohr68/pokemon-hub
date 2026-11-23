@@ -88,6 +88,45 @@ internal sealed partial class PokeApiClient(HttpClient httpClient, ILogger<PokeA
         }
     }
 
+    public async Task<Result<IReadOnlyCollection<GameDexData>>> GetGameDexesAsync(
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            VersionGroupResponse[] groups = await ThrottledAsync(
+                Enumerable.Range(0, GameDexes.All.Count),
+                index => GetAsync<VersionGroupResponse>($"version-group/{GameDexes.All[index].VersionGroup}", cancellationToken),
+                cancellationToken);
+
+            var names = groups.SelectMany(g => g.Pokedexes.Select(p => p.Name)).Distinct().ToList();
+
+            PokedexResponse[] pokedexes = await ThrottledAsync(
+                Enumerable.Range(0, names.Count),
+                index => GetAsync<PokedexResponse>($"pokedex/{names[index]}", cancellationToken),
+                cancellationToken);
+
+            Dictionary<string, PokedexResponse> byName = pokedexes.ToDictionary(p => p.Name);
+
+            // A game with several Pokédexes (regions, expansions) lists them one after another.
+            return GameDexes.All
+                .Select((game, index) => new GameDexData(
+                    game.Slug,
+                    groups[index].Pokedexes
+                        .SelectMany(p => byName[p.Name].PokemonEntries.OrderBy(e => e.EntryNumber))
+                        .Select(e => e.PokemonSpecies.Id)
+                        .Distinct()
+                        .ToList()))
+                .ToList();
+        }
+        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException
+                                              or System.Text.Json.JsonException)
+        {
+            LogGameDexesFailed(exception);
+
+            return Result.Failure<IReadOnlyCollection<GameDexData>>(SpeciesErrors.CatalogUnavailable);
+        }
+    }
+
     private async Task<Dictionary<int, (string Name, int Generation)>> GetSpeciesByGenerationAsync(
         CancellationToken cancellationToken)
     {
@@ -287,6 +326,9 @@ internal sealed partial class PokeApiClient(HttpClient httpClient, ILogger<PokeA
 
     [LoggerMessage(LogLevel.Warning, "Species {SpeciesId} ({SpeciesName}) has no type in PokéAPI and was skipped")]
     private partial void LogSpeciesWithoutType(int speciesId, string speciesName);
+
+    [LoggerMessage(LogLevel.Error, "Loading the game Pokédexes from PokéAPI failed")]
+    private partial void LogGameDexesFailed(Exception exception);
 
     [LoggerMessage(LogLevel.Error, "Loading the species catalog from PokéAPI failed")]
     private partial void LogCatalogFailed(Exception exception);

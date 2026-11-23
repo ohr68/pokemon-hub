@@ -23,7 +23,7 @@ internal sealed class GetSpeciesEndpoint(ISender sender) : EndpointBase<GetSpeci
     public override async Task HandleAsync(GetSpeciesRequest req, CancellationToken ct)
     {
         Result<SpeciesPageResponse> result = await sender.Send(
-            new GetSpeciesQuery(req.Search, req.Type, req.Generation, req.Page, req.PageSize),
+            new GetSpeciesQuery(req.Search, req.Type, req.Generation, req.Page, req.PageSize, req.Game, req.National),
             ct);
 
         await SendResultAsync(result, page => Results.Ok(page));

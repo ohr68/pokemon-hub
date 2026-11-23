@@ -19,4 +19,11 @@ public interface ISpeciesRepository
     Task<IReadOnlyList<Move>> GetMovesAsync(CancellationToken cancellationToken = default);
 
     void Insert(Move move);
+
+    Task<bool> AnyGameDexEntriesAsync(CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyCollection<int>> GetIdsAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>Replaces every game's Pokédex list; saved with the unit of work.</summary>
+    Task ReplaceGameDexEntriesAsync(IReadOnlyCollection<GameDexEntry> entries, CancellationToken cancellationToken = default);
 }

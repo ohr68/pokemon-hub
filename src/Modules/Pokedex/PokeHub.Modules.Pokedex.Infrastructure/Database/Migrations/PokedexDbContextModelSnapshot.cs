@@ -348,6 +348,30 @@ namespace PokeHub.Modules.Pokedex.Infrastructure.Database.Migrations
                     b.ToTable("saves", "pokedex");
                 });
 
+            modelBuilder.Entity("PokeHub.Modules.Pokedex.Domain.Species.GameDexEntry", b =>
+                {
+                    b.Property<string>("GameSlug")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("game_slug");
+
+                    b.Property<int>("SpeciesId")
+                        .HasColumnType("integer")
+                        .HasColumnName("species_id");
+
+                    b.Property<int>("Position")
+                        .HasColumnType("integer")
+                        .HasColumnName("position");
+
+                    b.HasKey("GameSlug", "SpeciesId")
+                        .HasName("pk_game_dex_entries");
+
+                    b.HasIndex("SpeciesId")
+                        .HasDatabaseName("ix_game_dex_entries_species_id");
+
+                    b.ToTable("game_dex_entries", "pokedex");
+                });
+
             modelBuilder.Entity("PokeHub.Modules.Pokedex.Domain.Species.GrowthRate", b =>
                 {
                     b.Property<string>("Name")
@@ -563,6 +587,16 @@ namespace PokeHub.Modules.Pokedex.Infrastructure.Database.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_saves_trainers_trainer_id");
+                });
+
+            modelBuilder.Entity("PokeHub.Modules.Pokedex.Domain.Species.GameDexEntry", b =>
+                {
+                    b.HasOne("PokeHub.Modules.Pokedex.Domain.Species.PokemonSpecies", null)
+                        .WithMany()
+                        .HasForeignKey("SpeciesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_game_dex_entries_species_species_id");
                 });
 
             modelBuilder.Entity("PokeHub.Modules.Pokedex.Domain.Species.PokemonSpecies", b =>
