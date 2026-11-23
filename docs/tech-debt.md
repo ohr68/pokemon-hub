@@ -3,15 +3,6 @@
 Known gaps we chose to leave for later. Each entry says what is missing, why it matters
 and the direction for fixing it.
 
-## Trainers for accounts created before the Pokédex module
-
-**What's missing:** users registered before the Pokédex module existed never got a
-trainer, because their `UserRegistered` events were dropped by the old outbox bug.
-They see "Preparing your trainer card..." forever.
-
-**Direction:** a one-off backfill that creates a trainer for every user without one,
-safe to run more than once.
-
 ## Save sync isn't fluid
 
 **What's missing:** moving data between the game and the hub takes too many manual steps.
