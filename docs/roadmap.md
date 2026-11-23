@@ -211,15 +211,17 @@ Trainers grow by playing, across every game connected to PokeHub:
 
 ## Backlog
 
-- **Fluid save sync** (scoped, not started; the problem is in
+- **Fluid save sync** (steps 1 and 2 done; the problem is in
   [tech-debt.md](tech-debt.md#save-sync-isnt-fluid)), in four steps:
-  1. **Safe transfers:** PokeHub records a transfer before the game's save changes, so a failed
-     restore or a closed tab can leave a withdrawn Pokémon in both places, or a delivered one
-     marked as in the game when it isn't. Make an interrupted transfer recoverable, back up the
-     save after every transfer, and stop automatic sync from starting as a transfer begins.
-  2. **Instant sync:** notice each in-game save and sync it a few seconds later, on by default
-     with an off switch, replacing the interval picker. First measure how often the save can
-     be checked, since each read may also write to browser storage.
+  1. **Safe transfers** (done): PokeHub records a transfer before the game's save changes, so
+     the browser notes it first. One cut short by a failed restore or a closed tab is settled
+     against what the save really holds: a withdrawn Pokémon still there goes back inside the
+     game, and a delivered one that's missing returns to the queue. The save is backed up after
+     every transfer, and automatic sync can't start as a transfer begins.
+  2. **Instant sync** (done): each in-game save is noticed and synced within about 20 seconds,
+     on by default with an off switch. Every read through the emulator rewrites the whole
+     128 KB save to IndexedDB, even unchanged, so changes are detected on the 15-second flush
+     the page already does instead of by polling faster.
   3. **One save panel:** a single status (up to date, syncing, failed, no save yet) with the
      last sync time, and tabs for transfers, items, import/export and backups.
   4. **Fewer disruptive restarts:** pending Pokémon and items go in when the game starts, while
@@ -228,9 +230,9 @@ Trainers grow by playing, across every game connected to PokeHub:
 
   Left out for now: writing into the running game's memory to avoid restarts (risky, needs its
   own spike), automating the 3DS routine, and detecting old save states.
-- **Automatic sync** (done for FireRed): while the game is open, it syncs at the interval
-  each trainer chooses, only when the in-game save changed. The interval is kept per account
-  in the browser, so it doesn't follow the trainer to another device.
+- **Automatic sync** (done for FireRed): while the game is open, it syncs after each in-game
+  save. Turning it off is kept per account in the browser, so it doesn't follow the trainer to
+  another device.
 - **Battle data per Pokémon** (done for FireRed): each sync stores what the save holds about
   a Pokémon (level, nature, moves and PP, IVs, EVs, friendship, held item and, for the party,
   current stats), per game. Each owned Pokémon has its own page (`/my-pokemon/:id`) with its
