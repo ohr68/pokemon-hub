@@ -30,7 +30,7 @@ internal sealed class ReplayHistoryCommandHandler(IDbConnectionFactory dbConnect
             """
             SELECT h.id AS Id, h.occurred_on_utc AS OccurredOnUtc, h.pokemon_id AS PokemonId, h.trainer_id AS TrainerId,
                    h.species_id AS SpeciesId, lower(p.origin) AS Origin, p.is_shiny AS IsShiny,
-                   (s.is_legendary OR s.is_mythical) AS IsRare,
+                   (s.is_legendary OR s.is_mythical) AS IsRare, g.game_id AS GameId,
                    NOT EXISTS (
                        SELECT 1 FROM pokedex.ownership_history e
                        WHERE e.trainer_id = h.trainer_id AND e.species_id = h.species_id
@@ -38,6 +38,7 @@ internal sealed class ReplayHistoryCommandHandler(IDbConnectionFactory dbConnect
             FROM pokedex.ownership_history h
             JOIN pokedex.pokemon p ON p.id = h.pokemon_id
             JOIN pokedex.species s ON s.id = h.species_id
+            LEFT JOIN pokedex.saves g ON g.id = h.save_id
             WHERE h.change = 'Obtained'
             ORDER BY h.occurred_on_utc;
 
@@ -49,11 +50,12 @@ internal sealed class ReplayHistoryCommandHandler(IDbConnectionFactory dbConnect
             WHERE r.change = 'ReceivedInTrade'
             ORDER BY r.occurred_on_utc;
 
-            SELECT id AS Id, occurred_on_utc AS OccurredOnUtc, pokemon_id AS PokemonId, trainer_id AS TrainerId,
-                   from_species_id AS FromSpeciesId, species_id AS ToSpeciesId
+            SELECT history.id AS Id, occurred_on_utc AS OccurredOnUtc, pokemon_id AS PokemonId, history.trainer_id AS TrainerId,
+                   from_species_id AS FromSpeciesId, species_id AS ToSpeciesId, g.game_id AS GameId
             FROM (
                 SELECT h.*, lag(h.species_id) OVER (PARTITION BY h.pokemon_id ORDER BY h.occurred_on_utc, h.id) AS from_species_id
                 FROM pokedex.ownership_history h) history
+            LEFT JOIN pokedex.saves g ON g.id = history.save_id
             WHERE change IN ('EvolvedByTrade', 'EvolvedInGame') AND from_species_id IS NOT NULL
             ORDER BY occurred_on_utc;
             """;
@@ -67,7 +69,7 @@ internal sealed class ReplayHistoryCommandHandler(IDbConnectionFactory dbConnect
         foreach (ObtainedRow o in obtained)
         {
             await eventBus.PublishAsync(
-                new PokemonObtainedIntegrationEvent(o.Id, o.OccurredOnUtc, o.PokemonId, o.TrainerId, o.SpeciesId, o.Origin, o.IsShiny, o.IsNewSpecies, o.IsRare),
+                new PokemonObtainedIntegrationEvent(o.Id, o.OccurredOnUtc, o.PokemonId, o.TrainerId, o.SpeciesId, o.Origin, o.IsShiny, o.IsNewSpecies, o.IsRare, o.GameId),
                 cancellationToken);
         }
 
@@ -81,16 +83,16 @@ internal sealed class ReplayHistoryCommandHandler(IDbConnectionFactory dbConnect
         foreach (EvolvedRow v in evolved)
         {
             await eventBus.PublishAsync(
-                new PokemonEvolvedIntegrationEvent(v.Id, v.OccurredOnUtc, v.PokemonId, v.TrainerId, v.FromSpeciesId, v.ToSpeciesId),
+                new PokemonEvolvedIntegrationEvent(v.Id, v.OccurredOnUtc, v.PokemonId, v.TrainerId, v.FromSpeciesId, v.ToSpeciesId, v.GameId),
                 cancellationToken);
         }
 
         return new ReplayHistoryResponse(obtained.Count, traded.Count, evolved.Count);
     }
 
-    private sealed record ObtainedRow(Guid Id, DateTime OccurredOnUtc, Guid PokemonId, Guid TrainerId, int SpeciesId, string Origin, bool IsShiny, bool IsRare, bool IsNewSpecies);
+    private sealed record ObtainedRow(Guid Id, DateTime OccurredOnUtc, Guid PokemonId, Guid TrainerId, int SpeciesId, string Origin, bool IsShiny, bool IsRare, Guid? GameId, bool IsNewSpecies);
 
     private sealed record TradedRow(Guid Id, DateTime OccurredOnUtc, Guid PokemonId, Guid TradeId, Guid FromTrainerId, Guid ToTrainerId);
 
-    private sealed record EvolvedRow(Guid Id, DateTime OccurredOnUtc, Guid PokemonId, Guid TrainerId, int FromSpeciesId, int ToSpeciesId);
+    private sealed record EvolvedRow(Guid Id, DateTime OccurredOnUtc, Guid PokemonId, Guid TrainerId, int FromSpeciesId, int ToSpeciesId, Guid? GameId);
 }

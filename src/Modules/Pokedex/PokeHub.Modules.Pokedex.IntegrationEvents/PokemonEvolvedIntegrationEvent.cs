@@ -9,7 +9,8 @@ public sealed class PokemonEvolvedIntegrationEvent(
     Guid pokemonId,
     Guid trainerId,
     int fromSpeciesId,
-    int toSpeciesId) : IntegrationEvent(id, occurredOnUtc)
+    int toSpeciesId,
+    Guid? gameId = null) : IntegrationEvent(id, occurredOnUtc)
 {
     public Guid PokemonId { get; init; } = pokemonId;
 
@@ -18,4 +19,7 @@ public sealed class PokemonEvolvedIntegrationEvent(
     public int FromSpeciesId { get; init; } = fromSpeciesId;
 
     public int ToSpeciesId { get; init; } = toSpeciesId;
+
+    // The game it evolved in; empty when it evolved by trading.
+    public Guid? GameId { get; init; } = gameId;
 }

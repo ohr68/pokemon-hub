@@ -44,6 +44,17 @@ internal sealed class WithdrawPokemonCommandHandler(
                 return Result.Failure<IReadOnlyCollection<Guid>>(SpeciesErrors.NotFound(withdrawal.SpeciesId));
             }
 
+            // Evolved in the game since its last sync.
+            foreach (int stage in await speciesRepository.GetEvolutionPathAsync(pokemon.SpeciesId, withdrawal.SpeciesId, cancellationToken))
+            {
+                Result evolved = pokemon.EvolveInGame(request.TrainerId, save, stage, utcNow);
+
+                if (evolved.IsFailure)
+                {
+                    return Result.Failure<IReadOnlyCollection<Guid>>(evolved.Error);
+                }
+            }
+
             Result result = pokemon.Withdraw(
                 request.TrainerId,
                 save,

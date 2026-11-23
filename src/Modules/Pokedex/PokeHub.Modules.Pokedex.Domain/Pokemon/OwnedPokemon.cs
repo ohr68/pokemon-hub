@@ -113,7 +113,8 @@ public sealed class OwnedPokemon : Entity
         PokemonOrigin origin,
         DateTime utcNow,
         Guid? saveId,
-        Guid? id = null)
+        Guid? id = null,
+        Guid? gameId = null)
     {
         if (level is < MinLevel or > MaxLevel)
         {
@@ -136,7 +137,7 @@ public sealed class OwnedPokemon : Entity
 
         pokemon.Record(OwnershipChange.Obtained, trainerId, utcNow, saveId: saveId);
 
-        pokemon.Raise(new PokemonObtainedDomainEvent(pokemon.Id, trainerId, speciesId, origin, isShiny));
+        pokemon.Raise(new PokemonObtainedDomainEvent(pokemon.Id, trainerId, speciesId, origin, isShiny, gameId));
 
         return pokemon;
     }
@@ -160,7 +161,8 @@ public sealed class OwnedPokemon : Entity
             isShiny,
             PokemonOrigin.Game,
             utcNow,
-            save.Id);
+            save.Id,
+            gameId: save.GameId);
 
         if (caught.IsFailure)
         {
@@ -399,6 +401,35 @@ public sealed class OwnedPokemon : Entity
     }
 
     /// <summary>
+    /// The game's save shows the Pokémon at a later form. The caller checks that
+    /// <paramref name="speciesId"/> really is its next stage, since restoring an older save
+    /// changes the species too.
+    /// </summary>
+    public Result EvolveInGame(Guid trainerId, Save save, int speciesId, DateTime utcNow)
+    {
+        Result ownership = EnsureActiveAndOwnedBy(trainerId);
+
+        if (ownership.IsFailure)
+        {
+            return ownership;
+        }
+
+        if (SaveId != save.Id || !IsInsideGame)
+        {
+            return Result.Failure(PokemonErrors.NotInThisSave);
+        }
+
+        int fromSpeciesId = SpeciesId;
+        SpeciesId = speciesId;
+
+        Record(OwnershipChange.EvolvedInGame, trainerId, utcNow, saveId: save.Id);
+
+        Raise(new PokemonEvolvedDomainEvent(Id, trainerId, fromSpeciesId, SpeciesId, save.GameId));
+
+        return Result.Success();
+    }
+
+    /// <summary>
     /// The game took the Pokémon out of its own save and sent it to the hub, with what it
     /// stored about it: it may have grown, evolved or been renamed while in the game.
     /// </summary>
@@ -427,15 +458,8 @@ public sealed class OwnedPokemon : Entity
         GameDataFormat = snapshot.DataFormat;
         GameData = snapshot.Data;
 
-        if (snapshot.SpeciesId != SpeciesId)
-        {
-            int fromSpeciesId = SpeciesId;
-            SpeciesId = snapshot.SpeciesId;
-
-            Record(OwnershipChange.EvolvedInGame, trainerId, utcNow, saveId: save.Id);
-
-            Raise(new PokemonEvolvedDomainEvent(Id, trainerId, fromSpeciesId, SpeciesId));
-        }
+        // Evolutions were recorded before this; a difference left is an older save's earlier form.
+        SpeciesId = snapshot.SpeciesId;
 
         Record(OwnershipChange.MovedToHub, trainerId, utcNow, saveId: save.Id);
 

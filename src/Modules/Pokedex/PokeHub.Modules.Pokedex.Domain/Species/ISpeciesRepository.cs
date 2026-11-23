@@ -10,6 +10,14 @@ public interface ISpeciesRepository
 
     Task<bool> AnyAsync(CancellationToken cancellationToken = default);
 
+    Task<bool> HasEvolutionLinesAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// The stages from one species up to a later form of it, without the first (Charmander to
+    /// Charizard is Charmeleon, Charizard). Empty when the second isn't a later form.
+    /// </summary>
+    Task<IReadOnlyList<int>> GetEvolutionPathAsync(int fromSpeciesId, int toSpeciesId, CancellationToken cancellationToken = default);
+
     void Insert(PokemonSpecies species);
 
     Task<IReadOnlyList<GrowthRate>> GetGrowthRatesAsync(CancellationToken cancellationToken = default);

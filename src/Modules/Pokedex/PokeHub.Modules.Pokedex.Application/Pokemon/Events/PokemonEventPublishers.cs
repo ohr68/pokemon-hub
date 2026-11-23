@@ -39,7 +39,8 @@ internal sealed class PokemonObtainedDomainEventHandler(IDbConnectionFactory dbC
                 domainEvent.Origin.ToString().ToLowerInvariant(),
                 domainEvent.IsShiny,
                 !hadSpecies,
-                isRare),
+                isRare,
+                domainEvent.GameId),
             cancellationToken);
     }
 }
@@ -68,6 +69,7 @@ internal sealed class PokemonEvolvedDomainEventHandler(IEventBus eventBus) : Dom
                 domainEvent.PokemonId,
                 domainEvent.TrainerId,
                 domainEvent.FromSpeciesId,
-                domainEvent.ToSpeciesId),
+                domainEvent.ToSpeciesId,
+                domainEvent.GameId),
             cancellationToken);
 }

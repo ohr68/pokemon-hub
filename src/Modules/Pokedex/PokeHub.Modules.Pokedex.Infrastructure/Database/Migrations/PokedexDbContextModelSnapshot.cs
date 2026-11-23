@@ -418,6 +418,10 @@ namespace PokeHub.Modules.Pokedex.Infrastructure.Database.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("id");
 
+                    b.Property<int?>("EvolvesFromSpeciesId")
+                        .HasColumnType("integer")
+                        .HasColumnName("evolves_from_species_id");
+
                     b.Property<int?>("Gen3Index")
                         .HasColumnType("integer")
                         .HasColumnName("gen3index");

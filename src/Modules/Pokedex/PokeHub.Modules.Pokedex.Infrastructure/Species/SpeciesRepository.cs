@@ -6,6 +6,8 @@ namespace PokeHub.Modules.Pokedex.Infrastructure.Species;
 
 internal sealed class SpeciesRepository(PokedexDbContext context) : ISpeciesRepository
 {
+    private const int MaxEvolutionStages = 4;
+
     public async Task<IReadOnlyList<PokemonSpecies>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         return await context.Species.Include(s => s.Gen3LevelUpMoves).ToListAsync(cancellationToken);
@@ -24,6 +26,45 @@ internal sealed class SpeciesRepository(PokedexDbContext context) : ISpeciesRepo
     public Task<bool> AnyAsync(CancellationToken cancellationToken = default)
     {
         return context.Species.AnyAsync(cancellationToken);
+    }
+
+    public Task<bool> HasEvolutionLinesAsync(CancellationToken cancellationToken = default)
+    {
+        return context.Species.AnyAsync(s => s.EvolvesFromSpeciesId != null, cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<int>> GetEvolutionPathAsync(
+        int fromSpeciesId,
+        int toSpeciesId,
+        CancellationToken cancellationToken = default)
+    {
+        var path = new List<int>();
+        int current = toSpeciesId;
+
+        // No evolution line is longer than this; it also stops on bad data.
+        for (int stage = 0; stage < MaxEvolutionStages; stage++)
+        {
+            path.Insert(0, current);
+
+            int? previous = await context.Species
+                .Where(s => s.Id == current)
+                .Select(s => s.EvolvesFromSpeciesId)
+                .SingleOrDefaultAsync(cancellationToken);
+
+            if (previous is null)
+            {
+                return [];
+            }
+
+            if (previous == fromSpeciesId)
+            {
+                return path;
+            }
+
+            current = previous.Value;
+        }
+
+        return [];
     }
 
     public void Insert(PokemonSpecies species)

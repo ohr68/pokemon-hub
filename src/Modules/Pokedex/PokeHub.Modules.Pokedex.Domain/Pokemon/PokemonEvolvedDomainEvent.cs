@@ -2,12 +2,13 @@ using PokeHub.Common.Domain.Abstractions;
 
 namespace PokeHub.Modules.Pokedex.Domain.Pokemon;
 
-/// <summary>The Pokémon evolved: by trading, or in a game (found when it came back to the hub).</summary>
+/// <summary>The Pokémon evolved: by trading, or in a game (<paramref name="gameId"/>).</summary>
 public sealed class PokemonEvolvedDomainEvent(
     Guid pokemonId,
     Guid trainerId,
     int fromSpeciesId,
-    int toSpeciesId) : DomainEvent
+    int toSpeciesId,
+    Guid? gameId = null) : DomainEvent
 {
     public Guid PokemonId { get; init; } = pokemonId;
 
@@ -16,4 +17,6 @@ public sealed class PokemonEvolvedDomainEvent(
     public int FromSpeciesId { get; init; } = fromSpeciesId;
 
     public int ToSpeciesId { get; init; } = toSpeciesId;
+
+    public Guid? GameId { get; init; } = gameId;
 }

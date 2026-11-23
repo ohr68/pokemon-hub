@@ -45,6 +45,12 @@ public interface IPokedexApi
     Task<IReadOnlyDictionary<Guid, int>> GetSpeciesEverOwnedAsync(Guid? trainerId = null, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Every catch and evolution that happened inside a game, oldest first. With a trainer id,
+    /// only theirs.
+    /// </summary>
+    Task<IReadOnlyCollection<GameFact>> GetGameFactsAsync(Guid? trainerId = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Keeps what the game reports about the Pokémon inside it. Catch keys it doesn't know are
     /// skipped, since the save may hold Pokémon not synced yet.
     /// </summary>

@@ -12,6 +12,7 @@ using PokeHub.Modules.Pokedex.Application.Saves.CancelWithdrawal;
 using PokeHub.Modules.Pokedex.Application.Saves.GetOrCreateSave;
 using PokeHub.Modules.Pokedex.Application.Saves.DeliverPokemon;
 using PokeHub.Modules.Pokedex.Application.Saves.GetAwaitingDelivery;
+using PokeHub.Modules.Pokedex.Application.Pokemon.GetGameFacts;
 using PokeHub.Modules.Pokedex.Application.Pokemon.GetSpeciesEverOwned;
 using PokeHub.Modules.Pokedex.Application.Saves.ReconcileSave;
 using PokeHub.Modules.Pokedex.Application.Saves.RedeliverPokemon;
@@ -152,6 +153,17 @@ internal sealed class PokedexApi(ISender sender, ISpeciesRepository speciesRepos
         return result.Value
             .Select(p => new LeftGameInfo(p.Id, p.SpeciesId, p.Nickname, p.Level, p.IsShiny))
             .ToList();
+    }
+
+    public async Task<IReadOnlyCollection<GameFact>> GetGameFactsAsync(Guid? trainerId = null, CancellationToken cancellationToken = default)
+    {
+        Result<IReadOnlyCollection<GameFactResponse>> result = await sender.Send(new GetGameFactsQuery(trainerId), cancellationToken);
+
+        return result.IsFailure
+            ? []
+            : result.Value
+                .Select(f => new GameFact(f.TrainerId, f.GameId, f.IsEvolution, f.PokemonId, f.SpeciesId, f.IsShiny, f.OccurredOnUtc))
+                .ToList();
     }
 
     public async Task<IReadOnlyDictionary<Guid, int>> GetSpeciesEverOwnedAsync(Guid? trainerId = null, CancellationToken cancellationToken = default)

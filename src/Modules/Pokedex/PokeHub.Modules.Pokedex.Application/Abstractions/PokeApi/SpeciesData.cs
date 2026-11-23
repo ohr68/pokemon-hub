@@ -4,6 +4,7 @@ namespace PokeHub.Modules.Pokedex.Application.Abstractions.PokeApi;
 /// <param name="GrowthRate">The name of its growth rate.</param>
 /// <param name="Gen3Index">Its number inside Generation III games, for species 1 to 386.</param>
 /// <param name="Gen3LevelUpMoves">The moves it learns by level in FireRed and LeafGreen, in the game's order.</param>
+/// <param name="EvolvesFromSpeciesId">The species it evolves from, if any.</param>
 public sealed record SpeciesData(
     int Id,
     string Name,
@@ -15,7 +16,8 @@ public sealed record SpeciesData(
     int? Gen3Index,
     IReadOnlyList<LevelUpMoveData> Gen3LevelUpMoves,
     bool IsLegendary,
-    bool IsMythical);
+    bool IsMythical,
+    int? EvolvesFromSpeciesId);
 
 public sealed record LevelUpMoveData(int Level, int MoveId);
 

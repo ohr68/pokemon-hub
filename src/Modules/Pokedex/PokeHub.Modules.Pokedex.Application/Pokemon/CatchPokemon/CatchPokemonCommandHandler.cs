@@ -30,9 +30,14 @@ internal sealed class CatchPokemonCommandHandler(
 
         if (existing is not null)
         {
-            return existing.TrainerId == request.TrainerId
-                ? existing.Id
-                : Result.Failure<Guid>(PokemonErrors.CatchKeyInUse(request.CatchKey));
+            if (existing.TrainerId != request.TrainerId)
+            {
+                return Result.Failure<Guid>(PokemonErrors.CatchKeyInUse(request.CatchKey));
+            }
+
+            Result evolved = await RecordEvolutionAsync(existing, request, cancellationToken);
+
+            return evolved.IsFailure ? Result.Failure<Guid>(evolved.Error) : existing.Id;
         }
 
         if (!await speciesRepository.ExistsAsync(request.SpeciesId, cancellationToken))
@@ -85,5 +90,47 @@ internal sealed class CatchPokemonCommandHandler(
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return pokemon.Value.Id;
+    }
+
+    // A Pokémon the game already reported, now at a later form. An earlier form means an older
+    // save was restored, which isn't an evolution and changes nothing.
+    private async Task<Result> RecordEvolutionAsync(
+        OwnedPokemon pokemon,
+        CatchPokemonCommand request,
+        CancellationToken cancellationToken)
+    {
+        if (pokemon.SpeciesId == request.SpeciesId)
+        {
+            return Result.Success();
+        }
+
+        Save? save = await saveRepository.GetForGameAsync(request.TrainerId, request.GameId, cancellationToken);
+
+        if (save is null || pokemon.SaveId != save.Id || !pokemon.IsInsideGame)
+        {
+            return Result.Success();
+        }
+
+        IReadOnlyList<int> stages = await speciesRepository.GetEvolutionPathAsync(
+            pokemon.SpeciesId,
+            request.SpeciesId,
+            cancellationToken);
+
+        foreach (int stage in stages)
+        {
+            Result result = pokemon.EvolveInGame(request.TrainerId, save, stage, dateTimeProvider.UtcNow);
+
+            if (result.IsFailure)
+            {
+                return result;
+            }
+        }
+
+        if (stages.Count > 0)
+        {
+            await unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+
+        return Result.Success();
     }
 }

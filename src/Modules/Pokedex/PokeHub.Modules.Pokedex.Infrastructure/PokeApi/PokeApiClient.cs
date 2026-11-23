@@ -67,7 +67,8 @@ internal sealed partial class PokeApiClient(HttpClient httpClient, ILogger<PokeA
                     gen3.Indices.TryGetValue(id, out int gen3Index) ? gen3Index : null,
                     gen3.LevelUpMoves.GetValueOrDefault(id) ?? [],
                     rarity.GetValueOrDefault(id)?.IsLegendary ?? false,
-                    rarity.GetValueOrDefault(id)?.IsMythical ?? false));
+                    rarity.GetValueOrDefault(id)?.IsMythical ?? false,
+                    rarity.GetValueOrDefault(id)?.EvolvesFromSpecies?.Id));
             }
 
             return new SpeciesCatalog(

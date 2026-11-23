@@ -7,7 +7,8 @@ public sealed class PokemonObtainedDomainEvent(
     Guid trainerId,
     int speciesId,
     PokemonOrigin origin,
-    bool isShiny) : DomainEvent
+    bool isShiny,
+    Guid? gameId = null) : DomainEvent
 {
     public Guid PokemonId { get; init; } = pokemonId;
 
@@ -18,4 +19,7 @@ public sealed class PokemonObtainedDomainEvent(
     public PokemonOrigin Origin { get; init; } = origin;
 
     public bool IsShiny { get; init; } = isShiny;
+
+    // The game it was caught in, if any.
+    public Guid? GameId { get; init; } = gameId;
 }

@@ -16,7 +16,10 @@ internal sealed class SyncSpeciesCommandHandler(
 {
     public async Task<Result<SpeciesSyncResponse>> Handle(SyncSpeciesCommand request, CancellationToken cancellationToken)
     {
-        if (request.OnlyIfEmpty && await speciesRepository.AnyAsync(cancellationToken))
+        // Evolution lines arrived after the catalog: an existing one needs one full sync for them.
+        if (request.OnlyIfEmpty
+            && await speciesRepository.AnyAsync(cancellationToken)
+            && await speciesRepository.HasEvolutionLinesAsync(cancellationToken))
         {
             // Game lists arrived after the catalog: an existing catalog still needs them once.
             if (!await speciesRepository.AnyGameDexEntriesAsync(cancellationToken))
@@ -59,6 +62,7 @@ internal sealed class SyncSpeciesCommandHandler(
                         ToLevelUpMoves(data.Gen3LevelUpMoves),
                         data.IsLegendary,
                         data.IsMythical,
+                        data.EvolvesFromSpeciesId,
                         utcNow))
                 {
                     updated++;
@@ -79,6 +83,7 @@ internal sealed class SyncSpeciesCommandHandler(
                 ToLevelUpMoves(data.Gen3LevelUpMoves),
                 data.IsLegendary,
                 data.IsMythical,
+                data.EvolvesFromSpeciesId,
                 utcNow));
 
             added++;

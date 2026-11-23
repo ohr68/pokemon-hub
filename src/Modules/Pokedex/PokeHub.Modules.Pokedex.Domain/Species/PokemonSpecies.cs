@@ -53,6 +53,12 @@ public sealed class PokemonSpecies : Entity
 
     public bool IsRare => IsLegendary || IsMythical;
 
+    /// <summary>
+    /// The species this one evolves from, which tells a real evolution from an older save
+    /// bringing back an earlier form.
+    /// </summary>
+    public int? EvolvesFromSpeciesId { get; private set; }
+
     public DateTime SyncedOnUtc { get; private set; }
 
     public static PokemonSpecies Create(
@@ -67,6 +73,7 @@ public sealed class PokemonSpecies : Entity
         IReadOnlyCollection<LevelUpMove> gen3LevelUpMoves,
         bool isLegendary,
         bool isMythical,
+        int? evolvesFromSpeciesId,
         DateTime utcNow)
     {
         var species = new PokemonSpecies
@@ -81,6 +88,7 @@ public sealed class PokemonSpecies : Entity
             Gen3Index = gen3Index,
             IsLegendary = isLegendary,
             IsMythical = isMythical,
+            EvolvesFromSpeciesId = evolvesFromSpeciesId,
             SyncedOnUtc = utcNow,
         };
 
@@ -103,6 +111,7 @@ public sealed class PokemonSpecies : Entity
         IReadOnlyCollection<LevelUpMove> gen3LevelUpMoves,
         bool isLegendary,
         bool isMythical,
+        int? evolvesFromSpeciesId,
         DateTime utcNow)
     {
         if (Name == name &&
@@ -114,6 +123,7 @@ public sealed class PokemonSpecies : Entity
             Gen3Index == gen3Index &&
             IsLegendary == isLegendary &&
             IsMythical == isMythical &&
+            EvolvesFromSpeciesId == evolvesFromSpeciesId &&
             _gen3LevelUpMoves.SequenceEqual(gen3LevelUpMoves))
         {
             return false;
@@ -128,6 +138,7 @@ public sealed class PokemonSpecies : Entity
         Gen3Index = gen3Index;
         IsLegendary = isLegendary;
         IsMythical = isMythical;
+        EvolvesFromSpeciesId = evolvesFromSpeciesId;
         SyncedOnUtc = utcNow;
 
         if (!_gen3LevelUpMoves.SequenceEqual(gen3LevelUpMoves))
