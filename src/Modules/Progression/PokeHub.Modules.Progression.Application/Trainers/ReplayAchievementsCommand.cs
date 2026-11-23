@@ -40,12 +40,20 @@ internal sealed class ReplayAchievementsCommandHandler(IDbConnectionFactory dbCo
         var badges = (await results.ReadAsync<BadgeRow>()).ToList();
         var levels = (await results.ReadAsync<LevelRow>()).ToList();
 
-        var tiers = Trophies.All.ToDictionary(t => t.Code, t => t.Tier.ToString().ToLowerInvariant());
-
-        foreach (TrophyRow t in trophies.Where(t => tiers.ContainsKey(t.Code)))
+        foreach (TrophyRow t in trophies)
         {
+            if (TrophyCatalog.TierOf(t.Code) is not { } tier)
+            {
+                continue;
+            }
+
             await eventBus.PublishAsync(
-                new TrophyEarnedIntegrationEvent(IdFor($"trophy:{t.TrainerId}:{t.Code}"), t.OnUtc, t.TrainerId, t.Code, tiers[t.Code]),
+                new TrophyEarnedIntegrationEvent(
+                    IdFor($"trophy:{t.TrainerId}:{t.Code}"),
+                    t.OnUtc,
+                    t.TrainerId,
+                    t.Code,
+                    tier.ToString().ToLowerInvariant()),
                 cancellationToken);
         }
 

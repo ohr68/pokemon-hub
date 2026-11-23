@@ -23,7 +23,8 @@ internal sealed class TrainerProgressConfiguration : IEntityTypeConfiguration<Tr
             trophies.ToTable("trainer_trophies");
             trophies.WithOwner().HasForeignKey(t => t.TrainerId);
             trophies.HasKey(t => new { t.TrainerId, t.TrophyCode });
-            trophies.Property(t => t.TrophyCode).HasMaxLength(50);
+            // Per-game trophies include the game's id.
+            trophies.Property(t => t.TrophyCode).HasMaxLength(100);
         });
 
         builder.Navigation(p => p.Trophies).UsePropertyAccessMode(PropertyAccessMode.Field);

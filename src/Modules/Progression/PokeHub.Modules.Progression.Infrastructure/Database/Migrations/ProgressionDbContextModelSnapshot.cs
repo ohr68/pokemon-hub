@@ -304,8 +304,8 @@ namespace PokeHub.Modules.Progression.Infrastructure.Database.Migrations
                                 .HasColumnName("trainer_id");
 
                             b1.Property<string>("TrophyCode")
-                                .HasMaxLength(50)
-                                .HasColumnType("character varying(50)")
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
                                 .HasColumnName("trophy_code");
 
                             b1.Property<DateTime>("EarnedOnUtc")

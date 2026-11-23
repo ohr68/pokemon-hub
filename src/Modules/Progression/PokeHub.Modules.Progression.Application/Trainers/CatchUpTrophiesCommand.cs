@@ -25,6 +25,7 @@ internal sealed class CatchUpTrophiesCommandHandler(
         DateTime utcNow = dateTimeProvider.UtcNow;
         int awarded = 0;
         IReadOnlyDictionary<Guid, int> species = await pokedexApi.GetSpeciesEverOwnedAsync(cancellationToken: cancellationToken);
+        ILookup<Guid, GameFact> facts = (await pokedexApi.GetGameFactsAsync(cancellationToken: cancellationToken)).ToLookup(f => f.TrainerId);
 
         foreach (TrainerProgress progress in await repository.GetAllAsync(cancellationToken))
         {
@@ -35,6 +36,7 @@ internal sealed class CatchUpTrophiesCommandHandler(
 
             int before = progress.Trophies.Count;
             progress.EarnTrophies(utcNow);
+            progress.EarnAchievements(TrainerAchievements.For(progress, facts[progress.TrainerId]), utcNow);
             awarded += progress.Trophies.Count - before;
         }
 

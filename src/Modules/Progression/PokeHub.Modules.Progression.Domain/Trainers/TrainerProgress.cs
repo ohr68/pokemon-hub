@@ -151,6 +151,33 @@ public sealed class TrainerProgress : Entity
         }
     }
 
+    /// <summary>
+    /// Awards every per-game and cross-game trophy the trainer reached and doesn't have yet.
+    /// Earned trophies are never removed, whatever later happens to the Pokémon.
+    /// </summary>
+    public void EarnAchievements(AchievementProgress achievements, DateTime earnedOnUtc) =>
+        EarnAchievements(achievements, GameTrophies.All, CrossGameTrophies.All, earnedOnUtc);
+
+    public void EarnAchievements(
+        AchievementProgress achievements,
+        IReadOnlyCollection<GameTrophy> gameTrophies,
+        IReadOnlyCollection<CrossGameTrophy> crossGameTrophies,
+        DateTime earnedOnUtc)
+    {
+        foreach (GameProgress game in achievements.Games)
+        {
+            foreach (GameTrophy trophy in gameTrophies.Where(t => game.Value(t.Stat) >= t.Target))
+            {
+                Award(trophy.CodeFor(game.GameId), trophy.Tier, earnedOnUtc);
+            }
+        }
+
+        foreach (CrossGameTrophy trophy in crossGameTrophies.Where(t => achievements.CrossGame.Value(t.Stat) >= t.Target))
+        {
+            Award(trophy.Code, trophy.Tier, earnedOnUtc);
+        }
+    }
+
     public int Value(TrainerStat stat) => stat switch
     {
         TrainerStat.StartersChosen => StartersChosen,
@@ -163,6 +190,17 @@ public sealed class TrainerProgress : Entity
         TrainerStat.Badges => Badges,
         _ => 0,
     };
+
+    private void Award(string code, TrophyTier tier, DateTime earnedOnUtc)
+    {
+        if (_trophies.Exists(t => t.TrophyCode == code))
+        {
+            return;
+        }
+
+        _trophies.Add(TrainerTrophy.Create(TrainerId, code, earnedOnUtc));
+        Raise(new TrophyEarnedDomainEvent(TrainerId, code, tier));
+    }
 
     private void Count(XpReason reason)
     {

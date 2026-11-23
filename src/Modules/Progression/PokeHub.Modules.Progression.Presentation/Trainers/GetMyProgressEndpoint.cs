@@ -55,6 +55,30 @@ internal sealed class GetMyTrophiesEndpoint(ISender sender) : EndpointWithoutReq
     }
 }
 
+internal sealed class GetMyAchievementsEndpoint(ISender sender) : EndpointWithoutRequestBase
+{
+    public override void Configure()
+    {
+        Get("me/achievements");
+        Policies(ProgressionPermissions.ReadProgression);
+        Group<ProgressionEndpointGroup>();
+
+        Description(builder => builder.Produces<TrainerAchievementsResponse>(StatusCodes.Status200OK, "application/json"));
+        Summary(s =>
+        {
+            s.Summary = "Gets the trainer's progress per game and across games";
+            s.Description = "Catches, evolutions, shinies, species and badges in each game, plus what connects the trainer's games.";
+        });
+    }
+
+    public override async Task HandleAsync(CancellationToken ct)
+    {
+        Result<TrainerAchievementsResponse> result = await sender.Send(new GetTrainerAchievementsQuery(User.GetUserId()), ct);
+
+        await SendResultAsync(result, achievements => Results.Ok(achievements));
+    }
+}
+
 internal sealed class GetMyBadgesEndpoint(ISender sender) : EndpointWithoutRequestBase
 {
     public override void Configure()

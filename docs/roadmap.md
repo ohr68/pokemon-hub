@@ -10,7 +10,7 @@
 | 5. FireRed | Done: play in the browser, sync, mirror, save backups, transfers both ways |
 | 6. Operations | Done: backups, reliable startup, problems view, local checks |
 | 7. Trainer progression: XP and levels, trophies, badges, coins | Done |
-| 8. Connected achievements: general, per-game, cross-game and specific | In progress (8a done) |
+| 8. Connected achievements: general, per-game, cross-game and specific | In progress (8a and 8b done) |
 
 More ideas, not yet in a phase, are in the [backlog](#backlog).
 
@@ -225,8 +225,9 @@ a larger journey. Today's trophies are global counters that don't know which gam
 - **8a. Reliable game data (done):** in-game evolutions are detected during sync, including
   skipped stages, and an older restored save doesn't count as one. Catch and evolution events
   carry their game, and past catches are read from the ownership history with no backfill.
-- **8b. Achievement engine:** general, per-game and cross-game progress. Trophies already
-  earned stay, and their coins aren't paid twice.
+- **8b. Achievement engine (done):** per-game and cross-game progress is worked out from game
+  history and can award trophies of each kind. Trophies already earned stay, and their coins
+  aren't paid twice. The new catalogs start empty and are filled by 8c and 8d.
 - **8c. Per-game set:** one template every new game gets automatically, using the game
   Pokédex lists.
 - **8d. Cross-game set:** the achievements that connect a trainer's games.
