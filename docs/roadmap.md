@@ -10,6 +10,7 @@
 | 5. FireRed | Done: play in the browser, sync, mirror, save backups, transfers both ways |
 | 6. Operations | Done: backups, reliable startup, problems view, local checks |
 | 7. Trainer progression: XP and levels, trophies, badges, coins | Done |
+| 8. Connected achievements: general, per-game, cross-game and specific | Scoped, not started |
 
 More ideas, not yet in a phase, are in the [backlog](#backlog).
 
@@ -208,6 +209,39 @@ Trainers grow by playing, across every game connected to PokeHub:
   safe catalog (balls, healing, vitamins, Rare Candy, evolution stones; no key items or
   TMs), and a purchase waits until the FireRed page writes it into the save, with a backup
   before and after.
+
+## 8. Connected achievements
+
+Achievements that follow a trainer across every game, so progress in one game counts toward
+a larger journey. Today's trophies are global counters that don't know which game earned them.
+
+| Category | Examples |
+|---|---|
+| General | 500 catches across all games, 16 badges in total, trainer level |
+| Per game (the same set for each game) | Catch 25, complete the regional Pokédex, evolve 10, find a shiny, earn all badges |
+| Cross-game | Catch the same species in 2, 3 and 5 games, evolve it in each, complete 2 regional Pokédexes |
+| Specific | FireRed: beat the Elite Four. General: a Pokémon that has visited 3 games |
+
+- **8a. Reliable game data:** detect in-game evolutions during sync (today they're only seen
+  when the Pokémon is sent to the hub), tag catch and evolution events with their game, and
+  backfill past catches from the ownership history.
+- **8b. Achievement engine:** general, per-game and cross-game progress. Trophies already
+  earned stay, and their coins aren't paid twice.
+- **8c. Per-game set:** one template every new game gets automatically, using the game
+  Pokédex lists.
+- **8d. Cross-game set:** the achievements that connect a trainer's games.
+- **8e. Specific achievements:** hand-made goals for FireRed and for the hub overall.
+- **8f. Trophy screen:** General and per-game tabs, progress bars, and notifications that name
+  the game.
+
+Rules:
+
+- "Every game" is a set of milestones (2, 3, 5 games). A literal "every game" would unlock on
+  the first catch with one game connected, and become incomplete when another is added.
+- Earned achievements are never revoked, even when a new game is added.
+- A game only counts toward a species goal if that species exists in it.
+- Rewards scale by tier, and cross-game achievements pay the most, so per-game sets don't
+  flood the economy with coins.
 
 ## Backlog
 
