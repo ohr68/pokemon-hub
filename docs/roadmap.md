@@ -211,7 +211,7 @@ Trainers grow by playing, across every game connected to PokeHub:
 
 ## Backlog
 
-- **Fluid save sync** (steps 1 and 2 done; the problem is in
+- **Fluid save sync** (steps 1 to 3 done; the problem is in
   [tech-debt.md](tech-debt.md#save-sync-isnt-fluid)), in four steps:
   1. **Safe transfers** (done): PokeHub records a transfer before the game's save changes, so
      the browser notes it first. One cut short by a failed restore or a closed tab is settled
@@ -222,8 +222,9 @@ Trainers grow by playing, across every game connected to PokeHub:
      on by default with an off switch. Every read through the emulator rewrites the whole
      128 KB save to IndexedDB, even unchanged, so changes are detected on the 15-second flush
      the page already does instead of by polling faster.
-  3. **One save panel:** a single status (up to date, syncing, failed, no save yet) with the
-     last sync time, and tabs for transfers, items, import/export and backups.
+  3. **One save panel** (done): a single status (synced, syncing, failed, no save yet) with the
+     last sync time, and tabs for transfers, items, backups and devices. Tabs stay
+     mounted, so a half-picked PC box or a receipt survives switching between them.
   4. **Fewer disruptive restarts:** pending Pokémon and items go in when the game starts, while
      there's no progress to lose. Mid-game they wait until the player applies them, with a
      warning that says how long ago the last save was.

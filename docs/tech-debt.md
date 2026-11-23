@@ -20,7 +20,6 @@ safe to run more than once.
   first.
 - Sending or withdrawing a Pokémon restarts the game from its last save, which drops any
   progress since then and takes the player back to the title screen.
-- Sync, transfers, import/export and backups are separate panels with their own buttons.
 - Save states aren't part of the save file, so loading an older one can hide a delivery.
 - On the 3DS, each trip is a manual GodMode9 and FTP routine.
 
@@ -29,10 +28,7 @@ chance to lose progress or think a transfer failed, as with a delivered Squirtle
 in Box 1 and looked missing.
 
 **Direction:**
-- Show one sync state on the Jogar page: up to date, syncing, unsaved or failed, with the
-  last sync time.
 - Queue transfers and apply them at a safe moment, so the player chooses when the game
   restarts, and warn before a restart if the game hasn't been saved recently.
-- Bring sync, transfers, import/export and backups into one save panel.
 - Study whether a transfer can avoid the restart by writing into the running game's memory.
   It's riskier than editing the save file, so it needs its own spike.
