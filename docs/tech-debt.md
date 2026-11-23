@@ -18,8 +18,8 @@ safe to run more than once.
 
 - Sync only sees what was last saved inside the game, so the player has to remember to save
   first.
-- Sending or withdrawing a Pokémon restarts the game from its last save, which drops any
-  progress since then and takes the player back to the title screen.
+- Changing the save mid-game still restarts it from the last save. The player chooses when and
+  is told how old that save is, but progress since then is dropped.
 - Save states aren't part of the save file, so loading an older one can hide a delivery.
 - On the 3DS, each trip is a manual GodMode9 and FTP routine.
 
@@ -28,7 +28,5 @@ chance to lose progress or think a transfer failed, as with a delivered Squirtle
 in Box 1 and looked missing.
 
 **Direction:**
-- Queue transfers and apply them at a safe moment, so the player chooses when the game
-  restarts, and warn before a restart if the game hasn't been saved recently.
 - Study whether a transfer can avoid the restart by writing into the running game's memory.
   It's riskier than editing the save file, so it needs its own spike.
