@@ -444,6 +444,45 @@ public sealed class OwnedPokemon : Entity
         return Result.Success();
     }
 
+    /// <summary>
+    /// Undoes a withdrawal the game couldn't finish: its save still holds the Pokémon, so it goes
+    /// back inside the game instead of staying in the hub as a second copy. Also settles one that
+    /// was moved back into the save since, and one that never left (repeating changes nothing).
+    /// </summary>
+    public Result CancelWithdrawal(Guid trainerId, Save save, DateTime utcNow)
+    {
+        Result ownership = EnsureActiveAndOwnedBy(trainerId);
+
+        if (ownership.IsFailure)
+        {
+            return ownership;
+        }
+
+        if (CatchKeyGameId != save.GameId || CatchKey is null)
+        {
+            return Result.Failure(PokemonErrors.NotInThisSave);
+        }
+
+        if (SaveId == save.Id && !AwaitingDelivery)
+        {
+            return Result.Success();
+        }
+
+        if (!IsInHub && SaveId != save.Id)
+        {
+            return Result.Failure(PokemonErrors.NotInThisSave);
+        }
+
+        SaveId = save.Id;
+        AwaitingDelivery = false;
+
+        Record(OwnershipChange.MovedToSave, trainerId, utcNow, saveId: save.Id);
+
+        RaiseSaveChanged(save.Id, SaveChange.Delivered);
+
+        return Result.Success();
+    }
+
     public Result Rename(Guid trainerId, string? nickname)
     {
         Result ownership = EnsureActiveAndOwnedBy(trainerId);

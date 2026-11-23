@@ -66,6 +66,17 @@ public interface IPokedexApi
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Puts withdrawn Pokémon back inside the game, for a withdrawal the game couldn't finish.
+    /// Refused for any Pokémon whose catch key isn't in <paramref name="presentCatchKeys"/>.
+    /// </summary>
+    Task<Result> CancelWithdrawalAsync(
+        Guid trainerId,
+        Guid gameId,
+        IReadOnlyCollection<string> catchKeys,
+        IReadOnlyCollection<string> presentCatchKeys,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Mirrors the game's save: Pokémon inside the game (caught or delivered) that are in its save on PokeHub but no
     /// longer among <paramref name="presentCatchKeys"/> left the game and are removed. With
     /// <paramref name="dryRun"/>, only reports them.

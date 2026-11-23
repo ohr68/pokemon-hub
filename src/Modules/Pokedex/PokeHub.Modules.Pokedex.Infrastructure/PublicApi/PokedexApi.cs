@@ -8,6 +8,7 @@ using PokeHub.Modules.Pokedex.Application.Pokemon.GetPokemon;
 using PokeHub.Modules.Pokedex.Application.Pokemon.GetTrainerPokemon;
 using PokeHub.Modules.Pokedex.Application.Pokemon.ReleasePokemon;
 using PokeHub.Modules.Pokedex.Application.Saves;
+using PokeHub.Modules.Pokedex.Application.Saves.CancelWithdrawal;
 using PokeHub.Modules.Pokedex.Application.Saves.GetOrCreateSave;
 using PokeHub.Modules.Pokedex.Application.Saves.DeliverPokemon;
 using PokeHub.Modules.Pokedex.Application.Saves.GetAwaitingDelivery;
@@ -198,6 +199,14 @@ internal sealed class PokedexApi(ISender sender, ISpeciesRepository speciesRepos
         IReadOnlyCollection<string> presentCatchKeys,
         CancellationToken cancellationToken = default) =>
         sender.Send(new RedeliverPokemonCommand(trainerId, gameId, pokemonIds, presentCatchKeys), cancellationToken);
+
+    public Task<Result> CancelWithdrawalAsync(
+        Guid trainerId,
+        Guid gameId,
+        IReadOnlyCollection<string> catchKeys,
+        IReadOnlyCollection<string> presentCatchKeys,
+        CancellationToken cancellationToken = default) =>
+        sender.Send(new CancelWithdrawalCommand(trainerId, gameId, catchKeys, presentCatchKeys), cancellationToken);
 
     public Task<Result> ReleaseFromSaveAsync(
         Guid trainerId,
