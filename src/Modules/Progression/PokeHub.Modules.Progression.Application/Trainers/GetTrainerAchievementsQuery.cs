@@ -26,7 +26,12 @@ public sealed record GameAchievementsResponse(
     int DexTotal,
     int TotalBadges);
 
-public sealed record CrossGameAchievementsResponse(int GamesPlayed, int SameSpeciesCaught, int SameSpeciesEvolved);
+public sealed record CrossGameAchievementsResponse(
+    int GamesPlayed,
+    int SameSpeciesCaught,
+    int SameSpeciesEvolved,
+    int DexesCompleted,
+    int BadgeSetsCompleted);
 
 internal static class TrainerAchievements
 {
@@ -92,7 +97,9 @@ internal sealed class GetTrainerAchievementsQueryHandler(IDbConnectionFactory db
             new CrossGameAchievementsResponse(
                 progress.CrossGame.GamesPlayed,
                 progress.CrossGame.SameSpeciesCaught,
-                progress.CrossGame.SameSpeciesEvolved));
+                progress.CrossGame.SameSpeciesEvolved,
+                progress.CrossGame.DexesCompleted,
+                progress.CrossGame.BadgeSetsCompleted));
     }
 
     private sealed record GameBadgesRow(Guid GameId, int TotalBadges);

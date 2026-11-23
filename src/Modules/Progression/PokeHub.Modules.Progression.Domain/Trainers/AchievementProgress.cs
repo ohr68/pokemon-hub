@@ -60,17 +60,29 @@ public sealed record GameProgress(
     };
 }
 
-/// <summary>What connects a trainer's games.</summary>
+/// <summary>
+/// What connects a trainer's games. Only games with a known Pokédex count, so a test or
+/// sandbox game can't earn the trophies that pay the most.
+/// </summary>
 /// <param name="GamesPlayed">Games with at least one catch, evolution or badge.</param>
 /// <param name="SameSpeciesCaught">The most games any one species was caught in.</param>
 /// <param name="SameSpeciesEvolved">The most games any one species was evolved into in.</param>
-public sealed record CrossGameProgress(int GamesPlayed, int SameSpeciesCaught, int SameSpeciesEvolved)
+/// <param name="DexesCompleted">Games whose whole Pokédex is registered.</param>
+/// <param name="BadgeSetsCompleted">Games with every badge earned.</param>
+public sealed record CrossGameProgress(
+    int GamesPlayed,
+    int SameSpeciesCaught,
+    int SameSpeciesEvolved,
+    int DexesCompleted,
+    int BadgeSetsCompleted)
 {
     public int Value(CrossGameStat stat) => stat switch
     {
         CrossGameStat.GamesPlayed => GamesPlayed,
         CrossGameStat.SameSpeciesCaught => SameSpeciesCaught,
         CrossGameStat.SameSpeciesEvolved => SameSpeciesEvolved,
+        CrossGameStat.DexesCompleted => DexesCompleted,
+        CrossGameStat.BadgeSetsCompleted => BadgeSetsCompleted,
         _ => 0,
     };
 }
@@ -97,12 +109,18 @@ public sealed record AchievementProgress(IReadOnlyList<GameProgress> Games, Cros
             .Select(gameId => ForGame(gameId, facts, badgeGameIds, contexts.FirstOrDefault(c => c.GameId == gameId)))
             .ToList();
 
+        var connected = games.Where(g => g.DexTotal > 0).ToList();
+        var connectedIds = connected.Select(g => g.GameId).ToHashSet();
+        var connectedFacts = facts.Where(f => connectedIds.Contains(f.GameId)).ToList();
+
         return new AchievementProgress(
             games,
             new CrossGameProgress(
-                games.Count,
-                MostGames(facts.Where(f => !f.IsEvolution)),
-                MostGames(facts.Where(f => f.IsEvolution))));
+                connected.Count,
+                MostGames(connectedFacts.Where(f => !f.IsEvolution)),
+                MostGames(connectedFacts.Where(f => f.IsEvolution)),
+                connected.Count(g => g.DexRegistered >= g.DexTotal),
+                connected.Count(g => g.TotalBadges > 0 && g.Badges >= g.TotalBadges)));
     }
 
     private static GameProgress ForGame(

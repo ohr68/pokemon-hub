@@ -27,7 +27,8 @@ internal sealed class TrophyEarnedDomainEventHandler(IEventBus eventBus) : Domai
                 domainEvent.OccurredOnUtc,
                 domainEvent.TrainerId,
                 domainEvent.TrophyCode,
-                domainEvent.Tier.ToString().ToLowerInvariant()),
+                domainEvent.Tier.ToString().ToLowerInvariant(),
+                domainEvent.IsCrossGame),
             cancellationToken);
 }
 

@@ -15,6 +15,7 @@ public sealed record GetTrainerTrophiesQuery(Guid TrainerId) : IQuery<IReadOnlyC
 /// <param name="Tier">bronze, silver or gold.</param>
 /// <param name="Progress">The trainer's count toward <paramref name="Target"/>, capped at it.</param>
 /// <param name="GameId">The game a per-game trophy belongs to; empty for the others.</param>
+/// <param name="IsCrossGame">It rewards what the trainer did across their games.</param>
 public sealed record TrophyResponse(
     string Code,
     string Name,
@@ -24,7 +25,8 @@ public sealed record TrophyResponse(
     int Target,
     DateTime? EarnedOnUtc,
     Guid? GameId = null,
-    string? GameName = null);
+    string? GameName = null,
+    bool IsCrossGame = false);
 
 internal sealed class GetTrainerTrophiesQueryHandler(IDbConnectionFactory dbConnectionFactory, IPokedexApi pokedexApi)
     : IQueryHandler<GetTrainerTrophiesQuery, IReadOnlyCollection<TrophyResponse>>
@@ -88,6 +90,15 @@ internal sealed class GetTrainerTrophiesQueryHandler(IDbConnectionFactory dbConn
                 t.Target,
                 earned.TryGetValue(t.Code, out DateTime on) ? on : null))
             .Concat(perGame)
+            .Concat(CrossGameTrophies.All.Select(t => new TrophyResponse(
+                t.Code,
+                t.Name,
+                t.Description,
+                t.Tier.ToString().ToLowerInvariant(),
+                Math.Min(achievements.CrossGame.Value(t.Stat), t.Target),
+                t.Target,
+                earned.TryGetValue(t.Code, out DateTime earnedOn) ? earnedOn : null,
+                IsCrossGame: true)))
             .ToList();
     }
 

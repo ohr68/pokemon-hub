@@ -20,6 +20,8 @@ public enum CrossGameStat
     GamesPlayed = 1,
     SameSpeciesCaught = 2,
     SameSpeciesEvolved = 3,
+    DexesCompleted = 4,
+    BadgeSetsCompleted = 5,
 }
 
 /// <summary>A trophy every game offers, earned separately in each.</summary>
@@ -59,11 +61,30 @@ public static class GameTrophies
 
 public static class CrossGameTrophies
 {
-    public static readonly IReadOnlyList<CrossGameTrophy> All = [];
+    /// <summary>What connects a trainer's games. These pay the most (see the coin rules).</summary>
+    public static readonly IReadOnlyList<CrossGameTrophy> All =
+    [
+        new("cross-games-2", "Novos horizontes", "Jogue 2 jogos conectados ao PokeHub.", TrophyTier.Bronze, CrossGameStat.GamesPlayed, 2),
+        new("cross-games-3", "Explorador de regiões", "Jogue 3 jogos conectados ao PokeHub.", TrophyTier.Silver, CrossGameStat.GamesPlayed, 3),
+        new("cross-games-5", "Viajante do mundo Pokémon", "Jogue 5 jogos conectados ao PokeHub.", TrophyTier.Gold, CrossGameStat.GamesPlayed, 5),
+
+        new("cross-catch-2", "Velho conhecido", "Capture a mesma espécie em 2 jogos.", TrophyTier.Bronze, CrossGameStat.SameSpeciesCaught, 2),
+        new("cross-catch-3", "Companheiro de jornada", "Capture a mesma espécie em 3 jogos.", TrophyTier.Silver, CrossGameStat.SameSpeciesCaught, 3),
+        new("cross-catch-5", "Laço entre mundos", "Capture a mesma espécie em 5 jogos.", TrophyTier.Gold, CrossGameStat.SameSpeciesCaught, 5),
+
+        new("cross-evolve-2", "Caminho conhecido", "Evolua um Pokémon para a mesma espécie em 2 jogos.", TrophyTier.Bronze, CrossGameStat.SameSpeciesEvolved, 2),
+        new("cross-evolve-3", "Mestre da evolução", "Evolua um Pokémon para a mesma espécie em 3 jogos.", TrophyTier.Silver, CrossGameStat.SameSpeciesEvolved, 3),
+        new("cross-evolve-5", "Evolução sem fronteiras", "Evolua um Pokémon para a mesma espécie em 5 jogos.", TrophyTier.Gold, CrossGameStat.SameSpeciesEvolved, 5),
+
+        new("cross-dex-2", "Dupla Pokédex", "Complete a Pokédex de 2 jogos.", TrophyTier.Gold, CrossGameStat.DexesCompleted, 2),
+        new("cross-badges-2", "Campeão de duas regiões", "Conquiste todas as insígnias de 2 jogos.", TrophyTier.Gold, CrossGameStat.BadgeSetsCompleted, 2),
+    ];
 }
 
 public static class TrophyCatalog
 {
+    public static bool IsCrossGame(string storedCode) => CrossGameTrophies.All.Any(t => t.Code == storedCode);
+
     /// <summary>The tier of a stored trophy code, or null when no trophy has that code.</summary>
     public static TrophyTier? TierOf(string storedCode)
     {

@@ -174,7 +174,7 @@ public sealed class TrainerProgress : Entity
 
         foreach (CrossGameTrophy trophy in crossGameTrophies.Where(t => achievements.CrossGame.Value(t.Stat) >= t.Target))
         {
-            Award(trophy.Code, trophy.Tier, earnedOnUtc);
+            Award(trophy.Code, trophy.Tier, earnedOnUtc, isCrossGame: true);
         }
     }
 
@@ -191,7 +191,7 @@ public sealed class TrainerProgress : Entity
         _ => 0,
     };
 
-    private void Award(string code, TrophyTier tier, DateTime earnedOnUtc)
+    private void Award(string code, TrophyTier tier, DateTime earnedOnUtc, bool isCrossGame = false)
     {
         if (_trophies.Exists(t => t.TrophyCode == code))
         {
@@ -199,7 +199,7 @@ public sealed class TrainerProgress : Entity
         }
 
         _trophies.Add(TrainerTrophy.Create(TrainerId, code, earnedOnUtc));
-        Raise(new TrophyEarnedDomainEvent(TrainerId, code, tier));
+        Raise(new TrophyEarnedDomainEvent(TrainerId, code, tier, isCrossGame));
     }
 
     private void Count(XpReason reason)

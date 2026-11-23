@@ -17,6 +17,9 @@ public static class CoinRules
         _ => 20,
     };
 
+    // Connecting games is the hardest thing to do, so it pays the most.
+    public static int CrossGameTrophy(string tier) => 2 * Trophy(tier);
+
     // Reaching a level pays ten times that level: 20 for level 2, 100 for level 10.
     public static int Level(int level) => 10 * level;
 }

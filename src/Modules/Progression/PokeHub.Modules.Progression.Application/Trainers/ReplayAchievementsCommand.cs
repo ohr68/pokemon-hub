@@ -53,7 +53,8 @@ internal sealed class ReplayAchievementsCommandHandler(IDbConnectionFactory dbCo
                     t.OnUtc,
                     t.TrainerId,
                     t.Code,
-                    tier.ToString().ToLowerInvariant()),
+                    tier.ToString().ToLowerInvariant(),
+                    TrophyCatalog.IsCrossGame(t.Code)),
                 cancellationToken);
         }
 

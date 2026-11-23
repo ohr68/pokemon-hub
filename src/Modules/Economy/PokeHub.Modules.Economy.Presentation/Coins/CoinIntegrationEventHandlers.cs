@@ -58,7 +58,11 @@ internal sealed class TrophyEarnedIntegrationEventHandler(ISender sender)
         Coins.EarnAsync(
             sender,
             e.TrainerId,
-            [new CoinAward(CoinReason.EarnedTrophy, CoinRules.Trophy(e.Tier), $"trophy:{e.TrophyCode}", e.OccurredOnUtc)],
+            [new CoinAward(
+                CoinReason.EarnedTrophy,
+                e.IsCrossGame ? CoinRules.CrossGameTrophy(e.Tier) : CoinRules.Trophy(e.Tier),
+                $"trophy:{e.TrophyCode}",
+                e.OccurredOnUtc)],
             cancellationToken);
 }
 
