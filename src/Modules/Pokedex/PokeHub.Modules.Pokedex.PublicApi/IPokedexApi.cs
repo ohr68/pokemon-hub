@@ -51,6 +51,12 @@ public interface IPokedexApi
     Task<IReadOnlyCollection<GameFact>> GetGameFactsAsync(Guid? trainerId = null, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// How much of each game's own Pokédex trainers have registered, one entry per save. With a
+    /// trainer id, only theirs.
+    /// </summary>
+    Task<IReadOnlyCollection<GameDexProgress>> GetGameDexProgressAsync(Guid? trainerId = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Keeps what the game reports about the Pokémon inside it. Catch keys it doesn't know are
     /// skipped, since the save may hold Pokémon not synced yet.
     /// </summary>

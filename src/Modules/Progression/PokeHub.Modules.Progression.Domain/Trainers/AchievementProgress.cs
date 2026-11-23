@@ -5,6 +5,12 @@ namespace PokeHub.Modules.Progression.Domain.Trainers;
 /// <param name="SpeciesId">The species it was caught as, or evolved into.</param>
 public sealed record AchievementFact(Guid GameId, bool IsEvolution, Guid PokemonId, int SpeciesId, bool IsShiny);
 
+/// <summary>What a game offers a trainer, beyond what they did in it.</summary>
+/// <param name="DexRegistered">Species of the game's own Pokédex registered in their save.</param>
+/// <param name="DexTotal">Species in that Pokédex; zero when the game has no known list.</param>
+/// <param name="TotalBadges">Badges in the game; zero until it reports them.</param>
+public sealed record GameContext(Guid GameId, int DexRegistered, int DexTotal, int TotalBadges);
+
 /// <summary>What a trainer has done inside one game.</summary>
 /// <param name="SpeciesRegistered">Different species caught in this game or evolved into in it.</param>
 public sealed record GameProgress(
@@ -13,8 +19,34 @@ public sealed record GameProgress(
     int Evolutions,
     int ShinyCatches,
     int SpeciesRegistered,
-    int Badges)
+    int Badges,
+    int DexRegistered = 0,
+    int DexTotal = 0,
+    int TotalBadges = 0)
 {
+    public int DexPercent => DexTotal == 0 ? 0 : 100 * DexRegistered / DexTotal;
+
+    public int BadgePercent => TotalBadges == 0 ? 0 : 100 * Badges / TotalBadges;
+
+    /// <summary>Whether this game can offer the trophy: one with no Pokédex or badges can't offer those.</summary>
+    public bool Offers(GameTrophy trophy) => trophy.Stat switch
+    {
+        GameStat.DexPercent => DexTotal > 0,
+        GameStat.Badges or GameStat.BadgePercent => TotalBadges > 0,
+        _ => true,
+    };
+
+    /// <summary>Progress toward the trophy in things to do: 38 of 76 species rather than 50%.</summary>
+    public (int Current, int Target) Measure(GameTrophy trophy) => trophy.Stat switch
+    {
+        GameStat.DexPercent => (DexRegistered, PartOf(DexTotal, trophy.Target)),
+        GameStat.BadgePercent => (Badges, PartOf(TotalBadges, trophy.Target)),
+        _ => (Value(trophy.Stat), trophy.Target),
+    };
+
+    // Rounded up, so reaching it always means reaching the percentage.
+    private static int PartOf(int total, int percent) => (total * percent + 99) / 100;
+
     public int Value(GameStat stat) => stat switch
     {
         GameStat.Catches => Catches,
@@ -22,6 +54,8 @@ public sealed record GameProgress(
         GameStat.ShinyCatches => ShinyCatches,
         GameStat.SpeciesRegistered => SpeciesRegistered,
         GameStat.Badges => Badges,
+        GameStat.DexPercent => DexPercent,
+        GameStat.BadgePercent => BadgePercent,
         _ => 0,
     };
 }
@@ -49,14 +83,18 @@ public sealed record AchievementProgress(IReadOnlyList<GameProgress> Games, Cros
 {
     /// <param name="facts">Every catch and evolution in a game.</param>
     /// <param name="badgeGameIds">The game of each badge earned, one entry per badge.</param>
-    public static AchievementProgress From(IReadOnlyCollection<AchievementFact> facts, IReadOnlyCollection<Guid> badgeGameIds)
+    /// <param name="contexts">What each game offers; a game left out offers no Pokédex or badge goals.</param>
+    public static AchievementProgress From(
+        IReadOnlyCollection<AchievementFact> facts,
+        IReadOnlyCollection<Guid> badgeGameIds,
+        IReadOnlyCollection<GameContext> contexts)
     {
         var games = facts
             .Select(f => f.GameId)
             .Concat(badgeGameIds)
             .Distinct()
             .Order()
-            .Select(gameId => ForGame(gameId, facts, badgeGameIds))
+            .Select(gameId => ForGame(gameId, facts, badgeGameIds, contexts.FirstOrDefault(c => c.GameId == gameId)))
             .ToList();
 
         return new AchievementProgress(
@@ -67,7 +105,11 @@ public sealed record AchievementProgress(IReadOnlyList<GameProgress> Games, Cros
                 MostGames(facts.Where(f => f.IsEvolution))));
     }
 
-    private static GameProgress ForGame(Guid gameId, IReadOnlyCollection<AchievementFact> facts, IReadOnlyCollection<Guid> badgeGameIds)
+    private static GameProgress ForGame(
+        Guid gameId,
+        IReadOnlyCollection<AchievementFact> facts,
+        IReadOnlyCollection<Guid> badgeGameIds,
+        GameContext? context)
     {
         var inGame = facts.Where(f => f.GameId == gameId).ToList();
         var caught = inGame.Where(f => !f.IsEvolution).DistinctBy(f => f.PokemonId).ToList();
@@ -79,7 +121,10 @@ public sealed record AchievementProgress(IReadOnlyList<GameProgress> Games, Cros
             evolved.Count,
             caught.Count(f => f.IsShiny),
             caught.Concat(evolved).Select(f => f.SpeciesId).Distinct().Count(),
-            badgeGameIds.Count(id => id == gameId));
+            badgeGameIds.Count(id => id == gameId),
+            context?.DexRegistered ?? 0,
+            context?.DexTotal ?? 0,
+            context?.TotalBadges ?? 0);
     }
 
     private static int MostGames(IEnumerable<AchievementFact> facts) =>

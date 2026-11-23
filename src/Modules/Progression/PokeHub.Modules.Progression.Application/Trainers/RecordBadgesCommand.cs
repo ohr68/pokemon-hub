@@ -37,7 +37,8 @@ internal sealed class RecordBadgesCommandHandler(
         progress.EarnTrophies(utcNow);
 
         IReadOnlyCollection<GameFact> facts = await pokedexApi.GetGameFactsAsync(request.TrainerId, cancellationToken);
-        progress.EarnAchievements(TrainerAchievements.For(progress, facts), utcNow);
+        IReadOnlyCollection<GameDexProgress> dexes = await pokedexApi.GetGameDexProgressAsync(request.TrainerId, cancellationToken);
+        progress.EarnAchievements(TrainerAchievements.For(progress, facts, dexes), utcNow);
 
         repository.InsertEntries(progress.NewEntries);
 

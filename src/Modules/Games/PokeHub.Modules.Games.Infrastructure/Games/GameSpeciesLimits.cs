@@ -16,4 +16,14 @@ internal sealed class GameSpeciesLimits(GamesDbContext context) : IGameSpeciesLi
             .Where(g => gameIds.Contains(g.Id) && g.MaxSpeciesId != null)
             .ToDictionaryAsync(g => g.Id, g => g.MaxSpeciesId!.Value, cancellationToken);
     }
+
+    public async Task<IReadOnlyDictionary<Guid, GameIdentity>> GetIdentitiesAsync(
+        IReadOnlyCollection<Guid> gameIds,
+        CancellationToken cancellationToken = default)
+    {
+        return await context.Set<Game>()
+            .AsNoTracking()
+            .Where(g => gameIds.Contains(g.Id))
+            .ToDictionaryAsync(g => g.Id, g => new GameIdentity(g.Slug, g.Name), cancellationToken);
+    }
 }

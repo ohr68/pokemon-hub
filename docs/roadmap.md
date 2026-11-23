@@ -10,7 +10,7 @@
 | 5. FireRed | Done: play in the browser, sync, mirror, save backups, transfers both ways |
 | 6. Operations | Done: backups, reliable startup, problems view, local checks |
 | 7. Trainer progression: XP and levels, trophies, badges, coins | Done |
-| 8. Connected achievements: general, per-game, cross-game and specific | In progress (8a and 8b done) |
+| 8. Connected achievements: general, per-game, cross-game and specific | In progress (8a to 8c done) |
 
 More ideas, not yet in a phase, are in the [backlog](#backlog).
 
@@ -228,8 +228,10 @@ a larger journey. Today's trophies are global counters that don't know which gam
 - **8b. Achievement engine (done):** per-game and cross-game progress is worked out from game
   history and can award trophies of each kind. Trophies already earned stay, and their coins
   aren't paid twice. The new catalogs start empty and are filled by 8c and 8d.
-- **8c. Per-game set:** one template every new game gets automatically, using the game
-  Pokédex lists.
+- **8c. Per-game set (done):** one template of 11 trophies every game gets automatically,
+  using the game Pokédex lists. Pokémon sent to a game count for its Pokédex goals, but not
+  for catch goals. A game's Pokédex is found from its slug, so a new game's slug must be a
+  list's slug or name just one version (`firered`).
 - **8d. Cross-game set:** the achievements that connect a trainer's games.
 - **8e. Specific achievements:** hand-made goals for FireRed and for the hub overall.
 - **8f. Trophy screen:** General and per-game tabs, progress bars, and notifications that name

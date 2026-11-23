@@ -11,4 +11,11 @@ public interface IGameSpeciesLimits
     Task<IReadOnlyDictionary<Guid, int>> GetMaxSpeciesIdsAsync(
         IReadOnlyCollection<Guid> gameIds,
         CancellationToken cancellationToken = default);
+
+    /// <summary>The slug and name of each game. An unknown game is left out.</summary>
+    Task<IReadOnlyDictionary<Guid, GameIdentity>> GetIdentitiesAsync(
+        IReadOnlyCollection<Guid> gameIds,
+        CancellationToken cancellationToken = default);
 }
+
+public sealed record GameIdentity(string Slug, string Name);

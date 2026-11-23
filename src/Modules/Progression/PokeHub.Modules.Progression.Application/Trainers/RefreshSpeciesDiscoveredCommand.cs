@@ -39,7 +39,8 @@ internal sealed class RefreshSpeciesDiscoveredCommandHandler(
         progress.EarnTrophies(utcNow);
 
         IReadOnlyCollection<GameFact> facts = await pokedexApi.GetGameFactsAsync(request.TrainerId, cancellationToken);
-        progress.EarnAchievements(TrainerAchievements.For(progress, facts), utcNow);
+        IReadOnlyCollection<GameDexProgress> dexes = await pokedexApi.GetGameDexProgressAsync(request.TrainerId, cancellationToken);
+        progress.EarnAchievements(TrainerAchievements.For(progress, facts, dexes), utcNow);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

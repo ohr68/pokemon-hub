@@ -39,4 +39,20 @@ public static class GameDexes
     ];
 
     public static GameDex? Find(string slug) => All.FirstOrDefault(g => g.Slug == slug);
+
+    /// <summary>
+    /// The Pokédex of a game registered on PokeHub: by its exact slug, or a slug naming one
+    /// version of a pair ("firered"). Empty when that's unknown or could mean several games.
+    /// </summary>
+    public static GameDex? ForGame(string gameSlug)
+    {
+        if (Find(gameSlug) is { } exact)
+        {
+            return exact;
+        }
+
+        var matches = All.Where(g => g.Slug.Split('-').Contains(gameSlug)).ToList();
+
+        return matches.Count == 1 ? matches[0] : null;
+    }
 }

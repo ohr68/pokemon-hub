@@ -8,6 +8,10 @@ public enum GameStat
     ShinyCatches = 3,
     SpeciesRegistered = 4,
     Badges = 5,
+
+    // Share of the game's own Pokédex, and of its badges, from 0 to 100.
+    DexPercent = 6,
+    BadgePercent = 7,
 }
 
 /// <summary>What a cross-game trophy counts.</summary>
@@ -32,7 +36,25 @@ public sealed record CrossGameTrophy(string Code, string Name, string Descriptio
 
 public static class GameTrophies
 {
-    public static readonly IReadOnlyList<GameTrophy> All = [];
+    /// <summary>The set every game gets, with nothing to configure when a game is added.</summary>
+    public static readonly IReadOnlyList<GameTrophy> All =
+    [
+        new("game-catch-1", "Primeira captura aqui", "Capture um Pokémon neste jogo.", TrophyTier.Bronze, GameStat.Catches, 1),
+        new("game-catch-25", "Caçador da região", "Capture 25 Pokémon neste jogo.", TrophyTier.Bronze, GameStat.Catches, 25),
+        new("game-catch-100", "Terror da grama alta", "Capture 100 Pokémon neste jogo.", TrophyTier.Silver, GameStat.Catches, 100),
+
+        new("game-evolve-1", "Primeira evolução aqui", "Evolua um Pokémon neste jogo.", TrophyTier.Bronze, GameStat.Evolutions, 1),
+        new("game-evolve-10", "Criador da região", "Evolua 10 Pokémon neste jogo.", TrophyTier.Silver, GameStat.Evolutions, 10),
+
+        new("game-shiny-1", "Brilho na região", "Capture um shiny neste jogo.", TrophyTier.Silver, GameStat.ShinyCatches, 1),
+
+        new("game-dex-25", "Pokédex iniciada", "Registre 25% da Pokédex deste jogo.", TrophyTier.Bronze, GameStat.DexPercent, 25),
+        new("game-dex-50", "Meia Pokédex", "Registre 50% da Pokédex deste jogo.", TrophyTier.Silver, GameStat.DexPercent, 50),
+        new("game-dex-100", "Pokédex completa", "Registre toda a Pokédex deste jogo.", TrophyTier.Gold, GameStat.DexPercent, 100),
+
+        new("game-badge-1", "Primeira insígnia aqui", "Conquiste uma insígnia neste jogo.", TrophyTier.Bronze, GameStat.Badges, 1),
+        new("game-badges-all", "Todas as insígnias", "Conquiste todas as insígnias deste jogo.", TrophyTier.Gold, GameStat.BadgePercent, 100),
+    ];
 }
 
 public static class CrossGameTrophies
