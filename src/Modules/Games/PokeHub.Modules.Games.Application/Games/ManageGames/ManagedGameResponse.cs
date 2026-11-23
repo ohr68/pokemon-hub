@@ -12,6 +12,7 @@ public sealed record ManagedGameResponse(
     string ClientId,
     bool IsActive,
     int RateLimitPerMinute,
+    int? MaxSpeciesId,
     Uri? WebhookUrl,
     string? WebhookSecret,
     IReadOnlyCollection<ManagedGameFileResponse> Files);

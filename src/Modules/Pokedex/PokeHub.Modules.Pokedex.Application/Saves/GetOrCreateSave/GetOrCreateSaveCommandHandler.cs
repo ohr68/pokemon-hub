@@ -32,7 +32,7 @@ internal sealed class GetOrCreateSaveCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return new SaveResponse(save.Value.Id, save.Value.GameId, save.Value.GameName, save.Value.CreatedOnUtc, 0);
+        return new SaveResponse(save.Value.Id, save.Value.GameId, save.Value.GameName, save.Value.CreatedOnUtc, 0, null);
     }
 
     // Shared with catching: a catch in a game the trainer never opened creates the save too.

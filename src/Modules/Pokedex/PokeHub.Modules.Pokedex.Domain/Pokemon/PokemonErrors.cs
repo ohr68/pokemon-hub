@@ -9,6 +9,11 @@ public static class PokemonErrors
         return Error.NotFound("Pokemon.NotFound", $"The Pokémon with the identifier {pokemonId} was not found.");
     }
 
+    public static Error SpeciesNotInGame(int speciesId, string gameName)
+    {
+        return Error.Problem("Pokemon.SpeciesNotInGame", $"Pokémon #{speciesId} doesn't exist in {gameName}.");
+    }
+
     public static Error NotOwnedByTrainer(Guid pokemonId)
     {
         return Error.Problem("Pokemon.NotOwnedByTrainer", $"The Pokémon {pokemonId} belongs to another trainer.");

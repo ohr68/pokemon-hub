@@ -1,6 +1,8 @@
 using PokeHub.Common.Application.Messaging;
 using PokeHub.Common.Domain.Abstractions;
+using PokeHub.Modules.Games.PublicApi;
 using PokeHub.Modules.Pokedex.Application.Abstractions.Data;
+using PokeHub.Modules.Pokedex.Application.Saves.GameSpecies;
 using PokeHub.Modules.Pokedex.Domain.Pokemon;
 using PokeHub.Modules.Pokedex.Domain.Saves;
 
@@ -9,6 +11,7 @@ namespace PokeHub.Modules.Pokedex.Application.Saves.DeliverPokemon;
 internal sealed class DeliverPokemonCommandHandler(
     ISaveRepository saveRepository,
     IOwnedPokemonRepository pokemonRepository,
+    IGameSpeciesLimits speciesLimits,
     IUnitOfWork unitOfWork)
     : ICommandHandler<DeliverPokemonCommand>
 {
@@ -28,6 +31,23 @@ internal sealed class DeliverPokemonCommandHandler(
             if (pokemon is null)
             {
                 return Result.Failure(PokemonErrors.NotFound(delivery.PokemonId));
+            }
+
+            // Waiting since before the game's limit changed, for example. A repeated delivery is
+            // already inside the game.
+            if (pokemon.AwaitingDelivery)
+            {
+                Result fits = await GameSpeciesRule.CheckAsync(
+                    speciesLimits,
+                    save.GameId,
+                    save.GameName,
+                    pokemon.SpeciesId,
+                    cancellationToken);
+
+                if (fits.IsFailure)
+                {
+                    return fits;
+                }
             }
 
             // The game must not know two Pokémon by the same key.

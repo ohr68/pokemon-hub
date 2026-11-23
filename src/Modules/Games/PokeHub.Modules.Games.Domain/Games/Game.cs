@@ -42,6 +42,11 @@ public sealed class Game : Entity
     public int RateLimitPerMinute { get; private set; }
 
     /// <summary>
+    /// The last National Dex number that exists in this game; empty when it takes any Pokémon.
+    /// </summary>
+    public int? MaxSpeciesId { get; private set; }
+
+    /// <summary>
     /// Where PokeHub sends the game's events (a Pokémon moved into or out of its save), if
     /// anywhere. Each request is signed with <see cref="WebhookSecret"/>.
     /// </summary>
@@ -80,11 +85,12 @@ public sealed class Game : Entity
         return game;
     }
 
-    public void UpdateDetails(string name, string? description, int rateLimitPerMinute)
+    public void UpdateDetails(string name, string? description, int rateLimitPerMinute, int? maxSpeciesId)
     {
         Name = name;
         Description = string.IsNullOrWhiteSpace(description) ? null : description.Trim();
         RateLimitPerMinute = rateLimitPerMinute;
+        MaxSpeciesId = maxSpeciesId;
     }
 
     public void TurnOn()

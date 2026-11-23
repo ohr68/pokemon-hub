@@ -8,7 +8,13 @@ using PokeHub.Modules.Games.Domain.Games;
 namespace PokeHub.Modules.Games.Application.Games.UpdateGame;
 
 /// <param name="RateLimitPerMinute">Requests one player may make to the game API per minute.</param>
-public sealed record UpdateGameCommand(Guid GameId, string Name, string? Description, int RateLimitPerMinute) : ICommand;
+/// <param name="MaxSpeciesId">The last National Dex number in the game; empty when it takes any Pokémon.</param>
+public sealed record UpdateGameCommand(
+    Guid GameId,
+    string Name,
+    string? Description,
+    int RateLimitPerMinute,
+    int? MaxSpeciesId) : ICommand;
 
 internal sealed class UpdateGameCommandValidator : AbstractValidator<UpdateGameCommand>
 {
@@ -17,6 +23,7 @@ internal sealed class UpdateGameCommandValidator : AbstractValidator<UpdateGameC
         RuleFor(c => c.Name).NotEmpty().MaximumLength(100);
         RuleFor(c => c.Description).MaximumLength(1000);
         RuleFor(c => c.RateLimitPerMinute).InclusiveBetween(Game.MinRateLimitPerMinute, Game.MaxRateLimitPerMinute);
+        RuleFor(c => c.MaxSpeciesId).GreaterThan(0).When(c => c.MaxSpeciesId is not null);
     }
 }
 
@@ -35,7 +42,7 @@ internal sealed class UpdateGameCommandHandler(
             return Result.Failure(GameErrors.NotFound(request.GameId));
         }
 
-        game.UpdateDetails(request.Name.Trim(), request.Description, request.RateLimitPerMinute);
+        game.UpdateDetails(request.Name.Trim(), request.Description, request.RateLimitPerMinute, request.MaxSpeciesId);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

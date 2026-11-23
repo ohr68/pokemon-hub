@@ -28,6 +28,9 @@ internal sealed class UpdateGameRequest
     public string? Description { get; init; }
 
     public int RateLimitPerMinute { get; init; }
+
+    // The last National Dex number in the game; empty when it takes any Pokémon.
+    public int? MaxSpeciesId { get; init; }
 }
 
 /// <summary>Multipart/form-data with the file in a field named file.</summary>

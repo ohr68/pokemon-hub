@@ -3,10 +3,11 @@ using Dapper;
 using PokeHub.Common.Application.Data;
 using PokeHub.Common.Application.Messaging;
 using PokeHub.Common.Domain.Abstractions;
+using PokeHub.Modules.Games.PublicApi;
 
 namespace PokeHub.Modules.Pokedex.Application.Saves.GetMySaves;
 
-internal sealed class GetMySavesQueryHandler(IDbConnectionFactory dbConnectionFactory)
+internal sealed class GetMySavesQueryHandler(IDbConnectionFactory dbConnectionFactory, IGameSpeciesLimits speciesLimits)
     : IQueryHandler<GetMySavesQuery, IReadOnlyCollection<SaveResponse>>
 {
     public async Task<Result<IReadOnlyCollection<SaveResponse>>> Handle(
@@ -22,7 +23,8 @@ internal sealed class GetMySavesQueryHandler(IDbConnectionFactory dbConnectionFa
                 s.game_id AS {nameof(SaveResponse.GameId)},
                 s.game_name AS {nameof(SaveResponse.GameName)},
                 s.created_on_utc AS {nameof(SaveResponse.CreatedOnUtc)},
-                COUNT(p.id)::int AS {nameof(SaveResponse.PokemonCount)}
+                COUNT(p.id)::int AS {nameof(SaveResponse.PokemonCount)},
+                NULL::int AS {nameof(SaveResponse.MaxSpeciesId)}
              FROM pokedex.saves s
              LEFT JOIN pokedex.pokemon p ON p.save_id = s.id AND p.status = 'Active'
              WHERE s.trainer_id = @TrainerId
@@ -30,8 +32,14 @@ internal sealed class GetMySavesQueryHandler(IDbConnectionFactory dbConnectionFa
              ORDER BY s.created_on_utc
              """;
 
-        IEnumerable<SaveResponse> saves = await connection.QueryAsync<SaveResponse>(sql, request);
+        var saves = (await connection.QueryAsync<SaveResponse>(sql, request)).ToList();
 
-        return saves.ToList();
+        IReadOnlyDictionary<Guid, int> limits = await speciesLimits.GetMaxSpeciesIdsAsync(
+            saves.Select(s => s.GameId).Distinct().ToList(),
+            cancellationToken);
+
+        return saves
+            .Select(s => s with { MaxSpeciesId = limits.TryGetValue(s.GameId, out int max) ? max : null })
+            .ToList();
     }
 }

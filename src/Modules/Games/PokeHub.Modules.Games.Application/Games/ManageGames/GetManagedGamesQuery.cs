@@ -24,6 +24,7 @@ internal sealed class GetManagedGamesQueryHandler(IDbConnectionFactory dbConnect
             SELECT
                 id AS Id, name AS Name, slug AS Slug, description AS Description, url AS Url,
                 client_id AS ClientId, is_active AS IsActive, rate_limit_per_minute AS RateLimitPerMinute,
+                max_species_id AS MaxSpeciesId,
                 webhook_url AS WebhookUrl, webhook_secret AS WebhookSecret
             FROM games.games
             WHERE @GameId::uuid IS NULL OR id = @GameId
@@ -57,6 +58,7 @@ internal sealed class GetManagedGamesQueryHandler(IDbConnectionFactory dbConnect
                 g.ClientId,
                 g.IsActive,
                 g.RateLimitPerMinute,
+                g.MaxSpeciesId,
                 g.WebhookUrl is null ? null : new Uri(g.WebhookUrl),
                 g.WebhookSecret,
                 files[g.Id]
@@ -82,6 +84,7 @@ internal sealed class GetManagedGamesQueryHandler(IDbConnectionFactory dbConnect
         string ClientId,
         bool IsActive,
         int RateLimitPerMinute,
+        int? MaxSpeciesId,
         string? WebhookUrl,
         string? WebhookSecret);
 

@@ -67,7 +67,7 @@ internal sealed class UpdateGameEndpoint(ISender sender) : EndpointBase<UpdateGa
     public override async Task HandleAsync(UpdateGameRequest req, CancellationToken ct)
     {
         Result result = await sender.Send(
-            new UpdateGameCommand(req.GameId, req.Name, req.Description, req.RateLimitPerMinute),
+            new UpdateGameCommand(req.GameId, req.Name, req.Description, req.RateLimitPerMinute, req.MaxSpeciesId),
             ct);
 
         await SendResultAsync(result, Results.NoContent);

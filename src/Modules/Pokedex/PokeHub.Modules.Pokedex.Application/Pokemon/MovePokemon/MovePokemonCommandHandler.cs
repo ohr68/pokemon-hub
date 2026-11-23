@@ -1,7 +1,9 @@
 using PokeHub.Common.Application.Clock;
 using PokeHub.Common.Application.Messaging;
 using PokeHub.Common.Domain.Abstractions;
+using PokeHub.Modules.Games.PublicApi;
 using PokeHub.Modules.Pokedex.Application.Abstractions.Data;
+using PokeHub.Modules.Pokedex.Application.Saves.GameSpecies;
 using PokeHub.Modules.Pokedex.Domain.Pokemon;
 using PokeHub.Modules.Pokedex.Domain.Saves;
 
@@ -10,6 +12,7 @@ namespace PokeHub.Modules.Pokedex.Application.Pokemon.MovePokemon;
 internal sealed class MovePokemonCommandHandler(
     IOwnedPokemonRepository pokemonRepository,
     ISaveRepository saveRepository,
+    IGameSpeciesLimits speciesLimits,
     IDateTimeProvider dateTimeProvider,
     IUnitOfWork unitOfWork)
     : ICommandHandler<MovePokemonCommand>
@@ -33,6 +36,18 @@ internal sealed class MovePokemonCommandHandler(
             if (save is null || save.TrainerId != request.TrainerId)
             {
                 return Result.Failure(SaveErrors.NotFound(request.SaveId.Value));
+            }
+
+            Result fits = await GameSpeciesRule.CheckAsync(
+                speciesLimits,
+                save.GameId,
+                save.GameName,
+                pokemon.SpeciesId,
+                cancellationToken);
+
+            if (fits.IsFailure)
+            {
+                return fits;
             }
         }
 

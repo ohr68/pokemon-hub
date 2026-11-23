@@ -70,6 +70,8 @@ public static class GamesModule
 
             services.AddScoped<IGameRepository, GameRepository>();
 
+            services.AddScoped<IGameSpeciesLimits, GameSpeciesLimits>();
+
             services.AddScoped<ISaveFileRepository, SaveFileRepository>();
 
             services.AddScoped<IPlayerGameStatsRepository, PlayerGameStatsRepository>();

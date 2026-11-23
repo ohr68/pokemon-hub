@@ -206,6 +206,10 @@ namespace PokeHub.Modules.Games.Infrastructure.Database.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_active");
 
+                    b.Property<int?>("MaxSpeciesId")
+                        .HasColumnType("integer")
+                        .HasColumnName("max_species_id");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)

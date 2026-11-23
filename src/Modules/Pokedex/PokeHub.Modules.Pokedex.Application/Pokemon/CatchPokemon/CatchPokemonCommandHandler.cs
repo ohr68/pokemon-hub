@@ -1,7 +1,9 @@
 using PokeHub.Common.Application.Clock;
 using PokeHub.Common.Application.Messaging;
 using PokeHub.Common.Domain.Abstractions;
+using PokeHub.Modules.Games.PublicApi;
 using PokeHub.Modules.Pokedex.Application.Abstractions.Data;
+using PokeHub.Modules.Pokedex.Application.Saves.GameSpecies;
 using PokeHub.Modules.Pokedex.Application.Saves.GetOrCreateSave;
 using PokeHub.Modules.Pokedex.Domain.Pokemon;
 using PokeHub.Modules.Pokedex.Domain.Saves;
@@ -15,6 +17,7 @@ internal sealed class CatchPokemonCommandHandler(
     ISpeciesRepository speciesRepository,
     ITrainerRepository trainerRepository,
     ISaveRepository saveRepository,
+    IGameSpeciesLimits speciesLimits,
     IDateTimeProvider dateTimeProvider,
     IUnitOfWork unitOfWork)
     : ICommandHandler<CatchPokemonCommand, Guid>
@@ -35,6 +38,18 @@ internal sealed class CatchPokemonCommandHandler(
         if (!await speciesRepository.ExistsAsync(request.SpeciesId, cancellationToken))
         {
             return Result.Failure<Guid>(SpeciesErrors.NotFound(request.SpeciesId));
+        }
+
+        Result fits = await GameSpeciesRule.CheckAsync(
+            speciesLimits,
+            request.GameId,
+            request.GameName,
+            request.SpeciesId,
+            cancellationToken);
+
+        if (fits.IsFailure)
+        {
+            return Result.Failure<Guid>(fits.Error);
         }
 
         Result<Save> save = await GetOrCreateSaveCommandHandler.GetOrCreateAsync(
