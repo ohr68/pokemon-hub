@@ -12,6 +12,7 @@
 | 7. Trainer progression: XP and levels, trophies, badges, coins | Done |
 | 8. Connected achievements: general, per-game, cross-game and specific | Done |
 | 9. LeafGreen: a second connected game | Done |
+| 10. Ruby: the first game from another save family | Scoped, not started |
 
 More ideas, not yet in a phase, are in the [backlog](#backlog).
 
@@ -286,6 +287,40 @@ Rules:
 - Completing the Pokédex in either game can use Pokémon sent from the other, which replaces
   trading between versions.
 - The FireRed save is backed up before 9a, and play code isn't edited while the game is running.
+
+## 10. Ruby
+
+The first game from the other Gen 3 family (Ruby, Sapphire, Emerald). Registration, sign-in,
+the Pokédex (Ruby & Sapphire, up to #386), per-game trophies, the Pokémon data in a save and
+the PC boxes already work for it. The work is in the save code, which assumes FireRed and
+LeafGreen's layout: Ruby keeps the party, money, bag, badge flags and game stats elsewhere,
+doesn't encrypt money and items, and writes game code 0 instead of 1.
+
+Two risks:
+
+- **A damaged save:** Ruby's positions come from public documentation, not from a real save.
+  A wrong one would corrupt the save on the first write, so Ruby is read-only until a real
+  save confirms them, and every write is backed up first as before.
+- **Items Ruby doesn't have:** some shop items exist only in FireRed and LeafGreen, so the
+  shop offers an item only to games that have it.
+
+Steps:
+
+- **10a. Save layout per game family:** the reader and the bag writer take the FireRed/LeafGreen
+  or the Ruby layout, chosen by the game. A save from the other family is refused. Tests keep
+  FireRed's behaviour as it is.
+- **10b. Ruby live, read-only:** register Ruby (US code AXVE) and upload its ROM, then play to a
+  first save and sync. The party, Hoenn badges, money and stats are checked against what the
+  game shows before anything writes to the save.
+- **10c. Writing into Ruby:** Pokémon from the hub arrive marked as Ruby's and met in Hoenn,
+  Pokémon leave for the hub, and shop items go into Ruby's bag.
+- **10d. Trophies and full test:** Ruby's specific trophies (champion, Groudon, the Hoenn
+  exclusives), then a real test of a cross-game catch and a move between Kanto and Hoenn.
+
+Rules:
+
+- Ruby is a connected game like FireRed and LeafGreen, with its own save, trophies and Pokédex.
+- Sapphire later needs only its origin number and ROM code. Emerald needs a third layout.
 
 ## Backlog
 
