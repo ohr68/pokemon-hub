@@ -49,6 +49,8 @@ internal sealed class GetOrCreateSaveCommandHandler(
 
         if (save is not null)
         {
+            save.UpdateGameName(gameName);
+
             return save;
         }
 

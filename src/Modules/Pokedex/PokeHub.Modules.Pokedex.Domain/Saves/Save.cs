@@ -19,7 +19,8 @@ public sealed class Save : Entity
 
     public Guid GameId { get; private set; }
 
-    // Copied from the Games module so the Pokédex can show it without asking.
+    // Copied from the Games module so the Pokédex can show it without asking; refreshed each
+    // time the game opens the save, so a renamed game catches up.
     public string GameName { get; private set; }
 
     public DateTime CreatedOnUtc { get; private set; }
@@ -34,5 +35,13 @@ public sealed class Save : Entity
             GameName = gameName,
             CreatedOnUtc = utcNow,
         };
+    }
+
+    public void UpdateGameName(string gameName)
+    {
+        if (!string.IsNullOrWhiteSpace(gameName))
+        {
+            GameName = gameName;
+        }
     }
 }
