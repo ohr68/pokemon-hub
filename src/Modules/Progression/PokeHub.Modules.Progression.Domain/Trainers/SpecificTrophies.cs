@@ -29,6 +29,7 @@ public static class SpecificTrophies
 {
     private const string FireRed = "firered";
     private const string LeafGreen = "leafgreen";
+    private const string Ruby = "ruby";
 
     public static readonly IReadOnlyList<SpecificTrophy> All =
     [
@@ -43,6 +44,14 @@ public static class SpecificTrophies
 
         // The Pokémon only LeafGreen has in the wild; FireRed players get them through the hub.
         new("leafgreen-exclusives", "Só no LeafGreen", "Capture Sandshrew, Vulpix, Bellsprout, Slowpoke, Staryu, Magmar e Pinsir em LeafGreen.", TrophyTier.Silver, SpecificStat.SpeciesCaught, 7, LeafGreen, [27, 37, 69, 79, 120, 126, 127]),
+
+        new("ruby-champion", "Campeão de Hoenn", "Derrote a Elite dos Quatro em Ruby.", TrophyTier.Gold, SpecificStat.HallOfFame, 1, Ruby),
+        new("ruby-groudon", "Senhor da terra", "Capture Groudon em Ruby.", TrophyTier.Gold, SpecificStat.SpeciesCaught, 1, Ruby, [383]),
+        new("ruby-rayquaza", "Senhor dos céus", "Capture Rayquaza em Ruby.", TrophyTier.Gold, SpecificStat.SpeciesCaught, 1, Ruby, [384]),
+        new("ruby-regis", "Os três Regis", "Capture Regirock, Regice e Registeel em Ruby.", TrophyTier.Gold, SpecificStat.SpeciesCaught, 3, Ruby, [377, 378, 379]),
+
+        // The Pokémon only Ruby has in the wild; Sapphire players get them through the hub.
+        new("ruby-exclusives", "Só no Ruby", "Capture Seedot, Mawile, Zangoose e Solrock em Ruby.", TrophyTier.Silver, SpecificStat.SpeciesCaught, 4, Ruby, [273, 303, 335, 338]),
 
         new("hub-round-trip", "Ida e volta", "Traga um Pokémon do hub de volta para um jogo.", TrophyTier.Bronze, SpecificStat.ReturnsFromHub, 1),
         new("hub-trade-evolve", "Evolução por troca", "Receba um Pokémon que evolui na troca.", TrophyTier.Silver, SpecificStat.TradeEvolutions, 1),
