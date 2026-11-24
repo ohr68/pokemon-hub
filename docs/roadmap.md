@@ -12,7 +12,7 @@
 | 7. Trainer progression: XP and levels, trophies, badges, coins | Done |
 | 8. Connected achievements: general, per-game, cross-game and specific | Done |
 | 9. LeafGreen: a second connected game | Done |
-| 10. Ruby: the first game from another save family | Scoped, not started |
+| 10. Ruby: the first game from another save family | In progress: 10a to 10c done |
 
 More ideas, not yet in a phase, are in the [backlog](#backlog).
 
@@ -301,8 +301,9 @@ Two risks:
 - **A damaged save:** Ruby's positions come from public documentation, not from a real save.
   A wrong one would corrupt the save on the first write, so Ruby is read-only until a real
   save confirms them, and every write is backed up first as before.
-- **Items Ruby doesn't have:** some shop items exist only in FireRed and LeafGreen, so the
-  shop offers an item only to games that have it.
+- **Items Ruby doesn't have:** some items exist only in FireRed and LeafGreen. None of them is
+  in the shop's catalog today, so every item can go to Ruby; adding one would need a per-game
+  check.
 
 Steps:
 
