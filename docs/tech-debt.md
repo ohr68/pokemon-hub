@@ -21,3 +21,18 @@ in Box 1 and looked missing.
 **Direction:**
 - Study whether a transfer can avoid the restart by writing into the running game's memory.
   It's riskier than editing the save file, so it needs its own spike.
+
+## Ruby's badge positions are unconfirmed
+
+**What's missing:** Ruby reads its save from positions taken from public documentation. A real
+save confirmed the party, money, play time, Pokédex and game counters, but not the badge flags:
+the test save had no badges yet, and the first gym is a long way in.
+
+**Why it matters:** a wrong position would show Ruby's badges wrongly on the trainer page and
+in its badge trophies. Phase 10c, writing into Ruby's save, waits on a fully confirmed layout,
+since a wrong position there would damage the save.
+
+**Direction:**
+- After the first badge (Roxanne's Stone Badge), sync Ruby and check the trainer page shows it.
+- If it doesn't, find the flags in that save and correct `RS_LAYOUT` in
+  pokemon-web's `src/lib/gen3/layout.ts`, then start 10c.
