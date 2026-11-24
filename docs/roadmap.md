@@ -12,7 +12,7 @@
 | 7. Trainer progression: XP and levels, trophies, badges, coins | Done |
 | 8. Connected achievements: general, per-game, cross-game and specific | Done |
 | 9. LeafGreen: a second connected game | Done |
-| 10. Ruby: the first game from another save family | In progress: 10a to 10c done |
+| 10. Ruby: the first game from another save family | Done; its badge positions wait on a first badge ([tech debt](tech-debt.md)) |
 
 More ideas, not yet in a phase, are in the [backlog](#backlog).
 
