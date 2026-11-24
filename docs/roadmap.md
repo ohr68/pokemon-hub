@@ -13,6 +13,8 @@
 | 8. Connected achievements: general, per-game, cross-game and specific | Done |
 | 9. LeafGreen: a second connected game | Done |
 | 10. Ruby: the first game from another save family | Done; its badge positions wait on a first badge ([tech debt](tech-debt.md)) |
+| 11. Sapphire: Ruby's pair | Scoped, not started |
+| 12. Emerald: the third save layout | Scoped, not started |
 
 More ideas, not yet in a phase, are in the [backlog](#backlog).
 
@@ -323,8 +325,58 @@ Rules:
 - Ruby is a connected game like FireRed and LeafGreen, with its own save, trophies and Pokédex.
 - Sapphire later needs only its origin number and ROM code. Emerald needs a third layout.
 
+## 11. Sapphire
+
+Ruby's pair, on the layout Phase 10 confirmed. The save, the PC, the bag, the Pokédex
+(Ruby & Sapphire) and the trophy engine already work for it; Sapphire only differs in its
+origin number (1), its ROM code (AXP) and its version exclusives.
+
+Steps:
+
+- **11a. Sapphire live:** list it with its ROM code, origin and Hoenn met location, register it
+  and upload its ROM (US code AXPE), then play to a first save and check it as Ruby was.
+- **11b. Trophies and test:** Sapphire's specific trophies (champion, Kyogre, Rayquaza, the
+  Regis, and its exclusives: Lotad, Sableye, Seviper, Lunatone), then a Pokémon moved between
+  Ruby and Sapphire, which replaces trading between the two cartridges.
+
+Rules:
+
+- Ruby and Sapphire count as two connected games, like FireRed and LeafGreen.
+- A Ruby save loaded into Sapphire is refused as a catch source by the origin check (9b), as a
+  FireRed one is in LeafGreen.
+
+## 12. Emerald
+
+The third Gen 3 save layout. Emerald keeps the party where Ruby does, but moves the flags,
+the game counters and the bag pockets, and, like FireRed, XORs money, counters and item
+quantities with a security key. That key sits where the other games write their game code,
+so the game code can only hint at Emerald: a code other than 0 or 1 means Emerald, but a key
+that happens to be 0 or 1 doesn't say so.
+
+Two risks:
+
+- **Telling Emerald apart:** a key that happens to be 0 or 1 would read as Ruby or FireRed.
+  The family must come from the game the save is for, with the game code only as a check.
+- **A damaged save:** as with Ruby, its positions come from documentation, so Emerald is
+  read-only until a real save confirms them, and every write is backed up first.
+
+Steps:
+
+- **12a. Emerald layout:** the reader, stats and bag take Emerald's positions and key, with the
+  family chosen by the game. Tests keep the other families as they are.
+- **12b. Emerald live, read-only:** register it (US code BPEE, origin 3), play to a first save
+  and check party, money, stats and badges against the game.
+- **12c. Writing into Emerald:** Pokémon transfers and shop items, once a real save confirms the
+  PC and the bag.
+- **12d. Trophies and test:** Emerald's specific trophies (champion, Rayquaza, the Battle
+  Frontier, its legendaries), then a move between Emerald and the other games.
+
 ## Backlog
 
+- **Unchecked flows:** built but never checked by hand in the browser, so they may hide layout
+  or touch bugs: dragging the shop carousel by touch, the new trade flow's layout, and making a
+  real offer through the offer forms. Check each at phone and desktop sizes and fix what's
+  wrong.
 - **Fluid save sync** (done for the browser; what's left is in
   [tech-debt.md](tech-debt.md#save-sync-isnt-fluid)), in four steps:
   1. **Safe transfers** (done): PokeHub records a transfer before the game's save changes, so
