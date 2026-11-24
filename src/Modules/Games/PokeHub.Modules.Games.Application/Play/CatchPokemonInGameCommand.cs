@@ -6,6 +6,7 @@ using PokeHub.Modules.Pokedex.PublicApi;
 namespace PokeHub.Modules.Games.Application.Play;
 
 /// <param name="CatchKey">The game's own id for the catch; sending it again returns the same Pokémon.</param>
+/// <param name="FromOtherGame">The save says another game caught it. Then it is only recorded if PokeHub already put it in this game, so a save from another game can't pay rewards as new catches.</param>
 public sealed record CatchPokemonInGameCommand(
     string? ClientId,
     Guid TrainerId,
@@ -13,7 +14,8 @@ public sealed record CatchPokemonInGameCommand(
     int Level,
     bool IsShiny,
     string CatchKey,
-    string? Nickname = null) : ICommand<Guid>;
+    string? Nickname = null,
+    bool FromOtherGame = false) : ICommand<Guid>;
 
 internal sealed class CatchPokemonInGameCommandHandler(IGameRepository gameRepository, IPokedexApi pokedexApi)
     : ICommandHandler<CatchPokemonInGameCommand, Guid>
@@ -36,7 +38,8 @@ internal sealed class CatchPokemonInGameCommandHandler(IGameRepository gameRepos
                 request.Level,
                 request.IsShiny,
                 request.CatchKey,
-                request.Nickname),
+                request.Nickname,
+                request.FromOtherGame),
             cancellationToken);
     }
 }

@@ -36,6 +36,10 @@ public static class PokemonErrors
         return Error.Conflict("Pokemon.CatchKeyInUse", $"The catch key {catchKey} was already used for another trainer.");
     }
 
+    public static readonly Error FromOtherGame = Error.Conflict(
+        "Pokemon.FromOtherGame",
+        "This Pokémon was caught in another game. Only Pokémon caught in this game, or moved into it through PokeHub, can be recorded here.");
+
     public static readonly Error NotInHub = Error.Conflict(
         "Pokemon.NotInHub",
         "Only Pokémon in the PokeHub hub can be traded or released there. Move it out of the game first.");

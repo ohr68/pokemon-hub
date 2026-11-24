@@ -40,6 +40,13 @@ internal sealed class CatchPokemonCommandHandler(
             return evolved.IsFailure ? Result.Failure<Guid>(evolved.Error) : existing.Id;
         }
 
+        // Caught in another game and never put in this one by PokeHub: a save copied from that
+        // game. Recording it would pay its catches again, in a game the player never played.
+        if (request.FromOtherGame)
+        {
+            return Result.Failure<Guid>(PokemonErrors.FromOtherGame);
+        }
+
         if (!await speciesRepository.ExistsAsync(request.SpeciesId, cancellationToken))
         {
             return Result.Failure<Guid>(SpeciesErrors.NotFound(request.SpeciesId));

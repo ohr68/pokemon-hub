@@ -31,7 +31,8 @@ internal sealed class CatchPokemonEndpoint(ISender sender) : EndpointBase<CatchP
                 req.Level,
                 req.IsShiny,
                 req.CatchKey,
-                req.Nickname),
+                req.Nickname,
+                req.FromOtherGame),
             ct);
 
         await SendResultAsync(result, pokemonId => Results.Ok(pokemonId));

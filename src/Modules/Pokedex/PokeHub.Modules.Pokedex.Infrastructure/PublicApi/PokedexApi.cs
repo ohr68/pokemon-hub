@@ -130,7 +130,8 @@ internal sealed class PokedexApi(ISender sender, ISpeciesRepository speciesRepos
                 request.Level,
                 request.IsShiny,
                 request.CatchKey,
-                request.Nickname),
+                request.Nickname,
+                request.FromOtherGame),
             cancellationToken);
     }
 
