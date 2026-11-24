@@ -95,6 +95,14 @@ internal sealed class UpdateBattleDataCommandHandler(
                 continue;
             }
 
+            // Every sync reports the level, so the Pokémon's own level follows the game's.
+            Result leveled = pokemon.SetLevelInGame(save, report.Level);
+
+            if (leveled.IsFailure)
+            {
+                return leveled;
+            }
+
             string battleData = JsonSerializer.Serialize(report.Data, JsonOptions);
 
             if (statuses.TryGetValue(pokemon.Id, out PokemonGameStatus? status))

@@ -430,6 +430,27 @@ public sealed class OwnedPokemon : Entity
     }
 
     /// <summary>
+    /// The level the game's save holds for this Pokémon now. The save is what counts while the
+    /// Pokémon is inside it, so restoring an older save brings the level back down too.
+    /// </summary>
+    public Result SetLevelInGame(Save save, int level)
+    {
+        if (SaveId != save.Id || !IsInsideGame)
+        {
+            return Result.Failure(PokemonErrors.NotInThisSave);
+        }
+
+        if (level is < MinLevel or > MaxLevel)
+        {
+            return Result.Failure(PokemonErrors.InvalidLevel(level));
+        }
+
+        Level = level;
+
+        return Result.Success();
+    }
+
+    /// <summary>
     /// The game took the Pokémon out of its own save and sent it to the hub, with what it
     /// stored about it: it may have grown, evolved or been renamed while in the game.
     /// </summary>
