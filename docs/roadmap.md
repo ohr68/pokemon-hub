@@ -15,6 +15,7 @@
 | 10. Ruby: the first game from another save family | Done; its badge positions wait on a first badge ([tech debt](tech-debt.md)) |
 | 11. Sapphire: Ruby's pair | Done |
 | 12. Emerald: the third save layout | Scoped, not started |
+| 13. 3DS spike: can a 3DS game run in the browser | Scoped, not started |
 
 More ideas, not yet in a phase, are in the [backlog](#backlog).
 
@@ -374,6 +375,37 @@ Steps:
   PC and the bag.
 - **12d. Trophies and test:** Emerald's specific trophies (champion, Rayquaza, the Battle
   Frontier, its legendaries), then a move between Emerald and the other games.
+
+## 13. 3DS spike
+
+A short test of whether a 3DS Pokémon game can run on PokeHub at all, before any 3DS phase is
+planned. EmulatorJS has a 3DS core, Azahar (`EJS_core = '3ds'`), which needs
+`EJS_threads = true`. Everything else about it is unconfirmed, so the spike answers four
+questions in order, and stops at the first one that fails.
+
+Steps:
+
+- **13a. Cross-origin isolation:** threads need SharedArrayBuffer, so the app and the emulator
+  frame need COOP and COEP headers (`credentialless` if `require-corp` blocks too much). Check
+  that sign-in, the game sign-ins, PokeAPI sprites, uploaded game icons and the EmulatorJS CDN
+  all still load, in the dev server and in the Docker build.
+- **13b. EmulatorJS upgrade:** move from 4.2.3 to the first version with the 3DS core. FireRed,
+  LeafGreen, Ruby and Sapphire must still start, save, sync, restore and take transfers, with
+  the save fixes in `public/emulator/index.html` kept.
+- **13c. A game running:** one game (X or Y, the lightest likely candidates) on a 3DS page
+  behind a flag. Note the frame rate in a battle and on the overworld, the load time, and what
+  the core needs: a decrypted dump, keys from a console, or system files.
+- **13d. The save out of the frame:** where Azahar keeps the game's save (a file on its virtual
+  SD card, not the GBA save memory) and whether the frame can read it and write it back, as
+  sync and restore need.
+
+Rules:
+
+- The spike ships nothing to players: the 3DS page stays behind a flag, and if it fails, the
+  headers and the upgrade are kept only if they cost the GBA games nothing.
+- No 3DS ROM, key, system file or save is committed, as with the GBA ROMs.
+- Its result is a written decision here: a 3DS phase scoped (with the Gen 6 Pokémon data, the
+  pk6 format and moving Pokémon across generations), DS (Gen 4/5) first instead, or neither.
 
 ## Backlog
 
