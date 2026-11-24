@@ -11,7 +11,7 @@
 | 6. Operations | Done: backups, reliable startup, problems view, local checks |
 | 7. Trainer progression: XP and levels, trophies, badges, coins | Done |
 | 8. Connected achievements: general, per-game, cross-game and specific | Done |
-| 9. LeafGreen: a second connected game | In progress: 9a to 9c done |
+| 9. LeafGreen: a second connected game | In progress: 9a to 9d done |
 
 More ideas, not yet in a phase, are in the [backlog](#backlog).
 
@@ -274,8 +274,8 @@ Steps:
   Pokémon sent through the hub still arrive normally.
 - **9c. LeafGreen live:** register the game, then enable play, sync, badges and transfers, with
   new Pokémon marked as LeafGreen's. The ROM is uploaded through the admin page.
-- **9d. Shop items per game:** the player chooses which game receives a purchased item. Until
-  then only FireRed takes purchases, so opening LeafGreen first can't take FireRed's items.
+- **9d. Shop items per game:** the player chooses which game receives a purchased item, and
+  only that game's page puts it in the bag.
 - **9e. Trophies and full test:** LeafGreen's specific trophies, then a real test of catching in
   both games, moving a Pokémon across, and the double-coin payout.
 

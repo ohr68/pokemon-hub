@@ -39,6 +39,8 @@ internal sealed class ItemPurchaseConfiguration : IEntityTypeConfiguration<ItemP
 
         builder.Property(p => p.Pocket).HasMaxLength(20);
 
+        builder.Property(p => p.GameName).HasMaxLength(100);
+
         builder.HasOne<ItemOffer>().WithMany().HasForeignKey(p => p.OfferId).OnDelete(DeleteBehavior.Restrict);
 
         builder.HasIndex(p => new { p.TrainerId, p.DeliveredOnUtc });

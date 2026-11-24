@@ -24,6 +24,20 @@ internal sealed class UpdateItemOfferRequest
 
 internal sealed record MarkItemsDeliveredRequest(IReadOnlyCollection<Guid> PurchaseIds);
 
+internal sealed class BuyItemOfferRequest
+{
+    public Guid OfferId { get; init; }
+
+    // The game whose bag gets the item.
+    public Guid GameId { get; init; }
+}
+
+internal sealed class GetAwaitingItemsRequest
+{
+    // From the query string: only this game's items.
+    public Guid? GameId { get; init; }
+}
+
 internal sealed class GetItemOffersEndpoint(ISender sender) : EndpointWithoutRequestBase
 {
     public override void Configure()
@@ -42,37 +56,37 @@ internal sealed class GetItemOffersEndpoint(ISender sender) : EndpointWithoutReq
     }
 }
 
-internal sealed class BuyItemOfferEndpoint(ISender sender) : EndpointBase<OfferRouteRequest>
+internal sealed class BuyItemOfferEndpoint(ISender sender) : EndpointBase<BuyItemOfferRequest>
 {
     public override void Configure()
     {
         Post("shop/items/{offerId:guid}/buy");
         Policies(EconomyPermissions.Buy);
         Group<EconomyEndpointGroup>();
-        Summary(s => s.Summary = "Buys a bag item with coins; it waits until a game delivers it");
+        Summary(s => s.Summary = "Buys a bag item with coins for one of the player's games; it waits until that game delivers it");
     }
 
-    public override async Task HandleAsync(OfferRouteRequest req, CancellationToken ct)
+    public override async Task HandleAsync(BuyItemOfferRequest req, CancellationToken ct)
     {
-        Result<ItemPurchaseResultResponse> result = await sender.Send(new BuyItemOfferCommand(User.GetUserId(), req.OfferId), ct);
+        Result<ItemPurchaseResultResponse> result = await sender.Send(new BuyItemOfferCommand(User.GetUserId(), req.OfferId, req.GameId), ct);
 
         await SendResultAsync(result, purchase => Results.Ok(purchase));
     }
 }
 
-internal sealed class GetAwaitingItemsEndpoint(ISender sender) : EndpointWithoutRequestBase
+internal sealed class GetAwaitingItemsEndpoint(ISender sender) : EndpointBase<GetAwaitingItemsRequest>
 {
     public override void Configure()
     {
         Get("me/items");
         Policies(EconomyPermissions.ReadEconomy);
         Group<EconomyEndpointGroup>();
-        Summary(s => s.Summary = "Bought items waiting to enter a game");
+        Summary(s => s.Summary = "Bought items waiting to enter a game; pass gameId for one game's");
     }
 
-    public override async Task HandleAsync(CancellationToken ct)
+    public override async Task HandleAsync(GetAwaitingItemsRequest req, CancellationToken ct)
     {
-        Result<IReadOnlyCollection<AwaitingItemResponse>> result = await sender.Send(new GetAwaitingItemsQuery(User.GetUserId()), ct);
+        Result<IReadOnlyCollection<AwaitingItemResponse>> result = await sender.Send(new GetAwaitingItemsQuery(User.GetUserId(), req.GameId), ct);
 
         await SendResultAsync(result, items => Results.Ok(items));
     }

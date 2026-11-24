@@ -4,6 +4,7 @@
         <ProjectReference Include="..\..\..\Common\PokeHub.Common.Application\PokeHub.Common.Application.csproj"/>
         <ProjectReference Include="..\PokeHub.Modules.Economy.Domain\PokeHub.Modules.Economy.Domain.csproj"/>
         <ProjectReference Include="..\PokeHub.Modules.Economy.IntegrationEvents\PokeHub.Modules.Economy.IntegrationEvents.csproj"/>
+        <ProjectReference Include="..\..\Games\PokeHub.Modules.Games.PublicApi\PokeHub.Modules.Games.PublicApi.csproj"/>
         <ProjectReference Include="..\..\Pokedex\PokeHub.Modules.Pokedex.PublicApi\PokeHub.Modules.Pokedex.PublicApi.csproj"/>
     </ItemGroup>
 

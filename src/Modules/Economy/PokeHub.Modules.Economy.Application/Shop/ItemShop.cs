@@ -8,6 +8,7 @@ using PokeHub.Common.Domain.Abstractions;
 using PokeHub.Modules.Economy.Application.Abstractions.Data;
 using PokeHub.Modules.Economy.Domain.Shop;
 using PokeHub.Modules.Economy.Domain.Wallets;
+using PokeHub.Modules.Games.PublicApi;
 
 namespace PokeHub.Modules.Economy.Application.Shop;
 
@@ -17,7 +18,8 @@ public sealed record CreateItemOfferCommand(int ItemId, int Quantity, int Price,
 
 public sealed record UpdateItemOfferCommand(Guid OfferId, int Price, int? Stock, bool IsActive) : ICommand;
 
-public sealed record BuyItemOfferCommand(Guid TrainerId, Guid OfferId) : ICommand<ItemPurchaseResultResponse>;
+/// <param name="GameId">The game whose bag gets the item.</param>
+public sealed record BuyItemOfferCommand(Guid TrainerId, Guid OfferId, Guid GameId) : ICommand<ItemPurchaseResultResponse>;
 
 public sealed record ItemPurchaseResultResponse(Guid PurchaseId, long Balance);
 
@@ -37,9 +39,18 @@ public sealed record ItemOfferResponse(
     int? Stock,
     bool IsActive);
 
-public sealed record GetAwaitingItemsQuery(Guid TrainerId) : IQuery<IReadOnlyCollection<AwaitingItemResponse>>;
+/// <param name="GameId">Only the items for this game, plus ones bought before a game was chosen.</param>
+public sealed record GetAwaitingItemsQuery(Guid TrainerId, Guid? GameId = null) : IQuery<IReadOnlyCollection<AwaitingItemResponse>>;
 
-public sealed record AwaitingItemResponse(Guid Id, int ItemId, string ItemName, string Pocket, int Quantity, DateTime PurchasedOnUtc);
+public sealed record AwaitingItemResponse(
+    Guid Id,
+    int ItemId,
+    string ItemName,
+    string Pocket,
+    int Quantity,
+    DateTime PurchasedOnUtc,
+    Guid? GameId,
+    string? GameName);
 
 internal sealed class CreateItemOfferCommandValidator : AbstractValidator<CreateItemOfferCommand>
 {
@@ -117,6 +128,7 @@ internal sealed class UpdateItemOfferCommandHandler(IShopRepository shopReposito
 internal sealed class BuyItemOfferCommandHandler(
     IShopRepository shopRepository,
     IWalletRepository walletRepository,
+    IGameSpeciesLimits games,
     IDateTimeProvider dateTimeProvider,
     IUnitOfWork unitOfWork)
     : ICommandHandler<BuyItemOfferCommand, ItemPurchaseResultResponse>
@@ -128,6 +140,13 @@ internal sealed class BuyItemOfferCommandHandler(
         if (offer is null)
         {
             return Result.Failure<ItemPurchaseResultResponse>(ShopErrors.OfferNotFound(request.OfferId));
+        }
+
+        IReadOnlyDictionary<Guid, GameIdentity> identities = await games.GetIdentitiesAsync([request.GameId], cancellationToken);
+
+        if (!identities.TryGetValue(request.GameId, out GameIdentity? game))
+        {
+            return Result.Failure<ItemPurchaseResultResponse>(ShopErrors.GameNotFound(request.GameId));
         }
 
         Wallet? wallet = await walletRepository.GetAsync(request.TrainerId, cancellationToken);
@@ -145,7 +164,7 @@ internal sealed class BuyItemOfferCommandHandler(
         }
 
         DateTime utcNow = dateTimeProvider.UtcNow;
-        var purchase = ItemPurchase.Pay(request.TrainerId, offer, utcNow);
+        var purchase = ItemPurchase.Pay(request.TrainerId, offer, request.GameId, game.Name, utcNow);
         Result paid = wallet.Debit(offer.Price, $"item-purchase:{purchase.Id}", utcNow);
 
         if (paid.IsFailure)
@@ -223,13 +242,14 @@ internal sealed class GetAwaitingItemsQueryHandler(IDbConnectionFactory dbConnec
         const string sql =
             """
             SELECT id AS Id, item_id AS ItemId, item_name AS ItemName, pocket AS Pocket, quantity AS Quantity,
-                   purchased_on_utc AS PurchasedOnUtc
+                   purchased_on_utc AS PurchasedOnUtc, game_id AS GameId, game_name AS GameName
             FROM economy.item_purchases
             WHERE trainer_id = @TrainerId AND delivered_on_utc IS NULL
+              AND (@GameId::uuid IS NULL OR game_id IS NULL OR game_id = @GameId)
             ORDER BY purchased_on_utc
             """;
 
-        IEnumerable<AwaitingItemResponse> items = await connection.QueryAsync<AwaitingItemResponse>(sql, new { request.TrainerId });
+        IEnumerable<AwaitingItemResponse> items = await connection.QueryAsync<AwaitingItemResponse>(sql, new { request.TrainerId, request.GameId });
 
         return items.ToList();
     }
