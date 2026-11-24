@@ -28,6 +28,7 @@ public sealed record SpecificTrophy(
 public static class SpecificTrophies
 {
     private const string FireRed = "firered";
+    private const string LeafGreen = "leafgreen";
 
     public static readonly IReadOnlyList<SpecificTrophy> All =
     [
@@ -35,6 +36,13 @@ public static class SpecificTrophies
         new("firered-birds", "Aves lendárias", "Capture Articuno, Zapdos e Moltres em FireRed.", TrophyTier.Gold, SpecificStat.SpeciesCaught, 3, FireRed, [144, 145, 146]),
         new("firered-mewtwo", "O Pokémon genético", "Capture Mewtwo em FireRed.", TrophyTier.Gold, SpecificStat.SpeciesCaught, 1, FireRed, [150]),
         new("firered-eevee", "Família Eevee", "Evolua Vaporeon, Jolteon e Flareon em FireRed.", TrophyTier.Silver, SpecificStat.SpeciesEvolved, 3, FireRed, [134, 135, 136]),
+
+        new("leafgreen-champion", "Campeão de Kanto", "Derrote a Elite dos Quatro em LeafGreen.", TrophyTier.Gold, SpecificStat.HallOfFame, 1, LeafGreen),
+        new("leafgreen-birds", "Aves lendárias", "Capture Articuno, Zapdos e Moltres em LeafGreen.", TrophyTier.Gold, SpecificStat.SpeciesCaught, 3, LeafGreen, [144, 145, 146]),
+        new("leafgreen-mewtwo", "O Pokémon genético", "Capture Mewtwo em LeafGreen.", TrophyTier.Gold, SpecificStat.SpeciesCaught, 1, LeafGreen, [150]),
+
+        // The Pokémon only LeafGreen has in the wild; FireRed players get them through the hub.
+        new("leafgreen-exclusives", "Só no LeafGreen", "Capture Sandshrew, Vulpix, Bellsprout, Slowpoke, Staryu, Magmar e Pinsir em LeafGreen.", TrophyTier.Silver, SpecificStat.SpeciesCaught, 7, LeafGreen, [27, 37, 69, 79, 120, 126, 127]),
 
         new("hub-round-trip", "Ida e volta", "Traga um Pokémon do hub de volta para um jogo.", TrophyTier.Bronze, SpecificStat.ReturnsFromHub, 1),
         new("hub-trade-evolve", "Evolução por troca", "Receba um Pokémon que evolui na troca.", TrophyTier.Silver, SpecificStat.TradeEvolutions, 1),
