@@ -42,10 +42,20 @@ public static class GameDexes
 
     /// <summary>
     /// The Pokédex of a game registered on PokeHub: by its exact slug, or a slug naming one
-    /// version of a pair ("firered"). Empty when that's unknown or could mean several games.
+    /// version of a pair ("firered"). A plain version name in a remake's slug too ("ruby" in
+    /// omega-ruby-alpha-sapphire) means the original pair, the shortest slug. Empty when that's
+    /// unknown or still could mean several games.
     /// </summary>
     public static GameDex? ForGame(string gameSlug)
     {
+        // The admin form suggests slugs from the game's name: pokemon-ruby is Ruby.
+        const string Prefix = "pokemon-";
+
+        if (gameSlug.StartsWith(Prefix, StringComparison.Ordinal))
+        {
+            gameSlug = gameSlug[Prefix.Length..];
+        }
+
         if (Find(gameSlug) is { } exact)
         {
             return exact;
@@ -53,6 +63,14 @@ public static class GameDexes
 
         var matches = All.Where(g => g.Slug.Split('-').Contains(gameSlug)).ToList();
 
-        return matches.Count == 1 ? matches[0] : null;
+        if (matches.Count == 0)
+        {
+            return null;
+        }
+
+        int shortest = matches.Min(g => g.Slug.Split('-').Length);
+        var originals = matches.Where(g => g.Slug.Split('-').Length == shortest).ToList();
+
+        return originals.Count == 1 ? originals[0] : null;
     }
 }
