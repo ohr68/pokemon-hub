@@ -11,6 +11,7 @@
 | 6. Operations | Done: backups, reliable startup, problems view, local checks |
 | 7. Trainer progression: XP and levels, trophies, badges, coins | Done |
 | 8. Connected achievements: general, per-game, cross-game and specific | Done |
+| 9. LeafGreen: a second connected game | Scoped, not started |
 
 More ideas, not yet in a phase, are in the [backlog](#backlog).
 
@@ -249,6 +250,42 @@ Rules:
 - A game only counts toward a species goal if that species exists in it.
 - Rewards scale by tier, and cross-game achievements pay the most, so per-game sets don't
   flood the economy with coins.
+
+## 9. LeafGreen
+
+A second real game, so Pokémon can move between games and cross-game achievements can be
+earned. Registration, ROM upload, sign-in clients, save reading and per-game trophies are
+already generic, and each ROM has its own emulator save. The work is in the FireRed page code,
+which assumes there is only one game.
+
+Two risks to fix before LeafGreen goes live:
+
+- **Wrong save restored:** the backup list is cached under one shared FireRed key, so LeafGreen
+  could show FireRed's backups and restore the wrong one.
+- **Reward farming:** both games use the same save format, so a FireRed save imported into
+  LeafGreen passes validation. Its Pokémon would count as new catches, paying XP and coins and
+  unlocking cross-game trophies.
+
+Steps:
+
+- **9a. Multi-game foundation:** sign-in, sync, transfers, backups and settings become per game.
+  FireRed keeps its current data and connection.
+- **9b. Save protection:** a Pokémon counts as a catch only if its origin data matches the game.
+  Pokémon sent through the hub still arrive normally.
+- **9c. LeafGreen live:** register the game, then enable play, sync, badges and transfers, with
+  new Pokémon marked as LeafGreen's. The ROM is uploaded through the admin page.
+- **9d. Shop items per game:** the player chooses which game receives a purchased item, since
+  delivery always goes to FireRed today.
+- **9e. Trophies and full test:** LeafGreen's specific trophies, then a real test of catching in
+  both games, moving a Pokémon across, and the double-coin payout.
+
+Rules:
+
+- FireRed and LeafGreen count as two connected games, each with its own save, trophies and
+  Pokédex progress.
+- Completing the Pokédex in either game can use Pokémon sent from the other, which replaces
+  trading between versions.
+- The FireRed save is backed up before 9a, and play code isn't edited while the game is running.
 
 ## Backlog
 
