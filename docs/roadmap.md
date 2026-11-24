@@ -13,7 +13,7 @@
 | 8. Connected achievements: general, per-game, cross-game and specific | Done |
 | 9. LeafGreen: a second connected game | Done |
 | 10. Ruby: the first game from another save family | Done; its badge positions wait on a first badge ([tech debt](tech-debt.md)) |
-| 11. Sapphire: Ruby's pair | Scoped, not started |
+| 11. Sapphire: Ruby's pair | Done |
 | 12. Emerald: the third save layout | Scoped, not started |
 
 More ideas, not yet in a phase, are in the [backlog](#backlog).
@@ -338,6 +338,10 @@ Steps:
 - **11b. Trophies and test:** Sapphire's specific trophies (champion, Kyogre, Rayquaza, the
   Regis, and its exclusives: Lotad, Sableye, Seviper, Lunatone), then a Pokémon moved between
   Ruby and Sapphire, which replaces trading between the two cartridges.
+
+Done: a first save read as Ruby's was (team, money, play time, Pokédex, counters), and a
+Wurmple caught in Ruby moved through the hub into Sapphire's save. Sapphire shares Ruby's badge
+positions, so the badge check in tech debt covers both.
 
 Rules:
 
