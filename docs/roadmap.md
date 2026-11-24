@@ -11,7 +11,7 @@
 | 6. Operations | Done: backups, reliable startup, problems view, local checks |
 | 7. Trainer progression: XP and levels, trophies, badges, coins | Done |
 | 8. Connected achievements: general, per-game, cross-game and specific | Done |
-| 9. LeafGreen: a second connected game | In progress: 9a to 9d done |
+| 9. LeafGreen: a second connected game | Done |
 
 More ideas, not yet in a phase, are in the [backlog](#backlog).
 
