@@ -104,6 +104,25 @@ public static class GamesModule
                 })
                 .AddHttpMessageHandler<KeyCloakAuthDelegatingHandler>();
 
+            // Sign-in by code for devices without a browser (the 3DS sync app). Players' own
+            // tokens: no admin credentials on these calls.
+            services.AddHttpClient<IDeviceSignInService, DeviceSignInService>((serviceProvider, httpClient) =>
+            {
+                GamesKeyCloakOptions keyCloakOptions = serviceProvider
+                    .GetRequiredService<IOptions<GamesKeyCloakOptions>>().Value;
+
+                httpClient.BaseAddress = new Uri(keyCloakOptions.OpenIdConnectUrl.TrimEnd('/') + "/");
+                httpClient.Timeout = TimeSpan.FromSeconds(15);
+
+                // Keycloak names its issuer after the host it's asked at, and only refreshes a
+                // token at its issuer. The player approves at the public address, so the API
+                // asks there too, over Docker's network.
+                if (!string.IsNullOrEmpty(keyCloakOptions.PublicUrl))
+                {
+                    httpClient.DefaultRequestHeaders.Host = new Uri(keyCloakOptions.PublicUrl).Authority;
+                }
+            });
+
             // One instance: refreshed in the background, read by CORS, invalidated on registration.
             services.AddSingleton<GameOriginCache>();
             services.AddSingleton<IGameOriginCache>(sp => sp.GetRequiredService<GameOriginCache>());

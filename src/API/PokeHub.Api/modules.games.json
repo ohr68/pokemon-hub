@@ -12,7 +12,9 @@
       "AdminUrl": "",
       "TokenUrl": "",
       "ConfidentialClientId": "",
-      "ConfidentialClientSecret": ""
+      "ConfidentialClientSecret": "",
+      "OpenIdConnectUrl": "",
+      "PublicUrl": ""
     }
   }
 }

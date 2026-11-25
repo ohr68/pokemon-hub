@@ -12,7 +12,9 @@
       "AdminUrl": "http://pokehub.identity:8080/admin/realms/pokehub/",
       "TokenUrl": "http://pokehub.identity:8080/realms/pokehub/protocol/openid-connect/token",
       "ConfidentialClientId": "pokehub-confidential-client",
-      "ConfidentialClientSecret": "PzotcrvZRF9BHCKcUxdKfHWlIPECG49k"
+      "ConfidentialClientSecret": "PzotcrvZRF9BHCKcUxdKfHWlIPECG49k",
+      "OpenIdConnectUrl": "http://pokehub.identity:8080/realms/pokehub/protocol/openid-connect/",
+      "PublicUrl": "http://localhost:18080"
     }
   }
 }
