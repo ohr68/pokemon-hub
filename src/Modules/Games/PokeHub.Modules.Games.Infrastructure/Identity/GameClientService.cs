@@ -10,11 +10,14 @@ namespace PokeHub.Modules.Games.Infrastructure.Identity;
 
 /// <summary>
 /// Creates a game's client in Keycloak: a public client (browser games can't keep secrets)
-/// using the authorization code flow with PKCE, like pokemon-web's.
+/// using the authorization code flow with PKCE, like pokemon-web's, and sign-in by code for
+/// devices without a browser.
 /// </summary>
 internal sealed partial class GameClientService(HttpClient httpClient, ILogger<GameClientService> logger)
     : IGameClientService
 {
+    private const string DeviceFlowAttribute = "oauth2.device.authorization.grant.enabled";
+
     public async Task<Result> CreateClientAsync(GameClient client, CancellationToken cancellationToken = default)
     {
         var representation = new ClientRepresentation(
@@ -31,6 +34,9 @@ internal sealed partial class GameClientService(HttpClient httpClient, ILogger<G
             {
                 ["pkce.code.challenge.method"] = "S256",
                 ["post.logout.redirect.uris"] = string.Join("##", client.RedirectUris),
+                // Sign-in by code (the OAuth device flow): a device without a browser, like
+                // the 3DS sync app, shows a code the player approves on another device.
+                [DeviceFlowAttribute] = "true",
             });
 
         try
