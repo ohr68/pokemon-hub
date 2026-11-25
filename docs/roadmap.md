@@ -17,6 +17,7 @@
 | 12. Emerald: the third save layout | Done; Hoenn badge positions wait on a first badge ([tech debt](tech-debt.md)) |
 | 13. 3DS spike: can a 3DS game run in the browser | Stopped: a 3DS game doesn't fit in the browser emulator's memory |
 | 14. Gen 7 save loader: Sun, Moon, Ultra Sun and Ultra Moon saves, read | Done; champion trophies wait on the games' counters |
+| 15. Gen 6 save loader: X and Y saves, read | Scoped, not started |
 
 More ideas, not yet in a phase, are in the [backlog](#backlog).
 
@@ -484,6 +485,47 @@ Left for later:
   as the first slot.
 - **Ultra Sun and Ultra Moon:** read like Sun and Moon by their size, but no real save has
   confirmed them yet.
+
+## 15. Gen 6 save loader
+
+X and Y on Phase 14's path: played on a console or in Azahar, with the save uploaded on the
+game's page and read, never changed. PokeHub's Pokédex already has their dex (X & Y, #721).
+Omega Ruby and Alpha Sapphire can follow the same way, as Ultra Sun and Ultra Moon did.
+
+What carries over from Phase 14: the upload page, the sync (backup, catches, levels, battle
+data, money, play time, Pokédex, Pokémon that left the save), the growth rates endpoint, and
+the Pokémon themselves. Gen 6's pk6 has pk7's size, encryption, checksum and nearly all of its
+fields, so the decoder is shared.
+
+What's new is the save around them. It's the game's `main` file again (X and Y `0x65600`
+bytes), a row of blocks with a table at the end, but with:
+
+- **Its own blocks:** other ids and lengths for the trainer, the party, the Pokédex, money and
+  play time, found through the table as in Gen 7 and checked by their known lengths.
+- **31 boxes** instead of 32 (`0x34AD0` bytes).
+- **Another checksum:** CRC-16-CCITT (`0x1021`, starting at `0xFFFF`) instead of Gen 7's.
+- **Its own Pokédex layout.**
+
+Steps:
+
+- **15a. Gen 6 save reader:** the block table, checksums, trainer, party, boxes, money, play
+  time and Pokédex for X and Y, with the pk7 decoder shared as a Gen 6/7 one. Tests build saves
+  in code. The positions come from documentation; the player's real X save confirms them, by
+  uploading it once 15b is in.
+- **15b. X and Y on the upload page:** listed with their origin numbers (X 24, Y 25), so their
+  pages take a save; then the real X save is checked against the game (money, play time,
+  Pokédex, the Pokémon and their moves).
+- **15c. Trophies:** X's and Y's specific trophies (Xerneas or Yveltal, Mewtwo, the legendary
+  birds, Zygarde), and the champion one if the Hall of Fame can be read.
+
+Rules:
+
+- As in Gen 7: a Pokémon counts as caught in the game only when its origin is that game; one
+  brought through the Poké Transporter or Pokémon Bank pays no catch rewards.
+- Shiny below 16, as in Gen 7.
+- Kalos has gyms: X and Y report their 8 badges, read from the save's flags, which a first badge
+  confirms, as with Ruby's.
+- Read-only, as in Phase 14.
 
 ## Backlog
 
