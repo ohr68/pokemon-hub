@@ -16,7 +16,7 @@
 | 11. Sapphire: Ruby's pair | Done |
 | 12. Emerald: the third save layout | Done; Hoenn badge positions wait on a first badge ([tech debt](tech-debt.md)) |
 | 13. 3DS spike: can a 3DS game run in the browser | Stopped: a 3DS game doesn't fit in the browser emulator's memory |
-| 14. Gen 7 save loader: Sun, Moon, Ultra Sun and Ultra Moon saves, read | Scoped, not started |
+| 14. Gen 7 save loader: Sun, Moon, Ultra Sun and Ultra Moon saves, read | Done; champion trophies wait on the games' counters |
 
 More ideas, not yet in a phase, are in the [backlog](#backlog).
 
@@ -470,6 +470,20 @@ Rules:
 - Alola has trials instead of gym badges, so these games report no badges.
 - Read-only: Pokémon stay in the save and can't move to the hub or between games yet. Writing
   into a save (and converting Pokémon between generations) is a later phase.
+
+Done: a real Moon save read on the first upload. Its checksums passed, its five Pokémon came in
+with the moves their levels give, and money, play time and the Pokédex matched the game. Box
+levels come from a new endpoint with every species' growth rate (`pokedex/species/growth`).
+Sun and Moon have their Tapus, Solgaleo or Lunala and Ultra Beasts trophies.
+
+Left for later:
+
+- **Champion trophies:** they need the games' counters (the Hall of Fame), which this version
+  doesn't read; it reports money, play time and the Pokédex only.
+- **Hidden abilities:** PokeHub keeps an ability slot of 0 or 1, so a hidden ability is kept
+  as the first slot.
+- **Ultra Sun and Ultra Moon:** read like Sun and Moon by their size, but no real save has
+  confirmed them yet.
 
 ## Backlog
 
