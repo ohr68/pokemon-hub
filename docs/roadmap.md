@@ -12,9 +12,9 @@
 | 7. Trainer progression: XP and levels, trophies, badges, coins | Done |
 | 8. Connected achievements: general, per-game, cross-game and specific | Done |
 | 9. LeafGreen: a second connected game | Done |
-| 10. Ruby: the first game from another save family | Done; its badge positions wait on a first badge ([tech debt](tech-debt.md)) |
+| 10. Ruby: the first game from another save family | Done |
 | 11. Sapphire: Ruby's pair | Done |
-| 12. Emerald: the third save layout | Scoped, not started |
+| 12. Emerald: the third save layout | Done; Hoenn badge positions wait on a first badge ([tech debt](tech-debt.md)) |
 | 13. 3DS spike: can a 3DS game run in the browser | Scoped, not started |
 
 More ideas, not yet in a phase, are in the [backlog](#backlog).
@@ -375,6 +375,12 @@ Steps:
   PC and the bag.
 - **12d. Trophies and test:** Emerald's specific trophies (champion, Rayquaza, the Battle
   Frontier, its legendaries), then a move between Emerald and the other games.
+
+Done: a first save read its team, money, play time, Pokédex and counters through the key, which
+the game changes between saves. A shop Pikachu went into the PC and out to the hub, and 10 shop
+Poké Balls stayed in the bag through the game's own save. Its trophies are the champion,
+Rayquaza, the Regis, and Groudon with Kyogre. The Battle Frontier one waits on PokeHub reading a
+Battle Frontier stat; the badge flags wait on a first badge.
 
 ## 13. 3DS spike
 

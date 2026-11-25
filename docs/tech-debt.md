@@ -22,17 +22,19 @@ in Box 1 and looked missing.
 - Study whether a transfer can avoid the restart by writing into the running game's memory.
   It's riskier than editing the save file, so it needs its own spike.
 
-## Ruby's badge positions are unconfirmed
+## Hoenn badge positions are unconfirmed
 
-**What's missing:** Ruby reads its save from positions taken from public documentation. A real
-save confirmed the party, money, play time, Pokédex and game counters, but not the badge flags:
-the test save had no badges yet, and the first gym is a long way in.
+**What's missing:** Ruby, Sapphire and Emerald read their saves from positions taken from public
+documentation. Real saves confirmed the party, money, play time, Pokédex, game counters, PC and
+bag, but not the badge flags: no test save has a badge yet, and the first gym is a long way in.
+Ruby and Sapphire share `RS_LAYOUT`'s badge flags; Emerald has its own (`E_LAYOUT`, flags at
+`0x1270`, first badge flag `0x867`).
 
-**Why it matters:** a wrong position would show Ruby's badges wrongly on the trainer page and
-in its badge trophies. Phase 10c, writing into Ruby's save, waits on a fully confirmed layout,
-since a wrong position there would damage the save.
+**Why it matters:** a wrong position would show those games' badges wrongly on the trainer page
+and in their badge trophies. Badges are only read, never written, so a save can't be damaged.
 
 **Direction:**
-- After the first badge (Roxanne's Stone Badge), sync Ruby and check the trainer page shows it.
-- If it doesn't, find the flags in that save and correct `RS_LAYOUT` in
-  pokemon-web's `src/lib/gen3/layout.ts`, then start 10c.
+- After the first badge (Roxanne's Stone Badge) in Ruby or Sapphire, and again in Emerald, sync
+  and check the trainer page shows it.
+- If it doesn't, find the flags in that save and correct the layout in pokemon-web's
+  `src/lib/gen3/layout.ts`.
