@@ -18,7 +18,7 @@
 | 13. 3DS spike: can a 3DS game run in the browser | Stopped: a 3DS game doesn't fit in the browser emulator's memory |
 | 14. Gen 7 save loader: Sun, Moon, Ultra Sun and Ultra Moon saves, read | Done; champion trophies wait on the games' counters |
 | 15. Gen 6 save loader: X and Y saves, read | Paused before 15a, for Phase 16 |
-| 16. 3DS sync app: a homebrew app that sends the console's saves to PokeHub | Scoped, not started |
+| 16. 3DS sync app: a homebrew app that sends the console's saves to PokeHub | Done for Sun and Moon; the sync waits for the game's page to open |
 
 More ideas, not yet in a phase, are in the [backlog](#backlog).
 
@@ -564,6 +564,13 @@ Steps:
   over plain HTTP meanwhile.
 - **16d. The page picks it up:** a game's page notices a 3DS backup newer than its last sync
   and syncs it, showing where it came from.
+
+Done: a real console sent Moon's save. The app (`~/RandomProjects/pokehub-sync`) signed in by
+code through PokeHub's API (`api/games/device/*`, which asks Keycloak under its public host
+name, so the tokens' issuer and refreshes agree), kept the sign-in on the SD card, and uploaded
+the save as "Do 3DS". Moon's page then synced it by itself and said it came from the 3DS. The
+approval page's address is Keycloak's public one (`localhost:18080`), so for now it's approved
+on the computer running PokeHub.
 
 Rules:
 
