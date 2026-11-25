@@ -17,7 +17,8 @@
 | 12. Emerald: the third save layout | Done; Hoenn badge positions wait on a first badge ([tech debt](tech-debt.md)) |
 | 13. 3DS spike: can a 3DS game run in the browser | Stopped: a 3DS game doesn't fit in the browser emulator's memory |
 | 14. Gen 7 save loader: Sun, Moon, Ultra Sun and Ultra Moon saves, read | Done; champion trophies wait on the games' counters |
-| 15. Gen 6 save loader: X and Y saves, read | Scoped, not started |
+| 15. Gen 6 save loader: X and Y saves, read | Paused before 15a, for Phase 16 |
+| 16. 3DS sync app: a homebrew app that sends the console's saves to PokeHub | Scoped, not started |
 
 More ideas, not yet in a phase, are in the [backlog](#backlog).
 
@@ -526,6 +527,56 @@ Rules:
 - Kalos has gyms: X and Y report their 8 badges, read from the save's flags, which a first badge
   confirms, as with Ruby's.
 - Read-only, as in Phase 14.
+
+Paused before 15a, for Phase 16: uploading saves by hand is the step to remove first.
+
+## 16. 3DS sync app
+
+A 3DS never shows a save as a file, so today the player copies it out with Checkpoint or JKSM
+and uploads it. A homebrew app for consoles with custom firmware, "PokeHub Sync", sends the
+saves of the Pokémon games on the console straight to PokeHub instead.
+
+How it fits:
+
+- **Signing in:** by code, with the OAuth device flow, which Keycloak supports per client. The
+  app shows a short code, the player approves it on their phone or computer, and the app gets a
+  token for that game's own client (`game-pokemon-moon`, say), as the game's page does. No
+  password is typed on the console. The refresh token stays on the console's SD card.
+- **Reading:** each Pokémon game on the console (cartridge or digital), through the same
+  system calls Checkpoint uses. The app only reads saves.
+- **Sending:** to the save backups PokeHub already keeps (`game/save/files`), labelled as from
+  the 3DS. The app doesn't read Pokémon itself.
+- **Syncing:** the game's page syncs the newest backup it hasn't read yet when it opens, with
+  the reader it already has. A backend reader (the Gen 7 one in C#) would make the sync happen
+  as soon as the console sends, with no page open; that's a later step.
+
+Steps:
+
+- **16a. Sign-in by code:** turn the device flow on for game clients, in `GameClientService` for
+  new games and once for the existing ones, then sign in by code from a terminal and upload a
+  save with that token, to prove the path before any console code.
+- **16b. App skeleton:** a new repository, built with devkitPro (devkitARM, libctru, citro2d).
+  It lists the Pokémon games on the console by title id, reads one game's save and shows its
+  size. It runs in Azahar first, then on a real console.
+- **16c. Sign-in and upload from the app:** the code screen, the token kept on the SD card, and
+  the save sent to the game's backups. The console's own HTTPS is outdated, so the app brings
+  its own (libcurl with mbedTLS, as homebrew usually does); PokeHub on the same network works
+  over plain HTTP meanwhile.
+- **16d. The page picks it up:** a game's page notices a 3DS backup newer than its last sync
+  and syncs it, showing where it came from.
+
+Rules:
+
+- Only games PokeHub reads: Sun and Moon now, X and Y once Phase 15 resumes. The app lists the
+  others as not supported yet.
+- Read-only on the console: the app never writes a save. Restoring or writing Pokémon into a
+  3DS save is a later phase.
+- No save, token or key is committed, in this repository or the app's.
+- Custom firmware is the player's own setup; the app's README says what it needs and doesn't
+  ship anything from Nintendo.
+
+Open before 16b: where the app's repository lives, and whether Azahar's emulated network lets
+the app reach PokeHub, or only a real console can test 16c.
 
 ## Backlog
 
