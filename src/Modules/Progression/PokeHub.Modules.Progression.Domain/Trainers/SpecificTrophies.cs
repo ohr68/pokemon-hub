@@ -32,6 +32,8 @@ public static class SpecificTrophies
     private const string Ruby = "ruby";
     private const string Sapphire = "sapphire";
     private const string Emerald = "emerald";
+    private const string Sun = "sun";
+    private const string Moon = "moon";
 
     public static readonly IReadOnlyList<SpecificTrophy> All =
     [
@@ -69,6 +71,16 @@ public static class SpecificTrophies
 
         // Only Emerald has both of them, once Rayquaza has calmed them down.
         new("emerald-land-and-sea", "Terra e mar", "Capture Groudon e Kyogre em Emerald.", TrophyTier.Gold, SpecificStat.SpeciesCaught, 2, Emerald, [382, 383]),
+
+        // Alola's: read from uploaded saves. The champion trophies wait on PokeHub reading the
+        // Gen 7 games' counters (the Hall of Fame).
+        new("sun-tapus", "Guardiões de Alola", "Capture Tapu Koko, Tapu Lele, Tapu Bulu e Tapu Fini em Sun.", TrophyTier.Gold, SpecificStat.SpeciesCaught, 4, Sun, [785, 786, 787, 788]),
+        new("sun-solgaleo", "O Pokémon devorador do sol", "Capture Solgaleo em Sun.", TrophyTier.Gold, SpecificStat.SpeciesCaught, 1, Sun, [791]),
+        new("sun-ultra-beasts", "Ultracaçador", "Capture Nihilego, Buzzwole, Xurkitree, Kartana e Guzzlord em Sun.", TrophyTier.Gold, SpecificStat.SpeciesCaught, 5, Sun, [793, 794, 796, 798, 799]),
+
+        new("moon-tapus", "Guardiões de Alola", "Capture Tapu Koko, Tapu Lele, Tapu Bulu e Tapu Fini em Moon.", TrophyTier.Gold, SpecificStat.SpeciesCaught, 4, Moon, [785, 786, 787, 788]),
+        new("moon-lunala", "O Pokémon que chama a lua", "Capture Lunala em Moon.", TrophyTier.Gold, SpecificStat.SpeciesCaught, 1, Moon, [792]),
+        new("moon-ultra-beasts", "Ultracaçador", "Capture Nihilego, Pheromosa, Xurkitree, Celesteela e Guzzlord em Moon.", TrophyTier.Gold, SpecificStat.SpeciesCaught, 5, Moon, [793, 795, 796, 797, 799]),
 
         new("hub-round-trip", "Ida e volta", "Traga um Pokémon do hub de volta para um jogo.", TrophyTier.Bronze, SpecificStat.ReturnsFromHub, 1),
         new("hub-trade-evolve", "Evolução por troca", "Receba um Pokémon que evolui na troca.", TrophyTier.Silver, SpecificStat.TradeEvolutions, 1),
