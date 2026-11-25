@@ -15,7 +15,8 @@
 | 10. Ruby: the first game from another save family | Done |
 | 11. Sapphire: Ruby's pair | Done |
 | 12. Emerald: the third save layout | Done; Hoenn badge positions wait on a first badge ([tech debt](tech-debt.md)) |
-| 13. 3DS spike: can a 3DS game run in the browser | Scoped, not started |
+| 13. 3DS spike: can a 3DS game run in the browser | Stopped: a 3DS game doesn't fit in the browser emulator's memory |
+| 14. Gen 7 save loader: Sun, Moon, Ultra Sun and Ultra Moon saves, read | Scoped, not started |
 
 More ideas, not yet in a phase, are in the [backlog](#backlog).
 
@@ -412,6 +413,63 @@ Rules:
 - No 3DS ROM, key, system file or save is committed, as with the GBA ROMs.
 - Its result is a written decision here: a 3DS phase scoped (with the Gen 6 Pokémon data, the
   pk6 format and moving Pokémon across generations), DS (Gen 4/5) first instead, or neither.
+
+Result: stopped at 13c, and 3DS games aren't emulated.
+
+- **13a worked:** with COOP and COEP on the dev server, the app and the emulator frame were
+  isolated, and sign-in, PokéAPI, its sprites and FireRed all still worked. Game images needed
+  a `Cross-Origin-Resource-Policy` header from the API.
+- **13b changed:** the 3DS core only exists in EmulatorJS 4.3.0-pre, a pre-release, so the
+  test ran it in a frame of its own and left the GBA games on 4.2.3.
+- **13c failed:** the core downloaded and unpacked, but EmulatorJS reads the whole game into
+  one block of memory and copies it into 32-bit WebAssembly, which holds at most 4 GB. A
+  Pokémon Sun dump is 4 GB, so it failed before the core ran it. Sun, Moon and the Ultra games
+  can't fit; X and Y might once trimmed, but a fix would mean the emulator reading the game
+  from disk as it goes, which EmulatorJS doesn't do.
+- **Decision:** the spike's code was removed. 3DS games are played on a console or a desktop
+  emulator, and PokeHub reads their saves instead (Phase 14).
+
+## 14. Gen 7 save loader
+
+3DS games are played outside PokeHub, on a console or in the Azahar desktop app. The player
+uploads the game's save, and PokeHub reads it like a GBA sync: new catches, levels, money, play
+time and the Pokédex count towards the trainer, trophies and coins. The save itself is never
+changed: this first version only reads.
+
+Gen 7 first: Sun, Moon, Ultra Sun and Ultra Moon share the pk7 format and close save layouts,
+and PokeHub's Pokédex already has their dexes (#802 and #807). X, Y, Omega Ruby and Alpha
+Sapphire (Gen 6) follow in a later phase.
+
+Where the save comes from: Checkpoint or JKSM on a console with homebrew, or Azahar's save
+folder on a computer. It's the game's `main` file, about 440 KB (Sun/Moon `0x6BE00` bytes,
+Ultra Sun/Ultra Moon `0x6CC00`).
+
+Steps:
+
+- **14a. Gen 7 save reader:** in pokemon-web, next to `lib/gen3`. Tell Sun/Moon from the Ultra
+  games by size, check the blocks' checksums, and read the trainer (name, ID, secret ID), the
+  party and the 32 PC boxes (pk7: decrypted with the encryption constant, checked by its
+  checksum), money, play time and the Pokédex. Tests build saves in code; no real save is
+  committed.
+- **14b. Save upload page:** a registered Gen 7 game has no emulator. Its Jogar page offers
+  "Carregar save" instead, reads the file in the browser and syncs it through the game's own
+  connection, with the same catch, level and stats calls the GBA sync uses, and keeps a backup.
+  Moving Pokémon to the hub, shop items, restoring and the emulator's tools are hidden for it.
+- **14c. Live test and trophies:** register one game (Sun or Moon, say), upload a real save and
+  check its numbers against the game; then its specific trophies (champion, the Tapus, Solgaleo
+  or Lunala, the Ultra Beasts).
+
+Rules:
+
+- A Pokémon counts as caught in the game when its origin is that game (Sun 30, Moon 31,
+  Ultra Sun 32, Ultra Moon 33). One brought from another game through Pokémon Bank or the
+  Poké Transporter is from another game, so it pays no catch rewards, as with a Ruby save in
+  Sapphire.
+- Shiny in Gen 7 is the trainer and secret IDs XORed with the personality value's halves,
+  below 16 (Gen 3 uses below 8).
+- Alola has trials instead of gym badges, so these games report no badges.
+- Read-only: Pokémon stay in the save and can't move to the hub or between games yet. Writing
+  into a save (and converting Pokémon between generations) is a later phase.
 
 ## Backlog
 
