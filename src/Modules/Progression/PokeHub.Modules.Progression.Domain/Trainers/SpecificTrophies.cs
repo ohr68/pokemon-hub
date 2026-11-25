@@ -31,6 +31,7 @@ public static class SpecificTrophies
     private const string LeafGreen = "leafgreen";
     private const string Ruby = "ruby";
     private const string Sapphire = "sapphire";
+    private const string Emerald = "emerald";
 
     public static readonly IReadOnlyList<SpecificTrophy> All =
     [
@@ -61,6 +62,13 @@ public static class SpecificTrophies
 
         // The Pokémon only Sapphire has in the wild; Ruby players get them through the hub.
         new("sapphire-exclusives", "Só no Sapphire", "Capture Lotad, Sableye, Seviper e Lunatone em Sapphire.", TrophyTier.Silver, SpecificStat.SpeciesCaught, 4, Sapphire, [270, 302, 336, 337]),
+
+        new("emerald-champion", "Campeão de Hoenn", "Derrote a Elite dos Quatro em Emerald.", TrophyTier.Gold, SpecificStat.HallOfFame, 1, Emerald),
+        new("emerald-rayquaza", "Senhor dos céus", "Capture Rayquaza em Emerald.", TrophyTier.Gold, SpecificStat.SpeciesCaught, 1, Emerald, [384]),
+        new("emerald-regis", "Os três Regis", "Capture Regirock, Regice e Registeel em Emerald.", TrophyTier.Gold, SpecificStat.SpeciesCaught, 3, Emerald, [377, 378, 379]),
+
+        // Only Emerald has both of them, once Rayquaza has calmed them down.
+        new("emerald-land-and-sea", "Terra e mar", "Capture Groudon e Kyogre em Emerald.", TrophyTier.Gold, SpecificStat.SpeciesCaught, 2, Emerald, [382, 383]),
 
         new("hub-round-trip", "Ida e volta", "Traga um Pokémon do hub de volta para um jogo.", TrophyTier.Bronze, SpecificStat.ReturnsFromHub, 1),
         new("hub-trade-evolve", "Evolução por troca", "Receba um Pokémon que evolui na troca.", TrophyTier.Silver, SpecificStat.TradeEvolutions, 1),
