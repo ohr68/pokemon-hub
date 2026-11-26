@@ -21,7 +21,7 @@
 | 16. 3DS sync app: a homebrew app that sends the console's saves to PokeHub | Done for Sun, Moon, X and Y; the sync waits for the game's page to open |
 | 17. 3DS app look: a graphical PokeHub Sync, with a QR code to sign in | Done: game cards with icons, QR sign-in, per-game status, Send all, background sends that B cancels |
 | 18. 3DS hub: the GBA games on the console, moving Pokémon and the shop from the 3DS app | Done for the GBA ports (Twin Embers, Emerald 3DS); Gen 6 and 7 editing next |
-| 19. 3DS app UI/UX: clear navigation, seeing what a send does, pictures everywhere, polish | Scoped, not started |
+| 19. 3DS app UI/UX: clear navigation, seeing what a send does, pictures everywhere, polish | 19a and 19b done; result screen (19c) next |
 
 More ideas, not yet in a phase, are in the [backlog](#backlog).
 
@@ -758,14 +758,17 @@ screenshots of the console:
 
 Steps:
 
-- **19a. Navigation:** tabs on the top screen's header for Games, Boxes and Shop, switched with
+- **19a. Navigation** (done): tabs on the top screen's header for Games, Boxes and Shop, switched with
   SELECT or by touching them on the bottom screen; Boxes and Shop act on the selected game.
   Everything reacts to touch (cards, box cells, offers). One hint bar at the bottom of the
   bottom screen, with the console's own button glyphs (Ⓐ, Ⓑ, ✚) for what each key does on
-  that screen; the server address moves to a small info line.
-- **19b. Game panel and what's waiting:** the bottom screen shows the chosen game: its icon,
+  that screen; the server address moves to a small info line. Boxes and Shop put what you pick
+  from on the touch screen, with the chosen one large on the top screen.
+- **19b. Game panel and what's waiting** (done): the bottom screen shows the chosen game: its icon,
   last send, sign-in, and what PokeHub has waiting for it ("2 Pokémon, 1 item"), from a small
-  new endpoint the app asks when a signed-in game is chosen. Send's label says what it'll do.
+  new endpoint (`GET api/game/save/waiting`) the app asks quietly when a signed-in game is chosen,
+  shown as a badge on its card. Send's label says what it'll do ("Send & get 2"). Opening Boxes
+  on a GBA port brings in what's waiting first, so the boxes show it; box cells show sprites.
 - **19c. Result screen:** after a send or a move, a summary with a row per change: arrived
   (sprite, name, box and slot), left for the hub, into the bag; failures in red with what to do,
   successes in green.
