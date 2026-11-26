@@ -18,7 +18,8 @@
 | 13. 3DS spike: can a 3DS game run in the browser | Stopped: a 3DS game doesn't fit in the browser emulator's memory |
 | 14. Gen 7 save loader: Sun, Moon, Ultra Sun and Ultra Moon saves, read | Done; champion trophies wait on the games' counters |
 | 15. Gen 6 save loader: X and Y saves, read | 15a and 15b done; X and Y trophies (15c) next |
-| 16. 3DS sync app: a homebrew app that sends the console's saves to PokeHub | Done for Sun and Moon; the sync waits for the game's page to open |
+| 16. 3DS sync app: a homebrew app that sends the console's saves to PokeHub | Done for Sun, Moon, X and Y; the sync waits for the game's page to open |
+| 17. 3DS app look: a graphical PokeHub Sync, with a QR code to sign in | Scoped, not started |
 
 More ideas, not yet in a phase, are in the [backlog](#backlog).
 
@@ -588,6 +589,58 @@ Rules:
 
 Open before 16b: where the app's repository lives, and whether Azahar's emulated network lets
 the app reach PokeHub, or only a real console can test 16c.
+
+## 17. 3DS app look
+
+PokeHub Sync works, but as two screens of text: no accents, no game icons, a code to type on
+another device, and a frozen screen while it talks to PokeHub. This phase gives it the look of a
+3DS app, in its own repository (`~/RandomProjects/pokehub-sync`).
+
+How it looks:
+
+- **Top screen (400×240):** a header with PokeHub's name and colours, then one card per Pokémon
+  game on the console: its own icon, its name, cartridge or SD, and a status line ("Sent today
+  21:01", "Not signed in", "Soon" for Omega Ruby and Alpha Sapphire). The D-pad moves between
+  cards.
+- **Bottom screen (320×240):** big touch buttons, also on the buttons: **Send** (A), **Send
+  all** (Y), **Sign out** (X). While sending, a progress line and a spinner; afterwards, the
+  result ("New backup", "PokeHub already had it", or the error).
+- **Signing in:** the bottom screen shows a QR code for the approval page and the top one the
+  code in large type. Scanning it on a phone opens the page with the code filled in; typing the
+  code on the Mac still works.
+
+How it's built:
+
+- **citro2d**, already in the devkitPro image, for drawing; the console's **system font**
+  (`C2D_FontLoadSystem`), which has accents, so the screens can say "Pokémon"; pictures (logo,
+  buttons) in the app's romfs, built with `tex3ds`.
+- **Game icons** read from each game's own banner (its SMDH), the way Checkpoint shows them, so
+  nothing from Nintendo is shipped.
+- **Network on a worker thread:** sign-in and uploads run beside the drawing loop, so the screen
+  keeps moving and B still cancels.
+- **QR code:** a small public-domain or MIT QR generator kept in the app's source, drawn as
+  squares.
+- **Status** kept on the SD card next to the sign-ins (`/3ds/pokehub-sync/status.json`): when each
+  game was last sent and how it went.
+
+Steps:
+
+- **17a. Drawing base:** citro2d with the system font, the header, the game cards with their
+  icons and the bottom buttons, all on the save flow that works today (sign-in still as text).
+- **17b. Sign-in screen with a QR code:** the code and the QR code. For a phone to open the page,
+  PokeHub's public Keycloak address becomes the Mac's network address in development
+  (`Games:KeyCloak:PublicUrl`), and the API accepts tokens issued there too.
+- **17c. Status and Send all:** each game's last send on its card; Send all sends every supported
+  game already signed in, one after another, and lists the ones that still need a sign-in rather
+  than asking for several codes in a row.
+- **17d. Worker thread and polish:** network off the drawing loop, a spinner, B to cancel at any
+  point, and clear errors (no Wi-Fi, PokeHub unreachable, signed out).
+
+Rules:
+
+- Still read-only on the console: the app never writes a save.
+- Nothing from Nintendo in the repository: icons come from the games on the console.
+- No token, save or key committed, in either repository.
 
 ## Backlog
 
