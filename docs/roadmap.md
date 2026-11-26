@@ -20,7 +20,7 @@
 | 15. Gen 6 save loader: X and Y saves, read | 15a and 15b done; X and Y trophies (15c) next |
 | 16. 3DS sync app: a homebrew app that sends the console's saves to PokeHub | Done for Sun, Moon, X and Y; the sync waits for the game's page to open |
 | 17. 3DS app look: a graphical PokeHub Sync, with a QR code to sign in | Done: game cards with icons, QR sign-in, per-game status, Send all, background sends that B cancels |
-| 18. 3DS hub: the GBA games on the console, moving Pokémon and the shop from the 3DS app | Scoped, not started |
+| 18. 3DS hub: the GBA games on the console, moving Pokémon and the shop from the 3DS app | 18a and 18b done; save editing on PokeHub (18c) next |
 
 More ideas, not yet in a phase, are in the [backlog](#backlog).
 
@@ -680,10 +680,17 @@ Steps:
   VC titles: the app can already find and read those (by banner name, through PxiFS0), but none
   is installed to test with. Ruby, Sapphire and LeafGreen aren't on the console yet. Twin
   Embers and the browser's FireRed are different playthroughs, which 18b has to settle.
-- **18b. Latest save wins:** PokeHub marks each game's current save (made where and when). The
-  Jogar page loads a newer one from the console before the game starts, and the app offers to
-  bring a newer browser save onto the console. If both changed since the last shared save, both
-  are kept and the player picks.
+- **18b. The ports as games of their own** (done): Twin Embers and Emerald 3DS are their own
+  playthroughs, unrelated to the browser's FireRed and Emerald, so they're registered as games
+  of their own (`twin-embers`, `emerald-3ds`, Pokédex up to #386), read with FireRed's and
+  Emerald's save layout and origin numbers. Their Jogar pages take saves like the 3DS games' do,
+  and sync the one the console sent as the page opens. Checked from the console: both parties,
+  play times and counters arrived. Nothing is written into them until 18d.
+- **Latest save wins** (waits for a game played in both places, such as Ruby on the console):
+  PokeHub marks each game's current save (made where and when). The Jogar page offers a newer
+  one from the console before the game starts, and the app offers to bring a newer browser save
+  onto the console, the current save always backed up first. If both changed since the last
+  shared save, both are kept and the player picks.
 - **18c. Save editing on PokeHub:** C# readers and writers for Gen 3 (boxes, bag, the three
   layouts), Gen 6 (boxes, CRC-16) and Gen 7 (boxes, checksums and the save's signature). An
   endpoint takes a save and returns the edited save, recording each transfer before it's
