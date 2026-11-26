@@ -20,7 +20,7 @@
 | 15. Gen 6 save loader: X and Y saves, read | 15a and 15b done; X and Y trophies (15c) next |
 | 16. 3DS sync app: a homebrew app that sends the console's saves to PokeHub | Done for Sun, Moon, X and Y; the sync waits for the game's page to open |
 | 17. 3DS app look: a graphical PokeHub Sync, with a QR code to sign in | Done: game cards with icons, QR sign-in, per-game status, Send all, background sends that B cancels |
-| 18. 3DS hub: the GBA games on the console, moving Pokémon and the shop from the 3DS app | 18a to 18c done (Gen 3); writing on the console (18d) next |
+| 18. 3DS hub: the GBA games on the console, moving Pokémon and the shop from the 3DS app | 18a to 18d done for the GBA ports; moving Pokémon out from the console (18e) next |
 
 More ideas, not yet in a phase, are in the [backlog](#backlog).
 
@@ -703,10 +703,13 @@ saves are plain files on the SD card); Gen 6 and 7 follow the same path afterwar
   edited save and returns it with where each one went; checked with a shiny Pikachu sent to
   Twin Embers, read back by the browser's reader as expected. Shop items wait for 18f. Gen 6 (boxes,
   CRC-16) and Gen 7 (boxes, checksums and the save's signature) come after the Gen 3 path works.
-- **18d. Writing on the console:** the app sends the save to the edit endpoint instead of
-  uploading it, backs the save up to `/3ds/pokehub-sync/backups/<game>/`, writes PokeHub's
-  save, reads it back and compares. The GBA ports first (a file on the SD card), then X and Y
-  (plain checksums), then Sun to Ultra Moon. A write that fails to verify puts the backup back.
+- **18d. Writing on the console** (done for the GBA ports): sending Twin Embers or Emerald 3DS
+  goes through the edit endpoint. When PokeHub changed the save, the app backs the current one
+  up to `/3ds/pokehub-sync/backups/<client id>/<date-time>.sav`, writes the new one next to it,
+  and swaps it in; every file is read back and compared first, and a failed swap puts the old
+  save back. A save that's never written is settled on the next send. Checked on the real Twin
+  Embers save: a shiny Pikachu arrived in box 1, slot 1. X and Y, then Sun to Ultra Moon, follow
+  once PokeHub edits Gen 6 and 7 saves.
 - **18e. Moving Pokémon:** Pokémon waiting for a game arrive on its next send. On the console,
   a box screen shows the save's Pokémon (read by PokeHub) to pick ones to send to the hub. Gen 3
   Pokémon can go to Gen 6 and 7 games, converted the way Poké Transporter does. A Gen 6 or 7
