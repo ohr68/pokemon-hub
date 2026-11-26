@@ -17,7 +17,7 @@
 | 12. Emerald: the third save layout | Done; Hoenn badge positions wait on a first badge ([tech debt](tech-debt.md)) |
 | 13. 3DS spike: can a 3DS game run in the browser | Stopped: a 3DS game doesn't fit in the browser emulator's memory |
 | 14. Gen 7 save loader: Sun, Moon, Ultra Sun and Ultra Moon saves, read | Done; champion trophies wait on the games' counters |
-| 15. Gen 6 save loader: X and Y saves, read | Paused before 15a, for Phase 16 |
+| 15. Gen 6 save loader: X and Y saves, read | 15a and 15b done; X and Y trophies (15c) next |
 | 16. 3DS sync app: a homebrew app that sends the console's saves to PokeHub | Done for Sun and Moon; the sync waits for the game's page to open |
 
 More ideas, not yet in a phase, are in the [backlog](#backlog).
@@ -528,7 +528,11 @@ Rules:
   confirms, as with Ruby's.
 - Read-only, as in Phase 14.
 
-Paused before 15a, for Phase 16: uploading saves by hand is the step to remove first.
+Done (15a, 15b): a real X save, sent by the 3DS app, read as documented: all 55 blocks passed
+their checksums, and the trainer, money, play time, 5 badges, Pokédex and 33 Pokémon with their
+moves matched the game. The catalog sync now keeps every move through Generation VII, so newer
+Pokémon's moves have names, and friendship is read towards whoever has the Pokémon now (Sun and
+Moon's too). Held items still show by number.
 
 ## 16. 3DS sync app
 

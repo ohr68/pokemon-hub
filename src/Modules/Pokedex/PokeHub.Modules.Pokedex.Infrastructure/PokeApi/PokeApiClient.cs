@@ -11,8 +11,9 @@ namespace PokeHub.Modules.Pokedex.Infrastructure.PokeApi;
 /// each generation lists its species, and each type lists the Pokémon that have it and in
 /// which slot. A species' types are those of its default form, whose id equals the species id.
 /// Trade evolutions add about 50 more requests, and the Generation III data (game numbers and
-/// FireRed/LeafGreen learnsets) one per species up to #386 plus one per move they learn, and
-/// legendary/mythical flags one per species.
+/// FireRed/LeafGreen learnsets) one per species up to #386, the moves one per move up to
+/// Generation VII's last (the 3DS games' Pokémon know those), and legendary/mythical flags one
+/// per species.
 /// </summary>
 internal sealed partial class PokeApiClient(HttpClient httpClient, ILogger<PokeApiClient> logger) : IPokeApiClient
 {
@@ -20,6 +21,10 @@ internal sealed partial class PokeApiClient(HttpClient httpClient, ILogger<PokeA
     // species 1 to 251 the same way; Hoenn species (252 to 386) have their own numbers there.
     private const int LastGen2Species = 251;
     private const int LastGen3Species = 386;
+
+    // Sun, Moon, Ultra Sun and Ultra Moon's last move (Double Iron Bash): the newest a synced
+    // Pokémon knows.
+    private const int LastGen7Move = 742;
 
     // PokéAPI's name for FireRed and LeafGreen, which share their learnsets.
     private const string FireRedLeafGreen = "firered-leafgreen";
@@ -39,7 +44,9 @@ internal sealed partial class PokeApiClient(HttpClient httpClient, ILogger<PokeA
             Gen3Data gen3 = await GetGen3DataAsync(species, cancellationToken);
             Dictionary<int, SpeciesRarityResponse> rarity = await GetRarityAsync(species, cancellationToken);
             IReadOnlyCollection<MoveData> moves = await GetMovesAsync(
-                gen3.LevelUpMoves.Values.SelectMany(learnset => learnset.Select(m => m.MoveId)).ToHashSet(),
+                Enumerable.Range(1, LastGen7Move)
+                    .Union(gen3.LevelUpMoves.Values.SelectMany(learnset => learnset.Select(m => m.MoveId)))
+                    .ToHashSet(),
                 cancellationToken);
 
             var growthRateBySpecies = growthRates
