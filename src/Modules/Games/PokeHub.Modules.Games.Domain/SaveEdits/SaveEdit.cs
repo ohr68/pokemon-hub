@@ -4,9 +4,10 @@ namespace PokeHub.Modules.Games.Domain.SaveEdits;
 
 /// <summary>
 /// A save PokeHub edited and handed back to a device, such as the 3DS app, to write into the
-/// game. The Pokémon it put in are recorded as delivered when it's handed out; if the device
-/// never wrote the save, they're missing from the next one it sends, and go back to waiting.
-/// Settled against the next save from that game.
+/// game. The Pokémon it put in are recorded as delivered, and the ones it took out as in the
+/// hub, when it's handed out. If the device never wrote the save, the next one it sends shows
+/// it: delivered ones missing go back to waiting, withdrawn ones still there go back inside the
+/// game. Settled against the next save from that game.
 /// </summary>
 public sealed class SaveEdit : Entity
 {
@@ -27,15 +28,20 @@ public sealed class SaveEdit : Entity
 
     public List<string> DeliveredCatchKeys { get; private set; } = [];
 
+    // Pokémon taken out of the save for the hub.
+    public List<string> WithdrawnCatchKeys { get; private set; } = [];
+
     public DateTime? SettledOnUtc { get; private set; }
 
     public static SaveEdit Create(
         Guid trainerId,
         Guid gameId,
         IReadOnlyList<(Guid PokemonId, string CatchKey)> deliveries,
+        IReadOnlyList<string> withdrawnCatchKeys,
         DateTime createdOnUtc)
     {
         ArgumentNullException.ThrowIfNull(deliveries);
+        ArgumentNullException.ThrowIfNull(withdrawnCatchKeys);
 
         return new SaveEdit
         {
@@ -45,6 +51,7 @@ public sealed class SaveEdit : Entity
             CreatedOnUtc = createdOnUtc,
             DeliveredPokemonIds = [.. deliveries.Select(d => d.PokemonId)],
             DeliveredCatchKeys = [.. deliveries.Select(d => d.CatchKey)],
+            WithdrawnCatchKeys = [.. withdrawnCatchKeys],
         };
     }
 
@@ -54,6 +61,14 @@ public sealed class SaveEdit : Entity
         ArgumentNullException.ThrowIfNull(presentCatchKeys);
 
         return [.. DeliveredPokemonIds.Where((_, i) => !presentCatchKeys.Contains(DeliveredCatchKeys[i]))];
+    }
+
+    /// <summary>The withdrawn Pokémon still in this save: the device didn't write it.</summary>
+    public IReadOnlyList<string> StillIn(IReadOnlySet<string> presentCatchKeys)
+    {
+        ArgumentNullException.ThrowIfNull(presentCatchKeys);
+
+        return [.. WithdrawnCatchKeys.Where(presentCatchKeys.Contains)];
     }
 
     public void Settle(DateTime settledOnUtc) => SettledOnUtc = settledOnUtc;

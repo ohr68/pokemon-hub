@@ -12,4 +12,13 @@ public static class SaveEditErrors
     {
         return Error.Problem("SaveEdits.Unreadable", reason);
     }
+
+    public static readonly Error NotInBoxes = Error.Conflict(
+        "SaveEdits.NotInBoxes",
+        "A chosen Pokémon is no longer in the PC boxes. Read the boxes again.");
+
+    public static Error FromOtherGame(string name, string gameName)
+    {
+        return Error.Conflict("Pokemon.FromOtherGame", $"{name} was caught in another game and can't go to the hub through {gameName}.");
+    }
 }

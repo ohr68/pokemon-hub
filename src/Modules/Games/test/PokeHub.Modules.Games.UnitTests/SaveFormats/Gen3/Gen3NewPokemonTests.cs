@@ -109,4 +109,24 @@ public class Gen3NewPokemonTests
     {
         Gen3Game.ForSlug("pokemon-x").Should().BeNull();
     }
+
+    [Theory]
+    [InlineData("CHARMANDER", "charmander", null)]
+    [InlineData("NIDORAN♀", "nidoran-f", null)]
+    [InlineData("MR. MIME", "mr-mime", null)]
+    [InlineData("Blaze", "charmander", "Blaze")]
+    public void RealNickname_ShouldKeepOnlyRealNicknames(string nickname, string species, string? expected)
+    {
+        Gen3NewPokemon.RealNickname(nickname, species).Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData(0u, 1)]
+    [InlineData(134u, 4)]
+    [InlineData(135u, 5)]
+    [InlineData(10000u, 10)]
+    public void LevelFromExperience_ShouldGiveTheHighestLevelReached(uint experience, int level)
+    {
+        Gen3NewPokemon.LevelFromExperience(experience, Charmander.ExperienceByLevel).Should().Be(level);
+    }
 }

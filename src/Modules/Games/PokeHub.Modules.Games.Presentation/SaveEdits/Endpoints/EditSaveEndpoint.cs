@@ -39,7 +39,12 @@ internal sealed class EditSaveEndpoint(ISender sender) : EndpointBase<EditSaveRe
         await req.File.CopyToAsync(content, ct);
 
         Result<EditedSaveResponse> result = await sender.Send(
-            new EditSaveCommand(User.GetClientId(), User.GetUserId(), content.ToArray(), req.Label),
+            new EditSaveCommand(
+                User.GetClientId(),
+                User.GetUserId(),
+                content.ToArray(),
+                req.Label,
+                req.Withdraw?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)),
             ct);
 
         await SendResultAsync(result, edited => Results.Ok(edited));

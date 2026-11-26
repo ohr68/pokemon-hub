@@ -10,18 +10,28 @@ namespace PokeHub.Modules.Games.Application.SaveEdits.EditSave;
 /// <param name="ClientId">The client the player signed in with, from the token.</param>
 /// <param name="Content">The save file exactly as the game wrote it.</param>
 /// <param name="Label">Where it came from, kept on its backup, such as "Do 3DS".</param>
-public sealed record EditSaveCommand(string? ClientId, Guid TrainerId, byte[] Content, string? Label = null)
+/// <param name="Withdraw">Catch keys of PC box Pokémon to take out of the save, to the hub.</param>
+public sealed record EditSaveCommand(
+    string? ClientId,
+    Guid TrainerId,
+    byte[] Content,
+    string? Label = null,
+    IReadOnlyCollection<string>? Withdraw = null)
     : ICommand<EditedSaveResponse>;
 
 /// <param name="Content">The save to write into the game; the same bytes when nothing changed.</param>
 /// <param name="Changed">False when there was nothing to put in, so the device can skip writing.</param>
-/// <param name="Settled">Pokémon from an earlier edit that never reached the game, waiting again.</param>
+/// <param name="Withdrawn">Pokémon taken out of the save; they're in the hub now.</param>
+/// <param name="Settled">Pokémon of an earlier edit the game never got, put back where its save says they are.</param>
 public sealed record EditedSaveResponse(
     byte[] Content,
     bool Changed,
     IReadOnlyCollection<DeliveredToSaveResponse> Delivered,
     IReadOnlyCollection<NotDeliveredResponse> NotDelivered,
+    IReadOnlyCollection<WithdrawnFromSaveResponse> Withdrawn,
     int Settled);
+
+public sealed record WithdrawnFromSaveResponse(Guid PokemonId, string Name);
 
 /// <param name="Box">The PC box, as the game shows it (from 1).</param>
 /// <param name="Slot">The slot in that box (from 1).</param>

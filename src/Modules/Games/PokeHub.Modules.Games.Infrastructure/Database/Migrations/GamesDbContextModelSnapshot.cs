@@ -300,6 +300,11 @@ namespace PokeHub.Modules.Games.Infrastructure.Database.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("trainer_id");
 
+                    b.PrimitiveCollection<List<string>>("WithdrawnCatchKeys")
+                        .IsRequired()
+                        .HasColumnType("text[]")
+                        .HasColumnName("withdrawn_catch_keys");
+
                     b.HasKey("Id")
                         .HasName("pk_save_edits");
 

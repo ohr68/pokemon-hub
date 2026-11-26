@@ -9,4 +9,8 @@ internal sealed class EditSaveRequest
 
     // Optional, in a field named label: where the save came from, such as "Do 3DS".
     public string? Label { get; init; }
+
+    // Optional, in a field named withdraw: catch keys of PC box Pokémon to send to the hub,
+    // separated by commas.
+    public string? Withdraw { get; init; }
 }

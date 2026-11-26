@@ -107,6 +107,38 @@ public static class Gen3NewPokemon
             : speciesName.Replace('-', ' ').ToUpperInvariant();
     }
 
+    /// <summary>
+    /// The Pokémon's nickname, or null when it carries its species name (BULBASAUR), which isn't a
+    /// real nickname. Compared on letters alone, so NIDORAN♀ matches nidoran-f.
+    /// </summary>
+    public static string? RealNickname(string nickname, string speciesName)
+    {
+        ArgumentNullException.ThrowIfNull(nickname);
+        ArgumentNullException.ThrowIfNull(speciesName);
+
+        static string Letters(string text) => new([.. text.ToUpperInvariant().Where(c => c is >= 'A' and <= 'Z')]);
+
+        string letters = Letters(nickname);
+        return letters.Length == 0 || Letters(speciesName).StartsWith(letters, StringComparison.Ordinal) ? null : nickname;
+    }
+
+    /// <summary>Box Pokémon only store experience: the level is the highest one whose threshold it reached.</summary>
+    public static int LevelFromExperience(uint experience, IReadOnlyList<int> experienceByLevel)
+    {
+        ArgumentNullException.ThrowIfNull(experienceByLevel);
+
+        int level = 1;
+        for (int i = 0; i < experienceByLevel.Count; i++)
+        {
+            if (experience >= experienceByLevel[i])
+            {
+                level = i + 1;
+            }
+        }
+
+        return level;
+    }
+
     /// <summary>The same PokeHub trainer always gets the same trainer and secret id, never the player's.</summary>
     public static uint ForeignTrainerId(string pokehubTrainerId, uint playerTrainerId)
     {
