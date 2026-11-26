@@ -19,7 +19,7 @@
 | 14. Gen 7 save loader: Sun, Moon, Ultra Sun and Ultra Moon saves, read | Done; champion trophies wait on the games' counters |
 | 15. Gen 6 save loader: X and Y saves, read | 15a and 15b done; X and Y trophies (15c) next |
 | 16. 3DS sync app: a homebrew app that sends the console's saves to PokeHub | Done for Sun, Moon, X and Y; the sync waits for the game's page to open |
-| 17. 3DS app look: a graphical PokeHub Sync, with a QR code to sign in | Scoped, not started |
+| 17. 3DS app look: a graphical PokeHub Sync, with a QR code to sign in | Done: game cards with icons, QR sign-in, per-game status, Send all, background sends that B cancels |
 
 More ideas, not yet in a phase, are in the [backlog](#backlog).
 
@@ -625,15 +625,15 @@ How it's built:
 
 Steps:
 
-- **17a. Drawing base:** citro2d with the system font, the header, the game cards with their
+- **17a. Drawing base** (done): citro2d with the system font, the header, the game cards with their
   icons and the bottom buttons, all on the save flow that works today (sign-in still as text).
-- **17b. Sign-in screen with a QR code:** the code and the QR code. For a phone to open the page,
+- **17b. Sign-in screen with a QR code** (done): the code and the QR code. For a phone to open the page,
   PokeHub's public Keycloak address becomes the Mac's network address in development
   (`Games:KeyCloak:PublicUrl`), and the API accepts tokens issued there too.
-- **17c. Status and Send all:** each game's last send on its card; Send all sends every supported
+- **17c. Status and Send all** (done): each game's last send on its card; Send all sends every supported
   game already signed in, one after another, and lists the ones that still need a sign-in rather
   than asking for several codes in a row.
-- **17d. Worker thread and polish:** network off the drawing loop, a spinner, B to cancel at any
+- **17d. Worker thread and polish** (done): network off the drawing loop, a spinner, B to cancel at any
   point, and clear errors (no Wi-Fi, PokeHub unreachable, signed out).
 
 Rules:
