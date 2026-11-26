@@ -131,7 +131,7 @@ internal sealed class EditSaveCommandHandler(
             [.. delivered.Select(d =>
             {
                 (int box, int slot) = Gen3Save.BoxPosition(d.Slot);
-                return new DeliveredToSaveResponse(d.Pokemon.Id, NameOf(d.Pokemon), box, slot);
+                return new DeliveredToSaveResponse(d.Pokemon.Id, NameOf(d.Pokemon), box, slot, d.Pokemon.SpeciesId, d.Pokemon.IsShiny);
             })],
             notDelivered,
             withdrawn.Value,
@@ -320,7 +320,9 @@ internal sealed class EditSaveCommandHandler(
             save.SetSlot(pokemon.BoxSlot!.Value, []);
         }
 
-        return chosen.Select(c => new WithdrawnFromSaveResponse(c.Id, c.Nickname ?? Gen3NewPokemon.DisplayName(c.Species.Name))).ToList();
+        return chosen
+            .Select(c => new WithdrawnFromSaveResponse(c.Id, c.Nickname ?? Gen3NewPokemon.DisplayName(c.Species.Name), c.Species.SpeciesId, c.Pokemon.IsShiny))
+            .ToList();
     }
 
     private static (List<(DeliveryInfo, string, int)>, List<NotDeliveredResponse>) WritePokemon(
@@ -340,13 +342,13 @@ internal sealed class EditSaveCommandHandler(
         {
             if (!speciesById.TryGetValue(pokemon.SpeciesId, out Gen3SpeciesInfo? species))
             {
-                notDelivered.Add(new NotDeliveredResponse(pokemon.Id, NameOf(pokemon), $"{gameName} doesn't have this species."));
+                notDelivered.Add(new NotDeliveredResponse(pokemon.Id, NameOf(pokemon), $"{gameName} doesn't have this species.", pokemon.SpeciesId, pokemon.IsShiny));
                 continue;
             }
 
             if (!free.TryDequeue(out int slot))
             {
-                notDelivered.Add(new NotDeliveredResponse(pokemon.Id, NameOf(pokemon), "There's no free slot left in the PC boxes."));
+                notDelivered.Add(new NotDeliveredResponse(pokemon.Id, NameOf(pokemon), "There's no free slot left in the PC boxes.", pokemon.SpeciesId, pokemon.IsShiny));
                 continue;
             }
 

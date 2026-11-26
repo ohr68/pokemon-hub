@@ -40,10 +40,10 @@ public sealed record EditedSaveResponse(
 /// <param name="Reason">Why it stayed out, for one that didn't fit.</param>
 public sealed record ItemToSaveResponse(Guid PurchaseId, string Name, int Quantity, string? Reason = null);
 
-public sealed record WithdrawnFromSaveResponse(Guid PokemonId, string Name);
+public sealed record WithdrawnFromSaveResponse(Guid PokemonId, string Name, int SpeciesId, bool IsShiny);
 
 /// <param name="Box">The PC box, as the game shows it (from 1).</param>
 /// <param name="Slot">The slot in that box (from 1).</param>
-public sealed record DeliveredToSaveResponse(Guid PokemonId, string Name, int Box, int Slot);
+public sealed record DeliveredToSaveResponse(Guid PokemonId, string Name, int Box, int Slot, int SpeciesId, bool IsShiny);
 
-public sealed record NotDeliveredResponse(Guid PokemonId, string Name, string Reason);
+public sealed record NotDeliveredResponse(Guid PokemonId, string Name, string Reason, int SpeciesId = 0, bool IsShiny = false);
