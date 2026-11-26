@@ -23,10 +23,15 @@ public sealed record LevelUpMoveData(int Level, int MoveId);
 
 public sealed record MoveData(int Id, string Name, int Pp);
 
+/// <param name="Gen3Index">Its number in Generation III games, if they have it.</param>
+/// <param name="ModernIndex">Its number in X to Ultra Moon, if they have it.</param>
+public sealed record ItemData(int Id, string Name, int? Gen3Index, int? ModernIndex);
+
 /// <param name="ExperienceByLevel">Total experience for levels 1 to 100.</param>
 public sealed record GrowthRateData(string Name, int[] ExperienceByLevel);
 
 public sealed record SpeciesCatalog(
     IReadOnlyCollection<SpeciesData> Species,
     IReadOnlyCollection<GrowthRateData> GrowthRates,
-    IReadOnlyCollection<MoveData> Moves);
+    IReadOnlyCollection<MoveData> Moves,
+    IReadOnlyCollection<ItemData> Items);

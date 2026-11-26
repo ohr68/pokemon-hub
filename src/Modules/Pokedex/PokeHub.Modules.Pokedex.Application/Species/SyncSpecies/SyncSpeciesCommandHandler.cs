@@ -16,10 +16,11 @@ internal sealed class SyncSpeciesCommandHandler(
 {
     public async Task<Result<SpeciesSyncResponse>> Handle(SyncSpeciesCommand request, CancellationToken cancellationToken)
     {
-        // Evolution lines arrived after the catalog: an existing one needs one full sync for them.
+        // Evolution lines and items arrived after the catalog: an existing one needs one full sync for them.
         if (request.OnlyIfEmpty
             && await speciesRepository.AnyAsync(cancellationToken)
-            && await speciesRepository.HasEvolutionLinesAsync(cancellationToken))
+            && await speciesRepository.HasEvolutionLinesAsync(cancellationToken)
+            && await speciesRepository.AnyItemsAsync(cancellationToken))
         {
             // Game lists arrived after the catalog: an existing catalog still needs them once.
             if (!await speciesRepository.AnyGameDexEntriesAsync(cancellationToken))
@@ -46,6 +47,7 @@ internal sealed class SyncSpeciesCommandHandler(
 
         await SyncGrowthRatesAsync(catalog.Value.GrowthRates, cancellationToken);
         await SyncMovesAsync(catalog.Value.Moves, cancellationToken);
+        await SyncItemsAsync(catalog.Value.Items, cancellationToken);
 
         foreach (SpeciesData data in catalog.Value.Species)
         {
@@ -148,6 +150,22 @@ internal sealed class SyncSpeciesCommandHandler(
             }
 
             speciesRepository.Insert(Move.Create(data.Id, data.Name, data.Pp));
+        }
+    }
+
+    private async Task SyncItemsAsync(IReadOnlyCollection<ItemData> items, CancellationToken cancellationToken)
+    {
+        var existing = (await speciesRepository.GetItemsAsync(cancellationToken)).ToDictionary(i => i.Id);
+
+        foreach (ItemData data in items)
+        {
+            if (existing.TryGetValue(data.Id, out Item? item))
+            {
+                item.Update(data.Name, data.Gen3Index, data.ModernIndex);
+                continue;
+            }
+
+            speciesRepository.Insert(Item.Create(data.Id, data.Name, data.Gen3Index, data.ModernIndex));
         }
     }
 

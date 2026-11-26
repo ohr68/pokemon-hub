@@ -16,10 +16,12 @@ public sealed record UpdateBattleDataCommand(
 
 public sealed record BattleReport(string CatchKey, int Level, BattleData Data);
 
+/// <param name="HeldItemNumbering">"gen3" or "modern": which games' item numbers the held item is.</param>
 public sealed record BattleData(
     int Nature,
     int AbilitySlot,
     int HeldItemId,
+    string HeldItemNumbering,
     int Friendship,
     IReadOnlyList<BattleMove> Moves,
     IReadOnlyList<int> Ivs,
@@ -35,6 +37,8 @@ internal sealed class UpdateBattleDataCommandValidator : AbstractValidator<Updat
     private const int MaxReports = 500;
     private const int StatCount = 6;
 
+    private static readonly string[] ItemNumberings = ["gen3", "modern"];
+
     public UpdateBattleDataCommandValidator()
     {
         RuleFor(c => c.Reports).NotNull().Must(r => r.Count <= MaxReports);
@@ -47,6 +51,7 @@ internal sealed class UpdateBattleDataCommandValidator : AbstractValidator<Updat
             report.RuleFor(r => r.Data.Nature).InclusiveBetween(0, 24);
             report.RuleFor(r => r.Data.AbilitySlot).InclusiveBetween(0, 1);
             report.RuleFor(r => r.Data.HeldItemId).InclusiveBetween(0, ushort.MaxValue);
+            report.RuleFor(r => r.Data.HeldItemNumbering).Must(n => ItemNumberings.Contains(n));
             report.RuleFor(r => r.Data.Friendship).InclusiveBetween(0, 255);
             report.RuleFor(r => r.Data.Moves).NotNull().Must(m => m.Count <= 4);
             report.RuleForEach(r => r.Data.Moves).ChildRules(move =>

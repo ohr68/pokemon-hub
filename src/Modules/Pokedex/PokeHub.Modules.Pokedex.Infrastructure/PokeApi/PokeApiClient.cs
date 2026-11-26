@@ -12,8 +12,8 @@ namespace PokeHub.Modules.Pokedex.Infrastructure.PokeApi;
 /// which slot. A species' types are those of its default form, whose id equals the species id.
 /// Trade evolutions add about 50 more requests, and the Generation III data (game numbers and
 /// FireRed/LeafGreen learnsets) one per species up to #386, the moves one per move up to
-/// Generation VII's last (the 3DS games' Pokémon know those), and legendary/mythical flags one
-/// per species.
+/// Generation VII's last (the 3DS games' Pokémon know those), the items one per item up to the
+/// last Generation VII has, and legendary/mythical flags one per species.
 /// </summary>
 internal sealed partial class PokeApiClient(HttpClient httpClient, ILogger<PokeApiClient> logger) : IPokeApiClient
 {
@@ -25,6 +25,10 @@ internal sealed partial class PokeApiClient(HttpClient httpClient, ILogger<PokeA
     // Sun, Moon, Ultra Sun and Ultra Moon's last move (Double Iron Bash): the newest a synced
     // Pokémon knows.
     private const int LastGen7Move = 742;
+
+    // PokéAPI's highest id among the items Generation III or VII games have (Magmar Candy, from
+    // Let's Go); its later ids are Generation VIII and IX items.
+    private const int LastGen7Item = 1137;
 
     // PokéAPI's name for FireRed and LeafGreen, which share their learnsets.
     private const string FireRedLeafGreen = "firered-leafgreen";
@@ -48,6 +52,7 @@ internal sealed partial class PokeApiClient(HttpClient httpClient, ILogger<PokeA
                     .Union(gen3.LevelUpMoves.Values.SelectMany(learnset => learnset.Select(m => m.MoveId)))
                     .ToHashSet(),
                 cancellationToken);
+            IReadOnlyCollection<ItemData> items = await GetItemsAsync(cancellationToken);
 
             var growthRateBySpecies = growthRates
                 .SelectMany(rate => rate.PokemonSpecies.Select(s => (s.Id, rate.Name)))
@@ -85,7 +90,8 @@ internal sealed partial class PokeApiClient(HttpClient httpClient, ILogger<PokeA
                         rate.Name,
                         rate.Levels.OrderBy(l => l.Level).Select(l => l.Experience).ToArray()))
                     .ToList(),
-                moves);
+                moves,
+                items);
         }
         catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException
                                               or System.Text.Json.JsonException)
@@ -298,6 +304,33 @@ internal sealed partial class PokeApiClient(HttpClient httpClient, ILogger<PokeA
             cancellationToken);
 
         return moves.Select(m => new MoveData(m.Id, m.Name, m.Pp ?? 0)).ToList();
+    }
+
+    /// <summary>
+    /// The items with a number in Generation III or in X to Ultra Moon. PokéAPI lists items by
+    /// its own id, and each one says its number in every generation that has it.
+    /// </summary>
+    private async Task<IReadOnlyCollection<ItemData>> GetItemsAsync(CancellationToken cancellationToken)
+    {
+        ResourceList list = await GetAsync<ResourceList>("item?limit=10000", cancellationToken);
+
+        ItemResponse[] items = await ThrottledAsync(
+            list.Results.Select(i => i.Id).Where(id => id <= LastGen7Item),
+            id => GetAsync<ItemResponse>($"item/{id}", cancellationToken),
+            cancellationToken);
+
+        return items
+            .Select(item => new ItemData(
+                item.Id,
+                item.Name,
+                IndexIn(item, "generation-iii"),
+                // Sun and Moon number items as X and Y do, and add their own after.
+                IndexIn(item, "generation-vii") ?? IndexIn(item, "generation-vi")))
+            .Where(item => item.Gen3Index is not null || item.ModernIndex is not null)
+            .ToList();
+
+        static int? IndexIn(ItemResponse item, string generation) =>
+            item.GameIndices.FirstOrDefault(g => g.Generation.Name == generation)?.Index;
     }
 
     private static async Task<TResult[]> ThrottledAsync<TResult>(

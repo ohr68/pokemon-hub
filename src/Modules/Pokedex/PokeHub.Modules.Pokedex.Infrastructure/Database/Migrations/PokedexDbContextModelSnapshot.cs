@@ -390,6 +390,32 @@ namespace PokeHub.Modules.Pokedex.Infrastructure.Database.Migrations
                     b.ToTable("growth_rates", "pokedex");
                 });
 
+            modelBuilder.Entity("PokeHub.Modules.Pokedex.Domain.Species.Item", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    b.Property<int?>("Gen3Index")
+                        .HasColumnType("integer")
+                        .HasColumnName("gen3index");
+
+                    b.Property<int?>("ModernIndex")
+                        .HasColumnType("integer")
+                        .HasColumnName("modern_index");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("name");
+
+                    b.HasKey("Id")
+                        .HasName("pk_items");
+
+                    b.ToTable("items", "pokedex");
+                });
+
             modelBuilder.Entity("PokeHub.Modules.Pokedex.Domain.Species.Move", b =>
                 {
                     b.Property<int>("Id")

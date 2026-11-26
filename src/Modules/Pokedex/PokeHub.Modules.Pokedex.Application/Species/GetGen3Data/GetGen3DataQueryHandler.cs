@@ -35,6 +35,10 @@ internal sealed class GetGen3DataQueryHandler(IDbConnectionFactory dbConnectionF
             SELECT id AS Id, name AS Name, pp AS Pp
             FROM pokedex.moves
             ORDER BY id;
+
+            SELECT id AS Id, name AS Name, gen3index AS Gen3Index, modern_index AS ModernIndex
+            FROM pokedex.items
+            ORDER BY id;
             """;
 
         await using SqlMapper.GridReader results = await connection.QueryMultipleAsync(sql);
@@ -43,6 +47,7 @@ internal sealed class GetGen3DataQueryHandler(IDbConnectionFactory dbConnectionF
         var growthRates = (await results.ReadAsync<GrowthRateRow>()).ToDictionary(r => r.Name, r => r.ExperienceByLevel);
         ILookup<int, LevelUpMoveRow> learnsets = (await results.ReadAsync<LevelUpMoveRow>()).ToLookup(m => m.SpeciesId);
         var moves = (await results.ReadAsync<Gen3MoveResponse>()).ToList();
+        var items = (await results.ReadAsync<ItemResponse>()).ToList();
 
         return new Gen3DataResponse(
             species
@@ -54,7 +59,8 @@ internal sealed class GetGen3DataQueryHandler(IDbConnectionFactory dbConnectionF
                     learnsets[s.SpeciesId].Select(m => new Gen3LevelUpMoveResponse(m.Level, m.MoveId)).ToList()))
                 .ToList(),
             growthRates,
-            moves);
+            moves,
+            items);
     }
 
     private sealed record SpeciesRow(int Gen3Index, int SpeciesId, string Name, string? GrowthRate);

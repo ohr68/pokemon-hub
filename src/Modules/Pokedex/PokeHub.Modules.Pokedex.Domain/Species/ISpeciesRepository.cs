@@ -28,6 +28,12 @@ public interface ISpeciesRepository
 
     void Insert(Move move);
 
+    Task<IReadOnlyList<Item>> GetItemsAsync(CancellationToken cancellationToken = default);
+
+    Task<bool> AnyItemsAsync(CancellationToken cancellationToken = default);
+
+    void Insert(Item item);
+
     Task<bool> AnyGameDexEntriesAsync(CancellationToken cancellationToken = default);
 
     Task<IReadOnlyCollection<int>> GetIdsAsync(CancellationToken cancellationToken = default);

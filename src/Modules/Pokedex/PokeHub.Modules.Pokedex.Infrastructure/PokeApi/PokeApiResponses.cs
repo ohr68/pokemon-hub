@@ -90,6 +90,15 @@ internal sealed record MoveResponse(
     [property: JsonPropertyName("name")] string Name,
     [property: JsonPropertyName("pp")] int? Pp);
 
+internal sealed record ItemResponse(
+    [property: JsonPropertyName("id")] int Id,
+    [property: JsonPropertyName("name")] string Name,
+    [property: JsonPropertyName("game_indices")] IReadOnlyList<ItemGameIndex> GameIndices);
+
+internal sealed record ItemGameIndex(
+    [property: JsonPropertyName("game_index")] int Index,
+    [property: JsonPropertyName("generation")] NamedResource Generation);
+
 internal sealed record GameIndex(
     [property: JsonPropertyName("game_index")] int Index,
     [property: JsonPropertyName("version")] NamedResource Version);

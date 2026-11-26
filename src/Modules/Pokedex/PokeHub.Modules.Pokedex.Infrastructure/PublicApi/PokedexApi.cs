@@ -212,6 +212,7 @@ internal sealed class PokedexApi(ISender sender, ISpeciesRepository speciesRepos
         data.Nature,
         data.AbilitySlot,
         data.HeldItemId,
+        data.HeldItemNumbering,
         data.Friendship,
         [.. data.Moves.Select(m => new BattleMove(m.Id, m.Pp, m.PpUps))],
         data.Ivs,
