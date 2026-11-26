@@ -20,6 +20,7 @@
 | 15. Gen 6 save loader: X and Y saves, read | 15a and 15b done; X and Y trophies (15c) next |
 | 16. 3DS sync app: a homebrew app that sends the console's saves to PokeHub | Done for Sun, Moon, X and Y; the sync waits for the game's page to open |
 | 17. 3DS app look: a graphical PokeHub Sync, with a QR code to sign in | Done: game cards with icons, QR sign-in, per-game status, Send all, background sends that B cancels |
+| 18. 3DS hub: the GBA games on the console, moving Pokémon and the shop from the 3DS app | Scoped, not started |
 
 More ideas, not yet in a phase, are in the [backlog](#backlog).
 
@@ -641,6 +642,68 @@ Rules:
 - Still read-only on the console: the app never writes a save.
 - Nothing from Nintendo in the repository: icons come from the games on the console.
 - No token, save or key committed, in either repository.
+
+## 18. 3DS hub
+
+PokeHub Sync only sends saves today. This phase makes the console a full place to play: the
+GBA games installed on it (FireRed, Ruby, Sapphire and Emerald, as Virtual Console CIAs) sync
+like the 3DS games, Pokémon move between the console's saves and the hub, and the shop works
+from the 3DS.
+
+Decisions:
+
+- **The latest save wins** for a game played both in the browser and on the console. PokeHub
+  keeps the current save per game with when it was made; each side picks up a newer one before
+  playing, like a cloud save, and the older ones stay as backups.
+- **Save editing lives on PokeHub.** The app sends the save; PokeHub reads it, applies what's
+  waiting for that game (Pokémon, shop items) and returns the new save with a list of what
+  changed. The app backs the old save up to the SD card, writes the new one and reads it back.
+  This also lets a save sync without the game's page open. The Gen 3, 6 and 7 readers are
+  ported to C#, checked against the browser's on the same saves.
+- **The shop on the 3DS browses and buys.** The wallet and the shop's Pokémon and items, with
+  pictures; Pokémon go to the hub, and items go into the chosen game's bag on its next send.
+
+The risk: **Virtual Console saves.** While a GBA VC game runs, its save sits in a NAND partition
+(AGBSAVE) behind a 512-byte header with a CMAC made with the console's keys. Checkpoint and PKSM
+read and write these saves on a console with custom firmware, so it can be done, but how they
+do it (and how the CMAC is remade after a write) has to be confirmed first. Both are GPL: they
+are studied, not copied.
+
+Steps:
+
+- **18a. GBA VC spike, read-only:** find where the app can read FireRed's VC save on the
+  console, strip the header, and send it as FireRed's save. It must parse the same as the
+  browser's copy. Then try a write on a scratch save (a new game, not a real one) and check the
+  game still loads it. The outcome decides whether 18d covers GBA games.
+- **18b. Latest save wins:** PokeHub marks each game's current save (made where and when). The
+  Jogar page loads a newer one from the console before the game starts, and the app offers to
+  bring a newer browser save onto the console. If both changed since the last shared save, both
+  are kept and the player picks.
+- **18c. Save editing on PokeHub:** C# readers and writers for Gen 3 (boxes, bag, the three
+  layouts), Gen 6 (boxes, CRC-16) and Gen 7 (boxes, checksums and the save's signature). An
+  endpoint takes a save and returns the edited save, recording each transfer before it's
+  handed out, as the browser's safe transfers do. Tests build saves in code.
+- **18d. Writing on the console:** the app backs the save up to
+  `/3ds/pokehub-sync/backups/<game>/`, writes PokeHub's save, reads it back and compares. X and
+  Y first (plain checksums), then Sun to Ultra Moon, then the GBA games if 18a allows. A write
+  that fails to verify puts the backup back.
+- **18e. Moving Pokémon:** Pokémon waiting for a game arrive on its next send. On the console,
+  a box screen shows the save's Pokémon (read by PokeHub) to pick ones to send to the hub. Gen 3
+  Pokémon can go to Gen 6 and 7 games, converted the way Poké Transporter does. A Gen 6 or 7
+  Pokémon goes to a Gen 3 game only if it came from one, and returns exactly as it left. A
+  Pokémon a game can't hold (species, move, ability, item) is refused with the reason.
+- **18f. Shop on the 3DS:** a Shop screen with the wallet, the Pokémon and items with their
+  pictures (sent by PokeHub ready to draw, cached on the SD card), and a purchase after a
+  confirmation. Items ask which game gets them. Shop calls are made as the trainer, not as a
+  game, so the app needs its own sign-in for them.
+
+Rules:
+
+- The app may now write saves, but only after a backup on the SD card and on PokeHub, and only
+  what PokeHub returned for that game.
+- No real save is written until a scratch save has gone through the same write, and the first
+  write to each real save gets a yes first.
+- Nothing from Nintendo in either repository; no save, token or key committed.
 
 ## Backlog
 
