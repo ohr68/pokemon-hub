@@ -25,6 +25,9 @@
     <Project Path="src/Modules/Games/PokeHub.Modules.Games.Presentation/PokeHub.Modules.Games.Presentation.csproj" />
     <Project Path="src/Modules/Games/PokeHub.Modules.Games.PublicApi/PokeHub.Modules.Games.PublicApi.csproj" />
   </Folder>
+  <Folder Name="/src/Modules/Games/test/">
+    <Project Path="src/Modules/Games/test/PokeHub.Modules.Games.UnitTests/PokeHub.Modules.Games.UnitTests.csproj" />
+  </Folder>
   <Folder Name="/src/Modules/Pokedex/">
     <Project Path="src/Modules/Pokedex/PokeHub.Modules.Pokedex.Application/PokeHub.Modules.Pokedex.Application.csproj" />
     <Project Path="src/Modules/Pokedex/PokeHub.Modules.Pokedex.Domain/PokeHub.Modules.Pokedex.Domain.csproj" />

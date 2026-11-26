@@ -5,6 +5,7 @@ using PokeHub.Modules.Games.Application.Abstractions.Data;
 using PokeHub.Modules.Games.Application.Abstractions.Identity;
 using PokeHub.Modules.Games.Domain.Games;
 using PokeHub.Modules.Games.Domain.GameFiles;
+using PokeHub.Modules.Games.Domain.SaveEdits;
 using PokeHub.Modules.Games.Domain.SaveFiles;
 using PokeHub.Modules.Games.Domain.Stats;
 using PokeHub.Modules.Games.Domain.Webhooks;
@@ -13,6 +14,7 @@ using PokeHub.Modules.Games.Infrastructure.Webhooks;
 using PokeHub.Modules.Games.Infrastructure.Database;
 using PokeHub.Modules.Games.Infrastructure.Games;
 using PokeHub.Modules.Games.Infrastructure.Identity;
+using PokeHub.Modules.Games.Infrastructure.SaveEdits;
 using PokeHub.Modules.Games.Infrastructure.SaveFiles;
 using PokeHub.Modules.Games.Infrastructure.Stats;
 using PokeHub.Modules.Games.PublicApi;
@@ -73,6 +75,8 @@ public static class GamesModule
             services.AddScoped<IGameSpeciesLimits, GameSpeciesLimits>();
 
             services.AddScoped<ISaveFileRepository, SaveFileRepository>();
+
+            services.AddScoped<ISaveEditRepository, SaveEditRepository>();
 
             services.AddScoped<IPlayerGameStatsRepository, PlayerGameStatsRepository>();
 

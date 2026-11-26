@@ -155,4 +155,7 @@ public interface IPokedexApi
 
     /// <summary>A species in the catalog, or null when there is none with that number.</summary>
     Task<SpeciesInfo?> GetSpeciesAsync(int speciesId, CancellationToken cancellationToken = default);
+
+    /// <summary>The species, growth rates, learnsets and moves a Gen 3 save needs.</summary>
+    Task<Gen3Catalog> GetGen3CatalogAsync(CancellationToken cancellationToken = default);
 }

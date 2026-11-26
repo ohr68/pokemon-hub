@@ -18,6 +18,7 @@ using PokeHub.Modules.Pokedex.Application.Saves.ReconcileSave;
 using PokeHub.Modules.Pokedex.Application.Saves.RedeliverPokemon;
 using PokeHub.Modules.Pokedex.Application.Saves.UpdateBattleData;
 using PokeHub.Modules.Pokedex.Application.Saves.WithdrawPokemon;
+using PokeHub.Modules.Pokedex.Application.Species.GetGen3Data;
 using PokeHub.Modules.Pokedex.Application.Pokemon.TradePokemon;
 using PokeHub.Modules.Pokedex.Application.Trainers.GetTrainer;
 using PokeHub.Modules.Pokedex.Domain.Pokemon;
@@ -343,5 +344,29 @@ internal sealed class PokedexApi(ISender sender, ISpeciesRepository speciesRepos
         PokemonSpecies? species = await speciesRepository.GetAsync(speciesId, cancellationToken);
 
         return species is null ? null : new SpeciesInfo(species.Id, species.Name, species.IsRare);
+    }
+
+    public async Task<Gen3Catalog> GetGen3CatalogAsync(CancellationToken cancellationToken = default)
+    {
+        Result<Gen3DataResponse> result = await sender.Send(new GetGen3DataQuery(), cancellationToken);
+
+        if (result.IsFailure)
+        {
+            throw new PokeHubException(nameof(GetGen3DataQuery), result.Error);
+        }
+
+        Gen3DataResponse data = result.Value;
+
+        return new Gen3Catalog(
+            data.Species
+                .Select(s => new Gen3SpeciesInfo(
+                    s.Gen3Index,
+                    s.SpeciesId,
+                    s.Name,
+                    s.GrowthRate,
+                    s.LevelUpMoves.Select(m => new Gen3LevelUpMove(m.Level, m.MoveId)).ToList()))
+                .ToList(),
+            data.GrowthRates,
+            data.Moves.ToDictionary(m => m.Id, m => m.Pp));
     }
 }

@@ -20,7 +20,7 @@
 | 15. Gen 6 save loader: X and Y saves, read | 15a and 15b done; X and Y trophies (15c) next |
 | 16. 3DS sync app: a homebrew app that sends the console's saves to PokeHub | Done for Sun, Moon, X and Y; the sync waits for the game's page to open |
 | 17. 3DS app look: a graphical PokeHub Sync, with a QR code to sign in | Done: game cards with icons, QR sign-in, per-game status, Send all, background sends that B cancels |
-| 18. 3DS hub: the GBA games on the console, moving Pokémon and the shop from the 3DS app | 18a and 18b done; save editing on PokeHub (18c) next |
+| 18. 3DS hub: the GBA games on the console, moving Pokémon and the shop from the 3DS app | 18a to 18c done (Gen 3); writing on the console (18d) next |
 
 More ideas, not yet in a phase, are in the [backlog](#backlog).
 
@@ -691,14 +691,22 @@ Steps:
   one from the console before the game starts, and the app offers to bring a newer browser save
   onto the console, the current save always backed up first. If both changed since the last
   shared save, both are kept and the player picks.
-- **18c. Save editing on PokeHub:** C# readers and writers for Gen 3 (boxes, bag, the three
-  layouts), Gen 6 (boxes, CRC-16) and Gen 7 (boxes, checksums and the save's signature). An
-  endpoint takes a save and returns the edited save, recording each transfer before it's
-  handed out, as the browser's safe transfers do. Tests build saves in code.
-- **18d. Writing on the console:** the app backs the save up to
-  `/3ds/pokehub-sync/backups/<game>/`, writes PokeHub's save, reads it back and compares. X and
-  Y first (plain checksums), then Sun to Ultra Moon, then the GBA games if 18a allows. A write
-  that fails to verify puts the backup back.
+Gen 3 goes all the way to the console first (18c to 18e for Twin Embers and Emerald 3DS, whose
+saves are plain files on the SD card); Gen 6 and 7 follow the same path afterwards.
+
+- **18c. Save editing on PokeHub, Gen 3** (done): C# reading and writing of Gen 3 saves
+  (boxes and bag, the three layouts) in the Games module's domain, checked byte for byte against
+  the browser's code on both ports' saves, with unit tests on saves built in code.
+  `POST api/game/save/edits` takes a save as the game: it backs it up, puts back to waiting the
+  Pokémon of an earlier edit that never reached the game (a journal, `games.save_edits`), writes
+  the Pokémon waiting for the game into free PC slots, records them as delivered, backs up the
+  edited save and returns it with where each one went; checked with a shiny Pikachu sent to
+  Twin Embers, read back by the browser's reader as expected. Shop items wait for 18f. Gen 6 (boxes,
+  CRC-16) and Gen 7 (boxes, checksums and the save's signature) come after the Gen 3 path works.
+- **18d. Writing on the console:** the app sends the save to the edit endpoint instead of
+  uploading it, backs the save up to `/3ds/pokehub-sync/backups/<game>/`, writes PokeHub's
+  save, reads it back and compares. The GBA ports first (a file on the SD card), then X and Y
+  (plain checksums), then Sun to Ultra Moon. A write that fails to verify puts the backup back.
 - **18e. Moving Pokémon:** Pokémon waiting for a game arrive on its next send. On the console,
   a box screen shows the save's Pokémon (read by PokeHub) to pick ones to send to the hub. Gen 3
   Pokémon can go to Gen 6 and 7 games, converted the way Poké Transporter does. A Gen 6 or 7

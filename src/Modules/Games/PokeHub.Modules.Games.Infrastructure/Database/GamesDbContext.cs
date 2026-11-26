@@ -4,12 +4,14 @@ using PokeHub.Common.Infrastructure.Outbox;
 using PokeHub.Modules.Games.Application.Abstractions.Data;
 using PokeHub.Modules.Games.Domain.Games;
 using PokeHub.Modules.Games.Domain.GameFiles;
+using PokeHub.Modules.Games.Domain.SaveEdits;
 using PokeHub.Modules.Games.Domain.SaveFiles;
 using PokeHub.Modules.Games.Domain.Stats;
 using PokeHub.Modules.Games.Domain.Webhooks;
 using PokeHub.Modules.Games.Infrastructure.GameFiles;
 using PokeHub.Modules.Games.Infrastructure.Webhooks;
 using PokeHub.Modules.Games.Infrastructure.Games;
+using PokeHub.Modules.Games.Infrastructure.SaveEdits;
 using PokeHub.Modules.Games.Infrastructure.SaveFiles;
 using PokeHub.Modules.Games.Infrastructure.Stats;
 
@@ -20,6 +22,8 @@ public sealed class GamesDbContext(DbContextOptions<GamesDbContext> options) : D
     internal DbSet<Game> Games { get; set; }
 
     internal DbSet<SaveFile> SaveFiles { get; set; }
+
+    internal DbSet<SaveEdit> SaveEdits { get; set; }
 
     internal DbSet<GameFile> GameFiles { get; set; }
 
@@ -37,6 +41,7 @@ public sealed class GamesDbContext(DbContextOptions<GamesDbContext> options) : D
         modelBuilder.ApplyConfiguration(new InboxMessageConsumerConfiguration());
         modelBuilder.ApplyConfiguration(new GameConfiguration());
         modelBuilder.ApplyConfiguration(new SaveFileConfiguration());
+        modelBuilder.ApplyConfiguration(new SaveEditConfiguration());
         modelBuilder.ApplyConfiguration(new GameFileConfiguration());
         modelBuilder.ApplyConfiguration(new WebhookDeliveryConfiguration());
         modelBuilder.ApplyConfiguration(new PlayerGameStatsConfiguration());
