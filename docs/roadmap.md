@@ -671,10 +671,15 @@ are studied, not copied.
 
 Steps:
 
-- **18a. GBA VC spike, read-only:** find where the app can read FireRed's VC save on the
-  console, strip the header, and send it as FireRed's save. It must parse the same as the
-  browser's copy. Then try a write on a scratch save (a new game, not a real one) and check the
-  game still loads it. The outcome decides whether 18d covers GBA games.
+- **18a. GBA saves on the console, read-only** (done): the GBA games on the console turned out
+  not to be VC titles. FireRed is Twin Embers and Emerald is Emerald 3DS, native 3DS ports that
+  keep the unchanged 128 KB GBA save as a file on the SD card
+  (`/3ds/twinembers/twinembers.sav`, `/3ds/emerald3ds/emerald3ds.sav`). The app lists them by
+  title id, reads those files and sends them as FireRed's and Emerald's backups; both decode
+  exactly as on the card. Writing them is a plain file write, so the CMAC risk only applies to
+  VC titles: the app can already find and read those (by banner name, through PxiFS0), but none
+  is installed to test with. Ruby, Sapphire and LeafGreen aren't on the console yet. Twin
+  Embers and the browser's FireRed are different playthroughs, which 18b has to settle.
 - **18b. Latest save wins:** PokeHub marks each game's current save (made where and when). The
   Jogar page loads a newer one from the console before the game starts, and the app offers to
   bring a newer browser save onto the console. If both changed since the last shared save, both
