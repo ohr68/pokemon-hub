@@ -21,6 +21,7 @@
 | 16. 3DS sync app: a homebrew app that sends the console's saves to PokeHub | Done for Sun, Moon, X and Y; the sync waits for the game's page to open |
 | 17. 3DS app look: a graphical PokeHub Sync, with a QR code to sign in | Done: game cards with icons, QR sign-in, per-game status, Send all, background sends that B cancels |
 | 18. 3DS hub: the GBA games on the console, moving Pokémon and the shop from the 3DS app | Done for the GBA ports (Twin Embers, Emerald 3DS); Gen 6 and 7 editing next |
+| 19. 3DS app UI/UX: clear navigation, seeing what a send does, pictures everywhere, polish | Scoped, not started |
 
 More ideas, not yet in a phase, are in the [backlog](#backlog).
 
@@ -737,6 +738,51 @@ Rules:
 - No real save is written until a scratch save has gone through the same write, and the first
   write to each real save gets a yes first.
 - Nothing from Nintendo in either repository; no save, token or key committed.
+
+## 19. 3DS app UI/UX
+
+PokeHub Sync does everything Phase 18 asked, but it's hard to discover and to read. From
+screenshots of the console:
+
+- **Hidden actions:** the shop is SELECT and To hub is R, each only hinted in one place; the
+  home screen's four red buttons all look equally important, and only the bottom buttons react
+  to touch (not the cards, box cells or shop cards).
+- **Blind sends:** nothing says what's waiting for a game before Send writes it in, and results
+  are a paragraph of text.
+- **Empty bottom screen:** a generic sentence, the server's address, and a lot of space; in the
+  shop, the chosen offer isn't described at all, only "Not enough coins".
+- **Cramped shop cards:** level, "shiny" and the price overlap (RAPIDASH "Lv 5 shiny150 coins");
+  Pokémon and items are mixed; errors show in green like successes.
+- **Words where pictures would do:** the box screen shows names only; results name the Pokémon
+  without showing them.
+
+Steps:
+
+- **19a. Navigation:** tabs on the top screen's header for Games, Boxes and Shop, switched with
+  SELECT or by touching them on the bottom screen; Boxes and Shop act on the selected game.
+  Everything reacts to touch (cards, box cells, offers). One hint bar at the bottom of the
+  bottom screen, with the console's own button glyphs (Ⓐ, Ⓑ, ✚) for what each key does on
+  that screen; the server address moves to a small info line.
+- **19b. Game panel and what's waiting:** the bottom screen shows the chosen game: its icon,
+  last send, sign-in, and what PokeHub has waiting for it ("2 Pokémon, 1 item"), from a small
+  new endpoint the app asks when a signed-in game is chosen. Send's label says what it'll do.
+- **19c. Result screen:** after a send or a move, a summary with a row per change: arrived
+  (sprite, name, box and slot), left for the hub, into the bag; failures in red with what to do,
+  successes in green.
+- **19d. Pictures everywhere:** sprites in the box screen's cells and on the chosen Pokémon,
+  using the species the box list already returns; the shop's chosen offer large on the bottom
+  screen with its name, level, shiny, price, stock and where it goes.
+- **19e. Shop layout:** sections for Pokémon and items, price on its own line, unaffordable or
+  sold-out offers dimmed, errors in red.
+- **19f. Polish:** short slide and fade between screens, a highlight that follows the cursor,
+  simple sounds made in code (no audio files), and a faster start (titles scanned once and
+  cached on the SD card).
+
+Rules:
+
+- Nothing from Nintendo in the repository: sprites come from PokeHub, button glyphs from the
+  console's own font, sounds are generated.
+- Every step is checked on the console with Luma screenshots.
 
 ## Backlog
 
