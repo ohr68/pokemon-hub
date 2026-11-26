@@ -14,7 +14,7 @@
       "ConfidentialClientId": "pokehub-confidential-client",
       "ConfidentialClientSecret": "PzotcrvZRF9BHCKcUxdKfHWlIPECG49k",
       "OpenIdConnectUrl": "http://pokehub.identity:8080/realms/pokehub/protocol/openid-connect/",
-      "PublicUrl": "http://localhost:18080"
+      "PublicUrl": "http://192.168.0.100:18080"
     }
   }
 }
