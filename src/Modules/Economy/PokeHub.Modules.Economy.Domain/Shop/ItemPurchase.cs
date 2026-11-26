@@ -56,4 +56,10 @@ public sealed class ItemPurchase : Entity
     {
         DeliveredOnUtc ??= utcNow;
     }
+
+    /// <summary>The save it was written into never reached the game: it waits again.</summary>
+    public void Returned()
+    {
+        DeliveredOnUtc = null;
+    }
 }

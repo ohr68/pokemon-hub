@@ -21,15 +21,24 @@ public sealed record EditSaveCommand(
 
 /// <param name="Content">The save to write into the game; the same bytes when nothing changed.</param>
 /// <param name="Changed">False when there was nothing to put in, so the device can skip writing.</param>
+/// <param name="EditId">The edit, to report with save/edits/{id}/unwritten if the device can't write it; null when nothing changed.</param>
 /// <param name="Withdrawn">Pokémon taken out of the save; they're in the hub now.</param>
+/// <param name="Items">Shop items put into the bag.</param>
+/// <param name="ItemsLeft">Shop items that didn't fit; they keep waiting.</param>
 /// <param name="Settled">Pokémon of an earlier edit the game never got, put back where its save says they are.</param>
 public sealed record EditedSaveResponse(
+    Guid? EditId,
     byte[] Content,
     bool Changed,
     IReadOnlyCollection<DeliveredToSaveResponse> Delivered,
     IReadOnlyCollection<NotDeliveredResponse> NotDelivered,
     IReadOnlyCollection<WithdrawnFromSaveResponse> Withdrawn,
+    IReadOnlyCollection<ItemToSaveResponse> Items,
+    IReadOnlyCollection<ItemToSaveResponse> ItemsLeft,
     int Settled);
+
+/// <param name="Reason">Why it stayed out, for one that didn't fit.</param>
+public sealed record ItemToSaveResponse(Guid PurchaseId, string Name, int Quantity, string? Reason = null);
 
 public sealed record WithdrawnFromSaveResponse(Guid PokemonId, string Name);
 

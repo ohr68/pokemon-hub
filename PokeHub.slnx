@@ -16,6 +16,7 @@
     <Project Path="src/Modules/Economy/PokeHub.Modules.Economy.Infrastructure/PokeHub.Modules.Economy.Infrastructure.csproj" />
     <Project Path="src/Modules/Economy/PokeHub.Modules.Economy.IntegrationEvents/PokeHub.Modules.Economy.IntegrationEvents.csproj" />
     <Project Path="src/Modules/Economy/PokeHub.Modules.Economy.Presentation/PokeHub.Modules.Economy.Presentation.csproj" />
+    <Project Path="src/Modules/Economy/PokeHub.Modules.Economy.PublicApi/PokeHub.Modules.Economy.PublicApi.csproj" />
   </Folder>
   <Folder Name="/src/Modules/Games/">
     <Project Path="src/Modules/Games/PokeHub.Modules.Games.Application/PokeHub.Modules.Games.Application.csproj" />

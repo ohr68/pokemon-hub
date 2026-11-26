@@ -22,6 +22,8 @@ internal sealed class SaveEditConfiguration : IEntityTypeConfiguration<SaveEdit>
 
         builder.Property(s => s.WithdrawnCatchKeys);
 
+        builder.Property(s => s.DeliveredItemIds);
+
         builder.HasOne<Game>().WithMany().HasForeignKey(s => s.GameId).OnDelete(DeleteBehavior.Restrict);
 
         // The trainer lives in the Pokédex module, so there is no foreign key to it.

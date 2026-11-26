@@ -14,6 +14,11 @@ internal sealed class SaveEditRepository(GamesDbContext context) : ISaveEditRepo
             .ToListAsync(cancellationToken);
     }
 
+    public Task<SaveEdit?> GetAsync(Guid id, Guid trainerId, CancellationToken cancellationToken = default)
+    {
+        return context.SaveEdits.FirstOrDefaultAsync(s => s.Id == id && s.TrainerId == trainerId, cancellationToken);
+    }
+
     public void Insert(SaveEdit saveEdit)
     {
         context.SaveEdits.Add(saveEdit);

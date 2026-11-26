@@ -13,6 +13,14 @@ public static class SaveEditErrors
         return Error.Problem("SaveEdits.Unreadable", reason);
     }
 
+    public static readonly Error NotFound = Error.NotFound(
+        "SaveEdits.NotFound",
+        "There's no such edit of your save in this game.");
+
+    public static readonly Error AlreadySettled = Error.Conflict(
+        "SaveEdits.AlreadySettled",
+        "This edit was already settled by a later save.");
+
     public static readonly Error NotInBoxes = Error.Conflict(
         "SaveEdits.NotInBoxes",
         "A chosen Pokémon is no longer in the PC boxes. Read the boxes again.");

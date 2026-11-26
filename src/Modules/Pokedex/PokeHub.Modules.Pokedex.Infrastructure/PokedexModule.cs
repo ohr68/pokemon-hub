@@ -20,6 +20,8 @@ using PokeHub.Modules.Pokedex.Infrastructure.SpeciesSync;
 using PokeHub.Modules.Pokedex.Infrastructure.Trainers;
 using PokeHub.Modules.Pokedex.Presentation;
 using PokeHub.Modules.Pokedex.PublicApi;
+using PokeHub.Modules.Pokedex.Application.Sprites;
+using PokeHub.Modules.Pokedex.Infrastructure.Sprites;
 using PokeHub.Modules.Pokedex.Infrastructure.PublicApi;
 using PokeHub.Modules.Users.IntegrationEvents;
 using Microsoft.EntityFrameworkCore;
@@ -82,6 +84,8 @@ public static class PokedexModule
 
                 httpClient.BaseAddress = pokeApiOptions.BaseUrl;
             });
+
+            services.AddHttpClient<ISpriteSource, SpriteSource>(httpClient => httpClient.BaseAddress = SpriteSource.BaseAddress);
 
             services.Configure<SpeciesSyncOptions>(configuration.GetSection("Pokedex:SpeciesSync"));
 

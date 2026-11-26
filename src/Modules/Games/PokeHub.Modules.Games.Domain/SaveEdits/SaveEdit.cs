@@ -31,6 +31,9 @@ public sealed class SaveEdit : Entity
     // Pokémon taken out of the save for the hub.
     public List<string> WithdrawnCatchKeys { get; private set; } = [];
 
+    // Shop items put into the bag (their purchases).
+    public List<Guid> DeliveredItemIds { get; private set; } = [];
+
     public DateTime? SettledOnUtc { get; private set; }
 
     public static SaveEdit Create(
@@ -38,10 +41,12 @@ public sealed class SaveEdit : Entity
         Guid gameId,
         IReadOnlyList<(Guid PokemonId, string CatchKey)> deliveries,
         IReadOnlyList<string> withdrawnCatchKeys,
+        IReadOnlyList<Guid> deliveredItemIds,
         DateTime createdOnUtc)
     {
         ArgumentNullException.ThrowIfNull(deliveries);
         ArgumentNullException.ThrowIfNull(withdrawnCatchKeys);
+        ArgumentNullException.ThrowIfNull(deliveredItemIds);
 
         return new SaveEdit
         {
@@ -52,6 +57,7 @@ public sealed class SaveEdit : Entity
             DeliveredPokemonIds = [.. deliveries.Select(d => d.PokemonId)],
             DeliveredCatchKeys = [.. deliveries.Select(d => d.CatchKey)],
             WithdrawnCatchKeys = [.. withdrawnCatchKeys],
+            DeliveredItemIds = [.. deliveredItemIds],
         };
     }
 

@@ -7,6 +7,7 @@ using PokeHub.Modules.Games.Domain.Games;
 using PokeHub.Modules.Games.Domain.SaveEdits;
 using PokeHub.Modules.Games.Domain.SaveFiles;
 using PokeHub.Modules.Games.Domain.SaveFormats.Gen3;
+using PokeHub.Modules.Economy.PublicApi;
 using PokeHub.Modules.Pokedex.PublicApi;
 
 namespace PokeHub.Modules.Games.Application.SaveEdits.EditSave;
@@ -20,6 +21,7 @@ internal sealed class EditSaveCommandHandler(
     ISaveFileRepository saveFileRepository,
     ISaveEditRepository saveEditRepository,
     IPokedexApi pokedexApi,
+    IEconomyApi economyApi,
     IDateTimeProvider dateTimeProvider,
     IUnitOfWork unitOfWork)
     : ICommandHandler<EditSaveCommand, EditedSaveResponse>
@@ -89,19 +91,33 @@ internal sealed class EditSaveCommandHandler(
             }
         }
 
-        if (deliveries.Count == 0 && withdrawn.Value.Count == 0)
+        (List<ItemToSaveResponse> items, List<ItemToSaveResponse> itemsLeft) =
+            await AddItemsAsync(request.TrainerId, game.Id, save, cancellationToken);
+        if (items.Count > 0)
+        {
+            // Like the Pokémon, recorded as handed out; save/edits/{id}/unwritten returns them.
+            Result marked = await economyApi.MarkItemsDeliveredAsync(request.TrainerId, [.. items.Select(i => i.PurchaseId)], cancellationToken);
+            if (marked.IsFailure)
+            {
+                return Result.Failure<EditedSaveResponse>(marked.Error);
+            }
+        }
+
+        if (deliveries.Count == 0 && withdrawn.Value.Count == 0 && items.Count == 0)
         {
             await SaveAsync(request.TrainerId, game.Id, cancellationToken);
-            return new EditedSaveResponse(request.Content, false, [], notDelivered, [], settled.Value);
+            return new EditedSaveResponse(null, request.Content, false, [], notDelivered, [], [], itemsLeft, settled.Value);
         }
 
         byte[] edited = save.ToArray();
-        saveEditRepository.Insert(SaveEdit.Create(
+        var edit = SaveEdit.Create(
             request.TrainerId,
             game.Id,
             deliveries,
             [.. request.Withdraw ?? []],
-            dateTimeProvider.UtcNow));
+            [.. items.Select(i => i.PurchaseId)],
+            dateTimeProvider.UtcNow);
+        saveEditRepository.Insert(edit);
 
         // The edited save is the latest backup, so the game's page syncs it rather than the one
         // before the edit (which would read as delivered Pokémon having left the game).
@@ -109,6 +125,7 @@ internal sealed class EditSaveCommandHandler(
         await SaveAsync(request.TrainerId, game.Id, cancellationToken);
 
         return new EditedSaveResponse(
+            edit.Id,
             edited,
             true,
             [.. delivered.Select(d =>
@@ -118,7 +135,55 @@ internal sealed class EditSaveCommandHandler(
             })],
             notDelivered,
             withdrawn.Value,
+            items,
+            itemsLeft,
             settled.Value);
+    }
+
+    // Like pokemon-web's addItemsToBag: onto the item's stack, or into the first empty slot of
+    // its pocket. One that doesn't fit keeps waiting, and the rest still go in.
+    private async Task<(List<ItemToSaveResponse>, List<ItemToSaveResponse>)> AddItemsAsync(
+        Guid trainerId,
+        Guid gameId,
+        Gen3Save save,
+        CancellationToken cancellationToken)
+    {
+        IReadOnlyCollection<AwaitingItem> awaiting = await economyApi.GetAwaitingItemsAsync(trainerId, gameId, cancellationToken);
+        var added = new List<ItemToSaveResponse>();
+        var left = new List<ItemToSaveResponse>();
+
+        foreach (AwaitingItem item in awaiting)
+        {
+            Gen3Pocket? pocket = item.Pocket switch
+            {
+                "items" => Gen3Pocket.Items,
+                "balls" => Gen3Pocket.Balls,
+                _ => null,
+            };
+
+            Gen3BagRefusal refusal = pocket is null
+                ? Gen3BagRefusal.PocketFull
+                : save.AddItem(new Gen3BagItem(item.ItemId, pocket.Value, item.Quantity));
+
+            if (pocket is null)
+            {
+                left.Add(new ItemToSaveResponse(item.PurchaseId, item.ItemName, item.Quantity, "It can't go into the bag."));
+            }
+            else if (refusal == Gen3BagRefusal.None)
+            {
+                added.Add(new ItemToSaveResponse(item.PurchaseId, item.ItemName, item.Quantity));
+            }
+            else
+            {
+                left.Add(new ItemToSaveResponse(
+                    item.PurchaseId,
+                    item.ItemName,
+                    item.Quantity,
+                    refusal == Gen3BagRefusal.StackFull ? $"It would go over {Gen3Save.MaxStack} in the bag." : "That bag pocket is full."));
+            }
+        }
+
+        return (added, left);
     }
 
     // An earlier edit the game never got shows in this save: delivered Pokémon missing from it

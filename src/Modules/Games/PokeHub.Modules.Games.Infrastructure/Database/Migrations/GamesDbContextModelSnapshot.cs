@@ -283,6 +283,11 @@ namespace PokeHub.Modules.Games.Infrastructure.Database.Migrations
                         .HasColumnType("text[]")
                         .HasColumnName("delivered_catch_keys");
 
+                    b.PrimitiveCollection<List<Guid>>("DeliveredItemIds")
+                        .IsRequired()
+                        .HasColumnType("uuid[]")
+                        .HasColumnName("delivered_item_ids");
+
                     b.PrimitiveCollection<List<Guid>>("DeliveredPokemonIds")
                         .IsRequired()
                         .HasColumnType("uuid[]")

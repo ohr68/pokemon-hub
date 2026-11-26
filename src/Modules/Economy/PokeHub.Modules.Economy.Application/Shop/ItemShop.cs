@@ -26,6 +26,9 @@ public sealed record ItemPurchaseResultResponse(Guid PurchaseId, long Balance);
 /// <summary>A game wrote these purchases into its save. Repeating it changes nothing.</summary>
 public sealed record MarkItemsDeliveredCommand(Guid TrainerId, IReadOnlyCollection<Guid> PurchaseIds) : ICommand;
 
+/// <summary>Items recorded as delivered whose save never reached the game wait for it again.</summary>
+public sealed record ReturnItemsCommand(Guid TrainerId, IReadOnlyCollection<Guid> PurchaseIds) : ICommand;
+
 /// <param name="All">Admins see every offer, inactive and sold out ones too.</param>
 public sealed record GetItemOffersQuery(bool All) : IQuery<IReadOnlyCollection<ItemOfferResponse>>;
 
@@ -202,6 +205,30 @@ internal sealed class MarkItemsDeliveredCommandHandler(
         foreach (ItemPurchase purchase in purchases)
         {
             purchase.Delivered(utcNow);
+        }
+
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
+    }
+}
+
+internal sealed class ReturnItemsCommandHandler(IShopRepository shopRepository, IUnitOfWork unitOfWork)
+    : ICommandHandler<ReturnItemsCommand>
+{
+    public async Task<Result> Handle(ReturnItemsCommand request, CancellationToken cancellationToken)
+    {
+        Guid[] ids = [.. request.PurchaseIds.Distinct()];
+        IReadOnlyList<ItemPurchase> purchases = await shopRepository.GetItemPurchasesAsync(request.TrainerId, ids, cancellationToken);
+
+        if (purchases.Count != ids.Length)
+        {
+            return Result.Failure(ShopErrors.ItemPurchaseNotFound);
+        }
+
+        foreach (ItemPurchase purchase in purchases)
+        {
+            purchase.Returned();
         }
 
         await unitOfWork.SaveChangesAsync(cancellationToken);

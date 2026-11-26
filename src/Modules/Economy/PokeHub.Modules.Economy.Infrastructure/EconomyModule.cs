@@ -19,6 +19,9 @@ using PokeHub.Modules.Economy.Infrastructure.Wallets;
 using PokeHub.Modules.Pokedex.IntegrationEvents;
 using PokeHub.Modules.Progression.IntegrationEvents;
 
+using PokeHub.Modules.Economy.Infrastructure.PublicApi;
+using PokeHub.Modules.Economy.PublicApi;
+
 namespace PokeHub.Modules.Economy.Infrastructure;
 
 public static class EconomyModule
@@ -65,6 +68,8 @@ public static class EconomyModule
             services.AddScoped<IWalletRepository, WalletRepository>();
 
             services.AddScoped<IShopRepository, ShopRepository>();
+
+            services.AddScoped<IEconomyApi, EconomyApi>();
         }
 
         private void AddDomainEventHandlers()

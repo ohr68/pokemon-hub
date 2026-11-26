@@ -20,7 +20,7 @@
 | 15. Gen 6 save loader: X and Y saves, read | 15a and 15b done; X and Y trophies (15c) next |
 | 16. 3DS sync app: a homebrew app that sends the console's saves to PokeHub | Done for Sun, Moon, X and Y; the sync waits for the game's page to open |
 | 17. 3DS app look: a graphical PokeHub Sync, with a QR code to sign in | Done: game cards with icons, QR sign-in, per-game status, Send all, background sends that B cancels |
-| 18. 3DS hub: the GBA games on the console, moving Pokémon and the shop from the 3DS app | 18a to 18e done for the GBA ports; the shop on the 3DS (18f) next, then Gen 6 and 7 |
+| 18. 3DS hub: the GBA games on the console, moving Pokémon and the shop from the 3DS app | Done for the GBA ports (Twin Embers, Emerald 3DS); Gen 6 and 7 editing next |
 
 More ideas, not yet in a phase, are in the [backlog](#backlog).
 
@@ -720,10 +720,15 @@ saves are plain files on the SD card); Gen 6 and 7 follow the same path afterwar
   Pokémon can go to Gen 6 and 7 games, converted the way Poké Transporter does. A Gen 6 or 7
   Pokémon goes to a Gen 3 game only if it came from one, and returns exactly as it left. A
   Pokémon a game can't hold (species, move, ability, item) is refused with the reason.
-- **18f. Shop on the 3DS:** a Shop screen with the wallet, the Pokémon and items with their
-  pictures (sent by PokeHub ready to draw, cached on the SD card), and a purchase after a
-  confirmation. Items ask which game gets them. Shop calls are made as the trainer, not as a
-  game, so the app needs its own sign-in for them.
+- **18f. Shop on the 3DS** (done): SELECT opens the shop from the selected game, signed in as
+  that game (its token already reaches the trainer's shop endpoints). It shows the wallet and
+  the Pokémon and item offers with their PokéAPI sprites, which PokeHub fetches, caches and
+  serves on the local network (`pokedex/species/{id}/sprite`, `pokedex/species/items/{name}/sprite`)
+  and the app caches on the SD card and decodes with libpng. A purchase asks first. Pokémon go
+  to the hub; items wait for the game, and its next send puts them in the bag through the edit
+  (the Economy module now has a public API for that). A save the console couldn't write is
+  undone at once (`save/edits/{id}/unwritten`). Checked on the real Twin Embers save: a Rare
+  Candy bought on the 3DS arrived in the bag.
 
 Rules:
 
